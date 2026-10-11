@@ -382,9 +382,160 @@ silently substituted for 53. The behavior and encoding
 are subject to DDI 0406C.d; no assembler/compiler
 execution has yet been qualified.
 
+
+STACK AND INCREMENTING MULTIPLE-WORD OPERATIONS.
+
+The following additions distinguish stack pointer arithmetic from actual
+memory transfers. A "register set" is an encoded set whose members have
+unique register numbers; the textual order in which its names are written
+does not change the transfer order. The lowest numbered included register
+is associated with the lowest address in the transfer region. A load/store
+multiple or stack memory operation can fault partway through a transfer.
+No operation in this section promises transactional all-or-nothing
+memory effects after an exception. Successful-completion descriptions
+apply only when all required accesses complete normally.
+
+Operation 54. "Subtract four bytes for every selected register from
+the current thirty-two-bit stack pointer, write each selected register's
+original four-byte value into its designated ascending memory location
+within that newly reserved stack interval, and retain the lowest
+reserved address in the stack pointer."
+Mapping: PUSH, 16-bit T32 T1, encoding 1011010 M register_list.
+The register_list contains only registers R0 through R7. The M bit
+adds LR (R14) when M is one; neither PC nor SP may be stored by
+this operation. At least one register including optional LR must
+be selected. Let count be the number of selected registers and
+let oldSP be the starting stack pointer. For successful execution,
+newSP = oldSP - 4*count (modulo 2^32). Store the register with the
+lowest register number at newSP, the next selected number at
+newSP+4, and so on, with LR last if selected. Preserve the
+original source register values and N/Z/C/V. No control transfer
+occurs; the execution index advances by two bytes. Require a
+word-aligned, writable region and applicable OS stack permission
+facts. A failure is an exception, not a successful partial PUSH.
+This initial profile permits this 16-bit encoding ONLY; larger
+T32 PUSH forms are not implied by this name.
+
+Operation 55. "Load one word for each selected low general-purpose
+register from consecutive stack locations, starting at the
+original stack pointer and ascending by four bytes between
+selected registers; then advance the stack pointer by four
+bytes per selected register."
+Mapping: POP, 16-bit T32 T1, encoding 1011110 0 register_list.
+The list is a nonempty subset of R0 through R7. The lowest
+numbered selected destination receives the word at oldSP,
+and each successively higher numbered destination receives
+the next word in ascending memory order. On normal completion
+SP = oldSP + 4*count (modulo 2^32). Preserve N/Z/C/V
+and LR. No control transfer occurs. No PC or LR list bit
+is present in this permitted form. Memory must be readable
+and word aligned. This is not a generic 32-bit POP form.
+
+Operation 56. "Load one word for each selected low general-purpose
+register from consecutive stack locations, then load an
+additional final word as a tagged instruction-state target,
+advance the stack pointer past all loaded words, and branch
+only if that target requests a permitted T32 instruction
+address."
+Mapping: POP, 16-bit T32 T1 with P=1, encoding
+1011110 1 register_list. R0 through R7 may be included;
+the PC entry is always included, even if no low register
+is selected. Let count be the number of selected low
+registers plus one for PC. The low registers load in
+numeric order from oldSP upward. The last word comes
+from oldSP+4*(count-1) and is used for LoadWritePC.
+The target word must have bit zero equal to ONE for T32
+state, and its address after removing that state bit must
+be an approved executable instruction boundary.
+A target word whose bit zero is ZERO requests A32,
+which this language profile rejects; an encoding whose
+lowest two bits equal binary 10 is additionally invalid
+for the architectural interworking load.
+The successful stack pointer is oldSP+4*count.
+This is a control transfer, not mere sequential flow.
+It does not directly overwrite LR, does not change
+N/Z/C/V, and does not automatically ensure that
+the restored calling convention was valid.
+The PC-changing operation must be outside an IT block
+or satisfy the architecture's last-slot restriction.
+
+Operation 57. "Store the original thirty-two-bit contents
+of each selected low general-purpose register to a
+consecutive aligned memory word, starting at the address
+originally held in a separate low general-purpose base
+register and ascending by four bytes for each register,
+then advance that base register by the total stored size."
+Mapping: STM or STMIA, 16-bit T32 T1, encoding
+11000 Rn register_list. The base Rn is R0 through R7.
+The register_list is a nonempty subset of R0 through R7.
+For this RESTRICTED English operation, the base register
+MUST NOT be included in the transferred set, even though
+some native encodings can legally store a base register
+in specific circumstances. Let N be the count of
+selected registers; for normal completion, the word
+at oldBase+4*k contains the value of the kth
+selected register in ascending register-number order,
+for k=0 through N-1. The base register becomes
+oldBase+4*N modulo 2^32. Flags, SP and LR remain
+unchanged. No PC entry or PC-changing effect is granted.
+The encoding occupies TWO bytes; the addresses must be
+word aligned and writable. Base overlap is refused
+instead of guessing the architecture's exceptional
+special cases.
+
+Operation 58. "Read consecutive aligned thirty-two-bit
+memory words beginning at the address in a separate low
+general-purpose base register, put them into the selected
+low general-purpose registers in ascending register-number
+order, and advance the base register by four bytes for
+every transferred word."
+Mapping: LDM or LDMIA, 16-bit T32 T1, encoding
+11001 Rn register_list. The base Rn is R0 through R7,
+and the nonempty register_list contains only R0
+through R7. The base register MUST NOT be in the
+destination register set for THIS English operation.
+This deliberately chooses the form whose base
+writeback is defined, rather than the T1 case in
+which the base is among destinations and writeback
+does not occur. On normal completion each
+destination gets its assigned word and the base
+becomes oldBase+4*count modulo 2^32. Flags, SP
+and LR remain unchanged. No branch occurs and
+the instruction occupies TWO bytes. Memory must
+be readable, mapped, and word aligned.
+
+Operation 59. "Advance the architectural stack pointer
+by four times the explicitly encoded unsigned
+seven-bit integer without changing condition flags
+or reading or writing any data memory."
+Mapping: 16-bit T32 ADD SP, SP, #immediate (T2 form),
+encoding 101100000 imm7, hexadecimal base 0xB000.
+The immediate is 4*imm7, from zero through 508 inclusive.
+For normal execution SP becomes oldSP+immediate
+modulo 2^32. N, Z, C, V are unchanged. This is
+not a memory-access operation and cannot assert
+that the new pointer points to mapped writable
+stack memory. This operation occupies two bytes.
+Any ABI-imposed alignment obligation is separate.
+
+Operation 60. "Decrease the architectural stack pointer
+by four times the explicitly encoded unsigned
+seven-bit integer without changing condition flags
+or reading or writing any data memory."
+Mapping: 16-bit T32 SUB SP, SP, #immediate,
+encoding 101100001 imm7, hexadecimal base 0xB080.
+The immediate is 4*imm7, from zero through 508
+inclusive. For normal execution SP becomes
+oldSP-immediate modulo 2^32, N/Z/C/V are preserved,
+and the instruction occupies two bytes. The
+decrement alone does NOT store any register, initialize
+the reserved stack interval, or prove that the
+new SP is a valid address. A subsequent load or
+store must separately satisfy memory permissions.
+
 BOUNDARIES AND REJECTIONS.
 
-This operation grant contains exactly FIFTY-THREE numbered entries.
+This operation grant contains exactly SIXTY numbered entries.
 An implementation claiming that it supports this grant SHALL verify
 the count, unique names, exact encodings and legal operand variants;
 the existence of this file alone is not that verification.
