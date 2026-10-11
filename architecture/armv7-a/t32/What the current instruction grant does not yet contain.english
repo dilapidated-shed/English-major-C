@@ -3,7 +3,7 @@ WHAT THE CURRENT INSTRUCTION GRANT DOES NOT YET CONTAIN.
 Status: architecture COVERAGE LEDGER, not an operation grant.
 It is part of the work required before anyone can honestly
 call this a full ARMv7-A T32 instruction set definition.
-Current allowed operations: numbered 01 through 60, all and
+Current allowed operations: numbered 01 through 64, all and
 only those in the closed initial grant in this directory.
 
 Primary standard: ARM DDI 0406C.d, A6 T32 encoding and A8
@@ -18,7 +18,7 @@ in that guide is NOT evidence that it belongs to ARMv7-A T32.
 READING THE STATUS OF A FAMILY.
 
 COVERED-SUBSET: at least one machine effect is named in the
-present 60-operation grant, but encoding-by-encoding validation
+present 64-operation grant, but encoding-by-encoding validation
 and exhaustive forms remain unfinished.
 UNGRANTED: the hardware may provide this instruction family,
 but the English Major C profile does not yet name permitted
@@ -52,9 +52,23 @@ language restriction that the base register is NOT
 included among destinations or stored registers.
 See operations 57 and 58. The permitted narrow forms
 have writeback on successful completion. The legal
-native base-overlap cases, 32-bit Thumb forms, LDMDB,
-STMDB, optional PC/LR list entries and other address
-modes remain UNGRANTED by this subset.
+native base-overlap cases, most 32-bit Thumb forms,
+STMDB, optional PC register-list entries, and other
+address modes remain UNGRANTED by this subset.
+
+COVERED-SUBSET: four additional FOUR-BYTE Thumb operations
+(61 through 64), each assigning distinct semantics
+to STMIA W=0, STMIA W=1, LDMDB W=0 and LDMDB W=1.
+These admit selected low/high R0..R12 and optional LR
+register lists of at least TWO members, but deliberately
+exclude PC/SP and base-in-list overlap. The actual
+encoding examples E884:4800, E8A4:4800,
+E914:4800, and E934:4800 are preserved in
+"Actual wide Thumb multiple-word operations in long
+English.english" under the examples directory.
+These are COVERED FOR THAT SUBSET ONLY; general wide
+variants and independently accepted legal-encoding
+coverage are still unfinished.
 
 For PUSH/POP/LDM/STM, a successful trace does not
 prove all-or-nothing behavior after a mid-transfer
