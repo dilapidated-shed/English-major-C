@@ -1,0 +1,1 @@
+Execution index: A value identifying the memory address from which the next instruction is to be fetched. Ordinary sequential execution advances this value according to the length of the instruction. Branching replaces it with the address of another instruction.
