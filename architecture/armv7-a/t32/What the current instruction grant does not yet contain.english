@@ -3,7 +3,7 @@ WHAT THE CURRENT INSTRUCTION GRANT DOES NOT YET CONTAIN.
 Status: architecture COVERAGE LEDGER, not an operation grant.
 It is part of the work required before anyone can honestly
 call this a full ARMv7-A T32 instruction set definition.
-Current allowed operations: numbered 01 through 53, all and
+Current allowed operations: numbered 01 through 60, all and
 only those in the closed initial grant in this directory.
 
 Primary standard: ARM DDI 0406C.d, A6 T32 encoding and A8
@@ -18,7 +18,7 @@ in that guide is NOT evidence that it belongs to ARMv7-A T32.
 READING THE STATUS OF A FAMILY.
 
 COVERED-SUBSET: at least one machine effect is named in the
-present 53-operation grant, but encoding-by-encoding validation
+present 60-operation grant, but encoding-by-encoding validation
 and exhaustive forms remain unfinished.
 UNGRANTED: the hardware may provide this instruction family,
 but the English Major C profile does not yet name permitted
@@ -32,24 +32,36 @@ has been exhaustively enumerated.
 
 PART ONE. EVERYDAY EXECUTION MACHINERY.
 
-UNGRANTED: change SP by a specified encoded immediate and
-track its exact next value as a stack pointer.
-Source examples: ADD/SUB forms with SP, guide C2.9/C2.143.
+COVERED-SUBSET: advance or decrease SP by a seven-bit immediate
+scaled by FOUR bytes, using the dedicated 16-bit T32 ADD SP
+and SUB SP forms. See operations 59 and 60. All broader
+SP arithmetic forms and address-generation variants
+remain ungranted until separately named and verified.
 
-UNGRANTED: store a register set on a descending stack and
-move SP consistently with the number of stored words.
-Source: PUSH, guide C2.74. A real function may use this
-operation even if the English source never calls it PUSH.
+COVERED-SUBSET: 16-bit Thumb PUSH with a nonempty set
+of R0..R7 and optional LR, and 16-bit Thumb POP with a
+nonempty set of R0..R7 and optional PC. See operations
+54 through 56 and the exact stack memory document.
+Wide PUSH and POP aliases, single-register wide forms,
+more general register sets and exceptional encodings
+remain UNGRANTED and must not inherit permission.
 
-UNGRANTED: restore a register set from the stack and update
-SP; if PC is restored, apply the proper instruction-state
-and control-flow rules. Source: POP, guide C2.73.
+COVERED-SUBSET: 16-bit T32 LDMIA and STMIA, with base
+R0..R7, nonempty list in R0..R7, and the additional
+language restriction that the base register is NOT
+included among destinations or stored registers.
+See operations 57 and 58. The permitted narrow forms
+have writeback on successful completion. The legal
+native base-overlap cases, 32-bit Thumb forms, LDMDB,
+STMDB, optional PC/LR list entries and other address
+modes remain UNGRANTED by this subset.
 
-UNGRANTED: load or store several register values in one
-instruction using the prescribed addressing order,
-register-list encoding, optional address writeback
-and memory-exception behavior. Sources: LDM and STM,
-guide C2.45 and C2.138.
+For PUSH/POP/LDM/STM, a successful trace does not
+prove all-or-nothing behavior after a mid-transfer
+memory fault. Precise permission, alignment,
+architecture-specific exception and concurrency
+details remain acceptance obligations.
+Sources: DDI 0406C.d, guide C2.45/C2.73/C2.74/C2.138.
 
 UNGRANTED: load/store a pair of words and account for
 alignment, ordering, register pairs and writeback.
