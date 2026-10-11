@@ -23,9 +23,17 @@ The following additional files narrow the initial machine model without pretendi
 
 An initial byte-level bottom-up witness is [One actual Thumb branch listing translated from the bottom upward.english](examples/One%20actual%20Thumb%20branch%20listing%20translated%20from%20the%20bottom%20upward.english), based on a pinned Android Open Source Project assembler expectation. It records exact observed 16-bit halfwords and an independently specified English trace. The witness revealed that **MOVS (immediate) with flag changes requires a distinct long English operation**, now entry 53 in the initial grant. The specified trace has NOT been executed by an English Major C interpreter.
 
+## Stack operations and word-transfer examples
+
+[How registers enter memory and return from a stack.english](architecture/armv7-a/t32/How%20registers%20enter%20memory%20and%20return%20from%20a%20stack.english) defines seven additional **narrow** T32 instructions: PUSH, POP without or with a PC branch, STMIA, LDMIA, and immediate additions/subtractions of SP. The list ordering, exact transfer addresses, normal-success writeback, fault boundaries, T32-only return state and still-ungranted wide forms are explicitly recorded.
+
+[Actual Thumb word transfers translated into English.english](examples/Actual%20Thumb%20word%20transfers%20translated%20into%20English.english) reads four pinned Android ART assembler expectation halfwords, `C409`, `CC09`, `B014` and `B094`, as independent instruction specimens. It does not pretend their original fixture arrays constitute one executed program.
+
+The closed initial scalar operation grant now contains **60** entries, not the full ARMv7-A T32 ISA. Presence of an instruction in hardware is not equivalent to its authorization in this initial English Major C profile.
+
 ## Assembly-to-English decompilation target
 
-[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 53-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
+[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 60-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
 
 ## Contract status
 
