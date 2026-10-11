@@ -29,8 +29,8 @@ jobs:
             exit 1
           fi
           printf 'verified_commit=%s\n' "$actual"
-      - name: Check archived bytes, ledger and negative mutation fixtures
+      - name: Check extracted bytes, ledger and negative mutation fixtures
         shell: bash
         run: |
           set -euo pipefail
-          python3 -B examples/r-lm-native-x86-64/verify_archive.py --self-test
+          python3 -B examples/r-lm-native-x86-64/verify_extracted.py --self-test
