@@ -1,0 +1,154 @@
+INSTRUCTION SET ARCHITECTURE: SOURCES AND UNFULFILLED COVERAGE.
+
+Status: reference/provenance contract and explicit gaps, NOT a completed
+self-contained transcription of the full ARMv7-A Thumb instruction set.
+
+The selected abstract target is ARMv7-A executing T32 instructions in
+unprivileged application mode. "Thumb-2" denotes the 16-bit and 32-bit
+Thumb encoding facilities supported in this architecture, NOT a separate
+processor, and NOT a claim that every optional extension is fitted.
+
+PRIMARY ARCHITECTURAL REFERENCE.
+
+The normative reference is:
+
+Arm Limited, ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition,
+document ARM DDI 0406, revision C.d, publication identifier ID040418.
+
+Official document landing:
+https://developer.arm.com/documentation/ddi0406/cd
+
+Arm document content (C.d):
+https://documentation-service.arm.com/static/5f8daeb7f86e16515cdb8c4e
+
+This reference is identified by its document number AND revision. A later
+version, a similar ARMv7-M manual, an ARMv8-A AArch32 description, a blog
+post, and assembler implementation notes are NOT substitutions without a
+recorded compatibility review. A vendor Cortex-A reference manual can
+supply implementation and feature facts but does not silently replace the
+architecture manual.
+
+SECTIONS THAT MUST INFORM AN EXACT ARCHITECTURE PORT.
+
+A2: application programmers' model, 32-bit architectural registers,
+    PC operand reads, condition flags, execution state and extension state.
+A3: memory model, endianness, memory attributes, ordering, alignment,
+    translation and permissible access.
+A4: instruction-set overview and groupings, conditional execution,
+    branch/exchange behavior and the distinction between ARM and Thumb.
+A6: 16-bit and 32-bit Thumb instruction-decode tables.
+A8: individual instruction descriptions: all T encodings, operand
+    constraints, architectural pseudocode, condition/flag effects,
+    deprecations, UNDEFINED, UNPREDICTABLE and optional features.
+The applicable system-architecture and extension portions must be
+consulted whenever a physical target grants those operations.
+
+The architecture reference MUST be consulted at the specific instruction
+encoding, rather than merely matching an assembler mnemonic. Mnemonics may
+denote several encodings, aliases, different flag semantics, different
+operand restrictions, or a change of instruction state.
+
+This revision DOES NOT reproduce Arm's copyrighted full instruction
+descriptions or claim that short English glosses can replace its formal
+pseudocode. English Major C must eventually supply its own independently
+verified executable operation semantics or explicit reference binding.
+
+ENGLISH MAJOR C PROFILE BOUNDARY.
+
+The sole initial operation grant is:
+    All and only these initial operations are permitted.english
+
+It lists 52 named families. No machine instruction outside a verified
+lowering of one of those named families is thereby permitted by the
+language. That is a complete statement of the INITIAL SOFTWARE GRANT,
+but it is NOT a complete statement of all the instructions executable
+by a physical ARMv7-A processor.
+
+"All and only" is therefore a quantifier over the selected named
+operation profile. It does not mean that every architecturally possible
+physical instruction is present in that initial profile.
+
+WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
+
+The open coverage inventory includes, without implying exhaustiveness:
+
+  * every T32 encoding variant, width, restriction and alias even for
+    the 52 named operation families;
+  * full multiply, multiply-accumulate, dual-multiply, long-multiply
+    and signed/unsigned divide families;
+  * saturating, parallel arithmetic, packing, byte reversal,
+    bit-field selection and miscellaneous integer operations;
+  * all memory-addressing variants, register-list transfers,
+    stack aliases, exclusives, synchronization and memory barriers;
+  * exception/supervisor, CPSR/SPSR and mode-control facilities,
+    system access, coprocessor and privileged instructions;
+  * all architectural hints, instructions that may be deprecated,
+    unavailable, unconditional-encoding special cases and traps;
+  * VFP / floating-point support, Advanced SIMD / NEON and optional
+    processor-specific architecture extensions;
+  * ThumbEE and Jazelle, where relevant, which are not granted here;
+  * proof that instruction selection is identical across actual
+    processors with different supported architecture features;
+  * target operating-system ABI, toolchain, virtual-memory permissions,
+    exception handling, calling convention, code generation and
+    actual execution.
+
+Some of these instruction classes are wholly absent from the initial
+allowed vocabulary by design. Others will be subject to a future
+coverage or exact-encoding audit. The reference manual is the
+canonical source against which any statement of hardware-wide
+instruction completeness MUST be reconciled.
+
+FULL-CATALOGUE COMPLETION CRITERION.
+
+Before anyone labels an English Major C file "the complete ARMv7-A T32
+instruction set", an independent review SHALL:
+
+1. Pin and identify the architectural revision and target feature profile.
+2. Enumerate every T32 decode-table leaf for that feature profile,
+   including valid encodings, conditional forms, aliases, reserved
+   encodings and legal instructions only when their conditions hold.
+3. Associate each reachable valid form with a unique or explicitly
+   shared long English operation name and the full input/output/effect
+   specification, including PC, flags, ITSTATE, memory, exceptions,
+   processor state, and any required privilege.
+4. Demonstrate how two-byte and four-byte fetch/decode boundaries,
+   state interworking, endian choices and unaligned accesses are handled.
+5. Reject every intentionally invalid, missing-feature, forbidden,
+   implementation-dependent-without-manifest, or unpredicted form.
+6. Audit instruction groups and count against the ARM reference;
+   record discrepancies rather than assuming a mnemonic index complete.
+7. Compile/encode/decode checked fixtures only using an authorized
+   toolchain, and validate results independently. Report source,
+   encode/decode, semantic execution and hardware evidence separately.
+
+Until then, do not describe the 52-entry grant as the entire physical ISA.
+
+TARGET-MACHINE DECLARATION REQUIREMENT.
+
+The first future concrete declaration must identify the actual SoC, CPU
+core/revision, supported feature bits, architectural execution state,
+user-mode environment, endianness, memory permissions, permitted
+instruction forms, relevant cache coherency protocol and ABI. No
+unverified RAM/DRAM part number, device register map, or physical channel
+address shall be invented. A CPU architectural instruction cannot
+be promoted from "supported in a family" to "observed executable on
+this device" merely from the instruction-set name.
+
+PUBLIC CROSS-REFERENCES.
+
+English Major C's goal and future Idris-front-end exercise:
+https://github.com/dilapidated-shed/English-major-C/issues/1
+
+This specific Flexible Pipes authored-document job:
+https://github.com/isomorphisms/flexible-pipes/issues/91
+
+The separately reviewed execution-index definition:
+https://github.com/dilapidated-shed/English-major-C/pull/2
+
+Alternative branching choices and missing-value example:
+../../../decisions/Choices for missing-value branching and execution.english
+
+Nothing in this document grants implicit access to an assembler,
+compiler backend, native executable, device privilege, or successful
+acceptance check.
