@@ -58,7 +58,7 @@ ENGLISH MAJOR C PROFILE BOUNDARY.
 The sole initial operation grant is:
     All and only these initial operations are permitted.english
 
-It lists 52 named families. No machine instruction outside a verified
+It lists 53 named families. No machine instruction outside a verified
 lowering of one of those named families is thereby permitted by the
 language. That is a complete statement of the INITIAL SOFTWARE GRANT,
 but it is NOT a complete statement of all the instructions executable
@@ -73,7 +73,7 @@ WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
 The open coverage inventory includes, without implying exhaustiveness:
 
   * every T32 encoding variant, width, restriction and alias even for
-    the 52 named operation families;
+    the 53 named operation families;
   * full multiply, multiply-accumulate, dual-multiply, long-multiply
     and signed/unsigned divide families;
   * saturating, parallel arithmetic, packing, byte reversal,
@@ -122,7 +122,7 @@ instruction set", an independent review SHALL:
    toolchain, and validate results independently. Report source,
    encode/decode, semantic execution and hardware evidence separately.
 
-Until then, do not describe the 52-entry grant as the entire physical ISA.
+Until then, do not describe the 53-entry grant as the entire physical ISA.
 
 TARGET-MACHINE DECLARATION REQUIREMENT.
 
