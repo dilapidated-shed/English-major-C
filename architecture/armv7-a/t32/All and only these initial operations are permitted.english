@@ -533,9 +533,95 @@ the reserved stack interval, or prove that the
 new SP is a valid address. A subsequent load or
 store must separately satisfy memory permissions.
 
+
+WIDE THUMB MULTIPLE-WORD OPERATIONS, WITHOUT PC TRANSFERS.
+
+The next four operations are not simply spelling changes for operations
+57 and 58. They permit T32 FOUR-BYTE encodings and explicitly distinguish
+the two independent effects of a multiple-word memory transfer and base
+register writeback. Their first halfword announces a 32-bit Thumb
+instruction; the second halfword is part of the SAME instruction, not the
+next instruction in the stream.
+
+In operations 61-64, the base is a general register R0 through R12.
+The nonempty register set may contain R0 through R12 and LR (R14)
+but MUST NOT contain SP or PC and MUST contain at least TWO DISTINCT
+members. Even when the selected native encoding could support a base
+overlap in special circumstances, THIS profile forbids the base
+register from belonging to the selected register set. The encoded
+register mask, not the order in which the user writes the members,
+controls the association of register number with ascending address.
+The selected operation must have legal T32 operands and mode, and the
+exact encoding is still subject to the pinned ARM DDI 0406C.d.
+The user-visible flags N, Z, C and V are preserved. All addresses
+must meet word alignment and access requirements; multiword memory
+accesses are not assumed atomic or rollback-safe under exceptions.
+
+Operation 61. "Beginning at the memory address in a selected
+general-purpose base register, copy the original thirty-two-bit
+value of every member of a permitted register set into consecutive
+four-byte memory words ordered by ascending register number,
+without changing the value of the base register afterward."
+Mapping: 32-bit Thumb STMIA (T2 form) with the W writeback bit
+equal to ZERO. At a base value B with K selected registers,
+store the smallest register's old value at B, the next at
+B+4, and the final at B+4*(K-1). After successful transfers,
+leave the base unchanged. Each selected source register is
+preserved, including LR if it is selected. No PC transfer
+and no condition flag update occurs. The instruction occupies
+FOUR bytes, so ordinary sequential execution advances the
+execution index by FOUR, not TWO. A concrete permitted example
+is the halfword pair 0xE884,0x4800, storing {R11,LR} with
+base R4 and NO base writeback. This form does not itself
+establish any return address.
+
+Operation 62. "Beginning at the memory address in a selected
+general-purpose base register, copy the original thirty-two-bit
+value of every member of a permitted register set into consecutive
+four-byte memory words ordered by ascending register number,
+and then increase the base register by four bytes per member."
+Mapping: 32-bit Thumb STMIA (T2 form) with W equal to ONE.
+Successful memory effects are as for operation 61, but the base
+becomes B+4*K modulo 2^32. Flags remain unchanged and the
+instruction occupies FOUR bytes. A concrete permitted halfword
+pair is 0xE8A4,0x4800, storing the original values of
+{R11,LR} through base R4 and increasing R4 by eight bytes.
+The initial value of R4 must not appear in the selected set.
+
+Operation 63. "Read consecutive four-byte memory words beginning
+four bytes times the number of selected registers below the
+starting value of a general-purpose base register, assign the
+read values to the selected registers in ascending register-number
+order, and leave the base register unchanged after the reads."
+Mapping: 32-bit Thumb LDMDB (T1 form) with W equal to ZERO,
+the Decrement Before multiple-load addressing mode. Let B be
+the old base and K the number of selected registers. The
+first word, read at B-4*K, goes into the smallest selected
+register. The last word, read at B-4, goes into the highest
+selected register. The base is preserved. If LR is selected,
+LR receives the word assigned to it, but NO BRANCH happens
+merely because LR is loaded. The instruction occupies FOUR
+bytes, preserves condition flags and does not write PC.
+A concrete permitted halfword pair is 0xE914,0x4800,
+meaning base R4, set {R11,LR}, and NO base writeback.
+
+Operation 64. "Read consecutive four-byte memory words beginning
+four bytes times the number of selected registers below the
+starting value of a general-purpose base register, assign the
+read values to the selected registers in ascending register-number
+order, and then decrease the base register by four bytes per member."
+Mapping: 32-bit Thumb LDMDB (T1 form) with W equal to ONE.
+On successful completion, the loads are as in operation 63
+and the base becomes B-4*K modulo 2^32. Flag state is
+preserved. The instruction occupies FOUR bytes and
+does NOT branch merely because it may have loaded LR.
+A concrete permitted halfword pair is 0xE934,0x4800,
+loading {R11,LR} through R4 and changing R4 by negative
+eight bytes. Its original R4 must not be among destinations.
+
 BOUNDARIES AND REJECTIONS.
 
-This operation grant contains exactly SIXTY numbered entries.
+This operation grant contains exactly SIXTY-FOUR numbered entries.
 An implementation claiming that it supports this grant SHALL verify
 the count, unique names, exact encodings and legal operand variants;
 the existence of this file alone is not that verification.
