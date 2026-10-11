@@ -1,0 +1,279 @@
+WHICH INSTRUCTION IS NEXT, AND HOW IS IT FOUND?
+
+An English Major C architecture document.
+Status: detailed experimental semantic draft; NOT verified machine-code execution.
+Scope: ARMv7-A, T32 instruction state, unprivileged execution.
+Reference: Arm DDI 0406C.d (normative architectural reference), with
+Arm 100076_0200_00_en, sections A1.10, C1.3, C2.14, C2.19-C2.23,
+C2.41, and C2.154 used as an additional readable assembly guide.
+See "Instruction set architecture - sources and unfulfilled coverage.english".
+This document elaborates "Given a machine - objects and execution.english".
+It does NOT enlarge the set of permitted source operations.
+
+PART ONE. THREE ADDRESSES THAT MUST NOT BE CONFUSED.
+
+Define the CURRENT INSTRUCTION ADDRESS to be the virtual byte address
+of the first halfword of the instruction whose effects are being specified.
+
+Define the EXECUTION INDEX as follows, preserving the agreed definition:
+
+Execution index: A value identifying the memory address from which the next
+instruction is to be fetched. Ordinary sequential execution advances this
+value according to the length of the instruction. Branching replaces it with
+the address of another instruction.
+
+The execution index is the address of an architectural instruction
+boundary in the English Major C abstract execution model, not the
+ordinal number of an instruction in a textual list. It is not a separate
+CPU register. The architecture exposes R15, customarily called the
+program counter; the English Major C term does not invent another
+piece of hardware.
+
+Define the PC-OPERAND VALUE of a T32 instruction at address A, for the
+usual permitted PC reads, to be A plus four bytes. A PC-relative
+instruction may further align this quantity according to its own
+rule. ARM instruction descriptions, rather than this generic formula,
+control special cases.
+
+The PHYSICAL FETCH ADDRESS is not declared by this abstraction.
+Actual instruction fetches can get ahead of execution, refill a cache,
+fetch on a predicted path or discard speculatively fetched bytes.
+Those events do not make the execution index an index into a pipeline.
+No assumption about the number of stages, speculation policy, or
+cache behavior is implied.
+
+At address 0x00001002, the generic T32 PC operand equals 0x00001006.
+If the instruction is two bytes long, its ordinary successor equals
+0x00001004, which is NOT the PC-operand value.
+If the instruction is four bytes long, its ordinary successor equals
+0x00001006. Equality of those two numbers in this case does not make
+their meanings identical.
+
+PART TWO. HOW A T32 INSTRUCTION'S LENGTH IS IDENTIFIED.
+
+T32 instructions occupy either one 16-bit halfword or two successive
+16-bit halfwords, in instruction-stream order.
+
+A 16-bit first halfword whose five highest bits are one of
+11101, 11110, or 11111 marks a possible 32-bit T32 instruction; the
+next halfword belongs to the same instruction. The high-five-bit
+patterns other than those three mark a 16-bit T32 instruction.
+
+This is a length distinction, not a proof that the 16-bit or 32-bit
+encoding is valid. A decoded bit pattern may be allocated to an
+instruction, reserved, undefined, unpredictable in its current
+context, privileged, or dependent on a feature that is absent.
+The decoder must consult the exact instruction tables.
+
+The halfword is NOT automatically represented as an unsigned
+application data value. It is an instruction-fetch unit, whose
+bit fields are interpreted according to T32 instruction encoding
+and the architecture's defined handling of instruction endianness.
+
+If the first halfword signals a 32-bit T32 instruction, the second
+halfword must be accounted for as part of that same instruction.
+The semantic model must not advance two bytes after its first
+halfword, treating the second halfword as an independent successor.
+
+A T32 instruction address is divisible by two. A 32-bit T32
+instruction may begin at an address congruent to two modulo four,
+because its requirement is halfword alignment, not four-byte
+instruction-address alignment.
+
+PART THREE. ONE ARCHITECTURAL EXECUTION STEP.
+
+Given the current execution index A and the complete relevant
+architectural machine state:
+
+First, determine that the mapping containing the instruction bytes
+is permitted to be fetched and executed under the exact OS and
+memory-management state.
+
+Second, fetch enough instruction halfwords for T32 decoding.
+Determine whether the encoded instruction is two or four bytes
+long. The halfwords are one instruction when the first encoding
+marks a 32-bit instruction.
+
+Third, decode the instruction's operands, limitations, required
+processor features, architectural condition and exact encoding
+effects. Reject any attempted English Major C translation of
+a form not permitted by the versioned operation grant, even
+if the raw processor could execute that form.
+
+Fourth, if the encoding is valid and the current conditional
+execution state makes its effects conditional, determine the
+architectural condition using the appropriate flags or operation
+rule. A failed condition does not give permission to perform
+a prohibited memory write, arithmetic effect or branch.
+An instruction that is architecturally unconditionally executed
+must not be given an invented conditional guard.
+
+Fifth, if the instruction's condition passes, perform its specified
+architectural effects, including reads, writes, flag changes,
+control transfers, and possible exceptions. Whether an exception
+occurs, and how it is delivered, are subject to the actual
+architecture and environment, not a generic "skip on failure".
+
+Sixth, determine the successor address, either by ordinary
+sequential advancement or by the operation-specific control
+transfer. Advance any active conditional-execution state in
+accordance with the architecture. The exact ordering of condition
+handling, ITSTATE advancement, PC writes and exceptions must be
+validated against ARM DDI 0406C.d before executable semantics
+are accepted. These English steps are an explanation of effects,
+not a proposed processor pipeline timing diagram.
+
+PART FOUR. A CONCRETE TWO-BYTE / FOUR-BYTE ADDRESS TRACE.
+
+Assume that the following addresses contain executable,
+architecturally valid T32 instructions, independently decoded
+from actual bytes in a later experiment.
+
+The instruction at address 0x00001000 occupies TWO bytes.
+The instruction at address 0x00001002 occupies FOUR bytes.
+The instruction at address 0x00001006 occupies TWO bytes.
+
+If none transfers control, then the execution index successively
+identifies 0x00001000, 0x00001002, 0x00001006, and 0x00001008.
+
+The ordinary PC operand values while each of the first three
+instructions executes are respectively 0x00001004, 0x00001006,
+and 0x0000100A.
+
+When the second instruction occupies address 0x1002 through the
+end of the halfword at 0x1004, an instruction beginning at 0x1004
+is NOT the ordinary sequential successor. An explicit branch
+to 0x1004 must NOT be approved as a named, verified entry point
+to the decoded instruction stream merely because 0x1004 is
+halfword-aligned. A raw processor, if execution is permitted,
+may decode those bytes differently starting at 0x1004.
+This source-level prohibition is a checked-program boundary,
+not a claim that every ARM processor automatically traps the
+attempted mid-instruction branch.
+
+This illustrative trace asserts address arithmetic only. It
+does not assert the bytes, mnemonics, actual hardware behavior,
+or timing of an executable whose bytes have not been inspected.
+
+PART FIVE. HOW A DIRECT IMMEDIATE BRANCH REPLACES THE INDEX.
+
+For a T32 B instruction beginning at address A, the branch
+target is calculated from the ARM-defined PC-relative base
+and the sign-extended displacement of its selected encoding,
+subject to the encoding's range and alignment restrictions.
+
+A conditional branch whose architectural condition is false
+continues at A plus the instruction's length, without taking
+the branch. It does not clear flags, perform an unrelated
+memory write, or modify LR merely because the programmer
+wanted to express an "if" statement.
+
+An unconditional branch taken to legal target T makes T the
+next execution index, regardless of the adjacent instruction
+stream, while preserving all registers and flags except for
+effects expressly specified by that instruction.
+A B instruction does not write LR.
+
+A programmer's label is a logical source name requiring an
+actual resolved instruction address. The assembler or linker
+cannot turn an out-of-range B encoding into an in-range one
+by changing the architecture's immediate field; it may
+instead produce an explicit veneer, whose additional actual
+instructions must be translated and recorded separately.
+
+PART SIX. HOW A CALL AND RETURN ARE REPRESENTED.
+
+An immediate T32 BL is a branch that also writes LR. In
+Thumb state, LR holds the address following the call with
+the state indication bit set. A four-byte BL at address
+0x00002002 normally leaves a Thumb return value of
+0x00002007, because the next instruction begins at
+0x00002006 and bit zero is used to indicate T32 return.
+
+This low bit is metadata about the target instruction state,
+not a request to execute from an odd byte boundary.
+A return using BX LR reads LR's state indication:
+bit zero equal to one requests T32; the actual address
+has that low bit removed.
+A value with bit zero equal to zero requests A32 and is
+outside the present T32-only English Major C operation grant.
+
+A BL does not save every register. It overwrites LR.
+A nested call may therefore need a software convention for
+preserving an earlier return address. Saving registers,
+maintaining a stack, and obeying an ABI are separate
+program requirements that cannot be inferred from BL's
+single architectural effect.
+
+A BLX through a register can choose A32 or T32 state from
+the target register's low bit. In this restricted profile
+only target values denoting T32 are permitted. The fact
+that a physical ARMv7-A core supports interworking does
+not mean that this first language grant permits arbitrary
+execution in A32 state.
+
+PART SEVEN. TWO DIFFERENT KINDS OF "NOT EXECUTING".
+
+A conditional T32 instruction that has a false IT condition
+belongs to the sequentially encountered instruction stream
+but does not perform its normal conditional register or memory
+effects. The following instruction address is still computed
+using the current instruction's ACTUAL two-byte or four-byte
+encoding length.
+
+A conditional branch that evaluates false also follows the
+sequential successor. The target of that untaken branch is
+not the next architectural instruction.
+These two situations may reach the same next address, but
+have distinct encodings and possible machine-state effects.
+
+A memory-protection fault, a malformed instruction encoding,
+a disallowed instruction state, and an unsupported language
+operation are NOT either of those cases. They require
+different outcomes in the architecture or the verifier.
+
+PART EIGHT. WHO DECIDES WHETHER MEMORY CONTENTS ARE EXECUTED.
+
+A register can hold 0x00001006 as ordinary numerical data,
+as a virtual address of another object, or as a value used
+in computing the next instruction address. Only an
+instruction that performs an architecturally permitted
+control transfer can make that value become a next
+instruction location in the execution trace.
+
+A load of bytes from an executable mapping is not a call.
+A store of bytes equal to a legal branch encoding is not
+an executed branch. A table-branch load reads bytes as
+offset data and uses the numerical value to calculate
+a branch target; it does not execute the bytes of the table.
+
+No instruction-cache-coherency operation or page-permission
+change is authorized merely by declaring that stored bytes
+will later be treated as machine instructions.
+
+PART NINE. MISSING EVIDENCE AND TEST OBLIGATIONS.
+
+Before claiming a concrete machine trace, attach the
+exact executable bytes, their addresses, target state,
+architecture variant, endian interpretation, permitted
+instruction encoding and operands, register/flag snapshot,
+memory map and execution permissions.
+
+An independent reviewer must check:
+  1. one valid two-byte instruction's successor;
+  2. one valid four-byte instruction's successor;
+  3. a four-byte instruction at an address equal to two mod four;
+  4. PC operand reads versus sequential successor for each width;
+  5. a conditional branch taken and not taken on different flags;
+  6. a BL followed by BX LR without silently removing bit zero;
+  7. an illegal A32 target rejected by the T32-only grant;
+  8. an attempted branch into an unverified second halfword rejected
+     by the checked English representation;
+  9. an instruction-fetch permission failure distinguished from
+     a harmless data read;
+ 10. an unsupported instruction rejected rather than translated
+     into a similar, but different, permitted operation.
+
+No listed case is marked as already executed. The current
+document is source-level reasoning, subject to the cited
+reference manual and future independent acceptance.
