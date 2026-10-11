@@ -1,0 +1,257 @@
+WHAT THE CURRENT INSTRUCTION GRANT DOES NOT YET CONTAIN.
+
+Status: architecture COVERAGE LEDGER, not an operation grant.
+It is part of the work required before anyone can honestly
+call this a full ARMv7-A T32 instruction set definition.
+Current allowed operations: numbered 01 through 53, all and
+only those in the closed initial grant in this directory.
+
+Primary standard: ARM DDI 0406C.d, A6 T32 encoding and A8
+instruction details, with architecture restrictions throughout.
+Secondary source for convenient family location: Arm assembly
+guide 100076_0200_00_en, section C2 (integer/control), section
+C3 (Advanced SIMD), section C4 (floating point).
+The SECONDARY 2019 GUIDE ALSO DESCRIBES LATER ARMv8 and M
+instructions and A32-only forms. Merely naming a family
+in that guide is NOT evidence that it belongs to ARMv7-A T32.
+
+READING THE STATUS OF A FAMILY.
+
+COVERED-SUBSET: at least one machine effect is named in the
+present 53-operation grant, but encoding-by-encoding validation
+and exhaustive forms remain unfinished.
+UNGRANTED: the hardware may provide this instruction family,
+but the English Major C profile does not yet name permitted
+effects/encodings for it.
+TARGET-DEPENDENT: extension or feature/privilege conditions
+must be verified before any admission.
+NOT-ARMV7-A-ASSUMED: later-architecture or another profile's
+instruction cannot be imported merely from another reference.
+Nothing in the status vocabulary says that the full architecture
+has been exhaustively enumerated.
+
+PART ONE. EVERYDAY EXECUTION MACHINERY.
+
+UNGRANTED: change SP by a specified encoded immediate and
+track its exact next value as a stack pointer.
+Source examples: ADD/SUB forms with SP, guide C2.9/C2.143.
+
+UNGRANTED: store a register set on a descending stack and
+move SP consistently with the number of stored words.
+Source: PUSH, guide C2.74. A real function may use this
+operation even if the English source never calls it PUSH.
+
+UNGRANTED: restore a register set from the stack and update
+SP; if PC is restored, apply the proper instruction-state
+and control-flow rules. Source: POP, guide C2.73.
+
+UNGRANTED: load or store several register values in one
+instruction using the prescribed addressing order,
+register-list encoding, optional address writeback
+and memory-exception behavior. Sources: LDM and STM,
+guide C2.45 and C2.138.
+
+UNGRANTED: load/store a pair of words and account for
+alignment, ordering, register pairs and writeback.
+Sources: LDRD/STRD; architectural A8 instruction details.
+
+COVERED-SUBSET: single scalar loads and stores and
+PC-relative literal loads. Exact register offset,
+pre-index, post-index, alignment, literal-pool data,
+endianness, permissions and exceptions still require
+encoding-specific validation. Sources: LDR, STR,
+LDRB/H, LDRSB/SH, STRB/H and the A8 variants.
+
+COVERED-SUBSET: direct and indirect branches, call/return,
+conditional zero branches, IT, table branches. The
+multiple encoding widths and full legal conditional
+combinations are NOT yet covered. Sources: B, BL,
+BX, BLX, CBZ, CBNZ, IT, TBB, TBH.
+
+UNGRANTED: supervisor-service/OS requests. SVC and
+the OS service ABI are not ordinary user-register
+arithmetic and cannot be approximated by a label
+saying "call the kernel". Source: guide C2.145.
+
+UNGRANTED: deliberate permanently undefined instruction,
+breakpoint and debug entry, whose exact trap/debug
+effects require the environment. Sources: UDF, BKPT,
+DBG, guide C2.162, C2.18, C2.32.
+
+PART TWO. ARITHMETIC THAT REAL PROGRAMS MAY NEED.
+
+COVERED-SUBSET: ADD, ADC, SUB, SBC, RSB, CMP, CMN,
+logical operations, ordinary shifts, rotate, multiply
+low 32 bits and the specific 16-bit MOVS-immediate.
+Actual encodings and per-form flag effects remain open.
+
+UNGRANTED: multiply-add and multiply-subtract using
+separate accumulators, even when they can be built
+from other arithmetic operations. Source: MLA/MLS,
+guide C2.56-C2.57.
+
+UNGRANTED: full 64-bit signed and unsigned multiply,
+multiply-accumulate and long results, including
+the behavior of high and low destination registers.
+Sources: SMULL, UMULL, SMLAL, UMLAL and variants.
+
+TARGET-DEPENDENT: signed and unsigned integer division.
+SDIV/UDIV support is optional for an ARMv7-A processor
+and may differ between the A32 and T32 instruction
+sets. Actual feature-register evidence is required.
+Source: guide C2.99 and C2.163.
+
+UNGRANTED: more complicated signed halfword multiplies,
+dual multiplies and signed absolute-difference
+accumulations. Sources include SMLAxy, SMLAD,
+SMLSD, SMLALD, SMUAD, SMUSD, USAD8, USADA8.
+Distinct signedness, overflow and accumulation
+rules must be preserved by each future long name.
+
+UNGRANTED: arithmetic saturation, saturation flags,
+and halfword/byte parallel integer arithmetic.
+Sources include SSAT, USAT, QADD, QSUB,
+QADD16/QSUB16, UADD8/UADD16 and related
+families. These cannot be assumed equivalent to
+ordinary modulo-2^32 addition.
+
+PART THREE. REARRANGEMENT, PACKING AND FLAGS.
+
+UNGRANTED: extract or insert a contiguous subset of
+bits using explicit starting bit and width, zero
+or sign extension, and preserve surrounding bits.
+Sources: BFC, BFI, UBFX, SBFX.
+
+UNGRANTED: reverse the bit order or reverse selected
+byte order within a 32-bit value. Sources: RBIT,
+REV, REV16, REVSH. These are not generic ROR
+operations and do not change data memory endianness.
+
+UNGRANTED: rotate a 32-bit value through the incoming
+carry flag, producing the appropriate resulting
+carry. Source: RRX. This is not operation 25,
+which rotates a complete 32-bit word without an
+extra carry-in bit.
+
+UNGRANTED: test bitwise exclusive-or for N/Z and
+the specific shifter-carry effects without storing
+a result. Source: TEQ. Operation 16 presently
+covers AND-based TST, not the different TEQ predicate.
+
+UNGRANTED: OR a source with the bitwise complement
+of another source. Source: ORN (T32 form).
+This may be constructible as a multi-instruction
+sequence but is still a distinct hardware encoding.
+
+UNGRANTED: packet/halfword packing, select bits
+based on GE flags, and explicitly update
+architectural GE flags where required.
+Sources: PKHBT/PKHTB, SEL and packed
+parallel arithmetic groups.
+
+PART FOUR. SYNCHRONIZATION, MEMORY AND INTERRUPTS.
+
+UNGRANTED: exclusive load/store reservation and
+success/failure status, and explicit clearing
+of an outstanding reservation. Sources: LDREX,
+STREX, CLREX and any associated byte/halfword/
+doubleword exclusive variants available to the
+actual architectural target.
+
+UNGRANTED: memory-ordering and instruction-
+synchronization barriers whose architectural
+effects differ. Sources: DMB, DSB, ISB.
+They are not substitutes for one another and
+cannot simply be omitted by a translator.
+
+UNGRANTED: prefetch instruction/data/cache hints.
+Sources: PLD, PLDW, PLI and hints. Their effects
+cannot be assumed to equal an architecturally
+successful data load or executable branch.
+
+UNGRANTED: wait-for-interrupt/event, send-event
+and yield hints. Sources: WFI, WFE, SEV, YIELD.
+Their instruction permissions and observable
+effects require target-context interpretation.
+
+UNGRANTED: change processor mode, interrupt masks
+or data endianness, and exception returns.
+Sources include CPS, SETEND, RFE, SRS,
+and SUBS PC, LR where legal.
+The unprivileged English Major C profile
+does not grant supervisor authority just
+because a mnemonic exists in the manual.
+
+TARGET-DEPENDENT: low-level coprocessor,
+architectural identification, debug, virtualization
+and trust-zone operations. Sources include
+MCR/MRC, MCRR/MRRC, CDP, MRS/MSR,
+SMC/HVC and BXJ. These require separate
+architecture and permission rules; they cannot
+be described as plain user-space function calls.
+
+PART FIVE. FLOATING POINT AND VECTOR EXTENSIONS.
+
+TARGET-DEPENDENT: VFP/Advanced SIMD register files,
+instruction presence, save/restore, rounding,
+denormals, NaNs, exceptions and status registers.
+A physical target must declare whether these
+facilities exist and are made available to
+the current operating process.
+
+UNGRANTED: move values between scalar general-purpose
+registers and extension registers. Floating-point
+load/store and arithmetic. Floating-point compare
+and transfer of comparison state to condition flags.
+Sources include VMOV, VLDR, VSTR, VADD, VSUB,
+VMUL, VDIV, VCMP, VMRS, VMSR and the applicable
+VFP instruction encodings, with extension restrictions.
+
+UNGRANTED: Advanced SIMD data layout and arithmetic,
+multi-register loads/stores, lane extraction and
+insertion, saturation, narrowing, widening and
+horizontal reduction. The full instruction families
+in the Arm reference require an independent
+coverage inventory rather than a single generic
+"perform SIMD" instruction.
+
+NOT-ARMV7-A-ASSUMED: ARMv8-only cryptography,
+CRC, acquire/release/other later forms, Armv8-M
+TrustZone and other later/profile-specific
+instructions. The 2019 Arm instruction guide
+includes some of these and therefore its table
+of contents is NOT a proof of support by
+ARMv7-A processors.
+
+PART SIX. THE REQUIRED NEXT INVENTORY METHOD.
+
+Start with the actual ARM DDI 0406C.d A6 decoding
+tables, NOT merely a list of popular mnemonics.
+For every valid T32 encoding under the chosen
+architectural feature profile, record:
+
+  * the exact first/second halfword discriminator;
+  * the official encoding identifier and any alias;
+  * whether the architecture feature is mandatory;
+  * which registers, immediates and IT contexts
+    are permitted and which are unpredictable;
+  * the effect on general registers, flags,
+    PC-operand reads, execution index, ITSTATE,
+    memory, exception state and special registers;
+  * the exact long English name and its versioned
+    permitted-operation identity, OR an explicit
+    exclusion and reason;
+  * independent correct and incorrect test inputs;
+  * source/encode/decode/semantic/hardware evidence
+    at each of those separate assurance levels.
+
+Only AFTER the decoding table audit covers every
+leaf and every architectural exception may the
+complete T32 hardware-catalogue claim be made.
+The present file does not perform that audit.
+It does prevent the unfinished work from being
+silently forgotten or mislabeled complete.
+
+TRACKING.
+https://github.com/isomorphisms/flexible-pipes/issues/91
+https://github.com/dilapidated-shed/English-major-C/issues/1
