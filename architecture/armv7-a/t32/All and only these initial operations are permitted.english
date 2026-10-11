@@ -262,15 +262,26 @@ code and legal branch encoding are part of this operation, not an
 unverified source-level Boolean expression.
 
 Operation 44. "Branch forward to the permitted target if the entire
-tested general register contains zero, otherwise continue sequentially."
-Mapping: CBZ. Its direct register test does NOT consume N/Z/C/V and
-does not set them. This is not an arbitrary signed-value comparison.
-The selected encoding's permitted registers, forward range, and rule
-for exclusion from IT blocks must be honored.
+tested low general-purpose register contains zero, otherwise continue
+sequentially."
+Mapping: CBZ, the 16-bit T32 form. Its direct register test does NOT
+consume N/Z/C/V and does not set them. Only R0 through R7 are admitted
+as the tested register. The unsigned displacement is a multiple of two
+from zero through 126 bytes relative to the instruction's PC operand
+value (the instruction address plus four). Its destination must stay
+in T32 state. CBZ cannot be inside an IT block. This is not an
+arbitrary signed-value comparison.
 
 Operation 45. "Branch forward to the permitted target if the entire
-tested general register is nonzero, otherwise continue sequentially."
-Mapping: CBNZ. The same encoding/IT restrictions apply as for CBZ.
+tested low general-purpose register is nonzero, otherwise continue
+sequentially."
+Mapping: CBNZ, the 16-bit T32 form. Its permissible tested registers
+are R0 through R7; it is forbidden in an IT block. The unsigned
+displacement is zero through 126 bytes in even steps from the
+instruction's PC operand value (the instruction address plus four).
+It neither reads the current condition flags as its predicate nor
+changes N/Z/C/V. The same T32 target-state requirement applies
+as for CBZ.
 
 Operation 46. "Mark one through four immediately following T32
 instructions as conditionally executed according to one condition and,
@@ -288,11 +299,21 @@ Mapping: BL (immediate). The return address retains the required
 Thumb-state indication in LR. This is NOT permission to enter A32
 state or an unspecified calling convention.
 
-Operation 48. "Branch to a permitted target obtained from a register,
-using the architecture's target-state indication and alignment rules."
-Mapping: BX (register). A branch into A32 state is disallowed by
-this profile; for an admitted target the required state is T32.
-The specified source register usage/encoding must be legal.
+Operation 48. "Replace the execution index with the instruction
+address held in one permitted general-purpose register or in the link
+register, after interpreting the least significant bit of that stored
+value as the instruction-state indication rather than an address bit."
+Mapping: BX (register). R0 through R12 and LR (R14) are permitted
+sources only when the selected Thumb encoding permits them; SP (R13)
+and PC (R15) are excluded by this English Major C grant. The
+selected register's bit zero MUST be one for an admitted T32 target;
+the actual byte address is the register value with bit zero cleared.
+If bit zero is zero, the physical instruction requests A32 state,
+which is disallowed by this profile. BX does not save a new return
+address in LR. Consequently BX LR is the explicitly named T32
+return mechanism, provided LR holds a valid tagged return address.
+No condition flags are changed. A call and return do not imply
+a particular ABI or stack discipline.
 
 Operation 49. "Branch to a permitted T32 target obtained from a
 register while saving the return location in the link register."
@@ -300,17 +321,36 @@ Mapping: BLX (register) limited to target values that remain in
 T32 state. All state exchange and link effects must be validated.
 BLX forms that enter A32 state are excluded here.
 
-Operation 50. "Obtain an unsigned table entry from a byte table and
-branch using that entry as an indexed halfword displacement."
-Mapping: TBB. The base and index registers, effective load
-address, PC-relative branch base, scale, and legal table position
-are exactly as in the ARM reference. It is not a general arbitrary
-memory-indirect jump.
+Operation 50. "Read an unsigned entry from an indexed byte table,
+double its numerical value to obtain a halfword-scaled forward
+displacement, and replace the execution index with the resulting
+instruction address relative to the architectural PC operand."
+Mapping: TBB (32-bit T32). The base may be R0 through R12 or PC,
+but not SP; the index may only be R0 through R12. A PC base means
+the instruction's starting address plus four. Read one byte at
+[base value + index value]. If that unsigned byte is K, the
+branch target is [starting instruction address + four + 2*K].
+The entry is data rather than an instruction, and the operation
+is prohibited inside an IT block. It cannot change to A32 state.
+The exact legality of destination, memory access and operands
+must be verified; no automatic bounds check is provided.
 
-Operation 51. "Obtain an unsigned table entry from a halfword table
-and branch using that entry as an indexed halfword displacement."
-Mapping: TBH. This differs from TBB in entry width and indexed
-address calculation. Target legality and memory faults still apply.
+Operation 51. "Read an unsigned entry from an indexed halfword
+table, double its numerical value to obtain a halfword-scaled
+forward displacement, and replace the execution index with the
+resulting instruction address relative to the architectural PC."
+Mapping: TBH (32-bit T32). The base may be R0 through R12 or PC,
+but not SP; the index may only be R0 through R12. A PC base means
+the instruction's starting address plus four. Read one
+sixteen-bit unsigned halfword at [base value + 2*index value].
+If that halfword is K, the branch target is
+[starting instruction address + four + 2*K]. This differs
+from TBB in both entry width and table-address calculation,
+not the factor of two used for its branch target. The
+entry is data rather than executable instruction bytes.
+TBH is forbidden in an IT block and does not switch to
+A32 state. Any memory fault or illegal target must not
+be treated as a successful branch.
 
 Operation 52. "Perform an architectural no-operation instruction,
 normally advancing the execution index according to its encoding."
