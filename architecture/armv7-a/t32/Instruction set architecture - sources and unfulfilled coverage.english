@@ -21,6 +21,21 @@ https://developer.arm.com/documentation/ddi0406/cd
 Arm document content (C.d):
 https://documentation-service.arm.com/static/5f8daeb7f86e16515cdb8c4e
 
+ADDITIONAL CROSS-CHECK SOURCE (NOT A SUBSTITUTE FOR DDI 0406C.d).
+
+Arm Limited, Instruction Set Assembly Guide for Armv7 and earlier Arm
+architectures, Reference Guide, version 2.0, document
+100076_0200_00_en (2019).
+https://documentation-service.arm.com/static/5e7b6a6216d2907d594035c4
+
+In that guide, A1.10 describes PC reads, C1 describes condition flags,
+C2.14/C2.19-C2.23 describe branches, C2.41 describes IT,
+and C2.154 describes TBB/TBH. This edition includes Armv8 and
+some other profile-specific forms. No instruction is admitted to this
+ARMv7-A T32 profile merely because this guide mentions it.
+The primary ARMv7-A-specific DDI 0406C.d must determine
+architecture and encoding validity.
+
 This reference is identified by its document number AND revision. A later
 version, a similar ARMv7-M manual, an ARMv8-A AArch32 description, a blog
 post, and assembler implementation notes are NOT substitutions without a
@@ -52,6 +67,27 @@ This revision DOES NOT reproduce Arm's copyrighted full instruction
 descriptions or claim that short English glosses can replace its formal
 pseudocode. English Major C must eventually supply its own independently
 verified executable operation semantics or explicit reference binding.
+
+FURTHER AUDIT RECORDS IN THIS REPOSITORY.
+
+"Which instruction is next and how it is found.english" specifies
+instruction length, execution index, PC operand and control-flow traces.
+
+"Exactly when execution branches.english" specifies condition flags
+and permitted branching mechanisms in long English.
+
+"When bytes mean data and when bytes mean instructions.english"
+separates data loads from instruction fetch and records the
+alternative execution models considered.
+
+"What the current instruction grant does not yet contain.english"
+holds the outstanding instruction-family inventory, including
+PUSH/POP, LDM/STM, barriers, exclusives, floating-point, SIMD
+and optional processor extensions.
+
+"One actual Thumb branch listing translated from the bottom upward.english"
+in ../../../examples/ gives a source-derived machine-byte specimen
+and exposes the distinct MOV versus MOVS flag behavior.
 
 ENGLISH MAJOR C PROFILE BOUNDARY.
 
