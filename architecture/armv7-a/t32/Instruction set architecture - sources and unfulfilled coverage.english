@@ -87,6 +87,14 @@ writeback, plus rejected base-overlap and exception
 assumptions. The closed initial grant includes
 seven additional operations, numbered 54 through 60.
 
+"Actual wide Thumb multiple-word operations in long English.english"
+in ../../../examples/ records the additional four-byte STMIA
+and LDMDB instructions with W=0 and W=1, admitted
+under separately named operations 61 through 64.
+Their subset has at least two selected general
+registers and explicitly excludes SP/PC and
+base-register overlap.
+
 "Actual Thumb word transfers translated into English.english"
 in ../../../examples/ records independently sourced
 AOSP halfwords C409, CC09, B014, and B094 and
@@ -108,7 +116,7 @@ ENGLISH MAJOR C PROFILE BOUNDARY.
 The sole initial operation grant is:
     All and only these initial operations are permitted.english
 
-It lists 60 named families. No machine instruction outside a verified
+It lists 64 named families. No machine instruction outside a verified
 lowering of one of those named families is thereby permitted by the
 language. That is a complete statement of the INITIAL SOFTWARE GRANT,
 but it is NOT a complete statement of all the instructions executable
@@ -123,7 +131,7 @@ WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
 The open coverage inventory includes, without implying exhaustiveness:
 
   * every T32 encoding variant, width, restriction and alias even for
-    the 60 named operation families;
+    the 64 named operation families;
   * full multiply, multiply-accumulate, dual-multiply, long-multiply
     and signed/unsigned divide families;
   * saturating, parallel arithmetic, packing, byte reversal,
@@ -172,7 +180,7 @@ instruction set", an independent review SHALL:
    toolchain, and validate results independently. Report source,
    encode/decode, semantic execution and hardware evidence separately.
 
-Until then, do not describe the 60-entry grant as the entire physical ISA.
+Until then, do not describe the 64-entry grant as the entire physical ISA.
 
 TARGET-MACHINE DECLARATION REQUIREMENT.
 
