@@ -12,6 +12,10 @@ English Major C is an experimental programming language specified in ordinary En
 4. [Choices for missing-value branching and execution.english](decisions/Choices%20for%20missing-value%20branching%20and%20execution.english) retains competing strategies and the tests required to select one. This is a decision history, not an assembly-performance claim.
 5. The separately authored exact definition of "execution index" is under [PR #2 — Define the execution index](https://github.com/dilapidated-shed/English-major-C/pull/2); that PR remains a separate merge/acceptance item.
 
+## Assembly-to-English decompilation target
+
+[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 52-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
+
 ## Contract status
 
 This revision is a **first source-level machine contract and closed initial operation profile**. It is **NOT** a complete independent transcription, enumeration, verification, or implementation of all ARMv7-A T32, Advanced SIMD, VFP, coprocessor, system, exception, or optional-extension instructions. Listing a short allowed vocabulary does not mean the physical CPU lacks other instructions.
