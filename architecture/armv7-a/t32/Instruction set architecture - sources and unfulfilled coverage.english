@@ -36,6 +36,24 @@ ARMv7-A T32 profile merely because this guide mentions it.
 The primary ARMv7-A-specific DDI 0406C.d must determine
 architecture and encoding validity.
 
+ADDITIONAL 16-BIT THUMB QUICK-CARD CROSS-CHECK.
+
+Arm Limited, "Thumb 16-bit Instruction Set", Quick Reference Card,
+which describes Thumb-2 16-bit instructions as well as earlier Thumb.
+https://documentation-service.arm.com/static/5ed67dc7ca06a95ce53f9334
+
+The page headed "Thumb 16-bit Instruction Set" that covers load,
+store, PUSH, POP, and branch operations distinguishes:
+  - LDM with its base excluded (base writeback required);
+  - LDM with its base included (base writeback omitted);
+  - STM with a base writeback in the narrow encoding;
+  - PUSH of low registers with optional LR;
+  - POP of low registers with optional PC;
+  - direct SP arithmetic scaled by four bytes.
+These distinctions are material to the English operation names.
+The quick card does not enumerate all wide T32 encodings or
+override ARM DDI 0406C.d.
+
 This reference is identified by its document number AND revision. A later
 version, a similar ARMv7-M manual, an ARMv8-A AArch32 description, a blog
 post, and assembler implementation notes are NOT substitutions without a
