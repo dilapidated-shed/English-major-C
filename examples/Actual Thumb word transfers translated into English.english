@@ -189,12 +189,16 @@ ARM machine code. Loading data from 0x3000 does
 not transfer control there.
 
 The actual AOSP fixture includes more instruction
-forms not translated in this document, including
-32-bit load/store multiple encodings with high
-registers. The fact that those forms are next in
-the source array does not permit 57/58 to
-silently broaden into them. Those forms need
-new explicit operation semantics and encodings.
+forms not translated IN THIS PARTICULAR DOCUMENT,
+including 32-bit load/store multiple encodings with
+high registers. The fact that those forms are next
+in the source array does not permit 57/58 to
+silently broaden into them. A separate document,
+"Actual wide Thumb multiple-word operations in long
+English.english", now translates four of those forms
+using operations 61 through 64, with distinct
+writeback semantics. Neither document grants
+the full ARMv7-A T32 instruction set.
 
 Do not claim that the four samples were executed
 on a real processor, combined into a compiled
