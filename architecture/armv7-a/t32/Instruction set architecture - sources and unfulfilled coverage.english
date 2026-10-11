@@ -80,10 +80,24 @@ and permitted branching mechanisms in long English.
 separates data loads from instruction fetch and records the
 alternative execution models considered.
 
+"How registers enter memory and return from a stack.english"
+specifies the narrow T32 PUSH, POP, LDMIA, STMIA, and
+SP add/subtract operations, their word ordering and
+writeback, plus rejected base-overlap and exception
+assumptions. The closed initial grant includes
+seven additional operations, numbered 54 through 60.
+
+"Actual Thumb word transfers translated into English.english"
+in ../../../examples/ records independently sourced
+AOSP halfwords C409, CC09, B014, and B094 and
+their separately stated machine-state transitions.
+
 "What the current instruction grant does not yet contain.english"
 holds the outstanding instruction-family inventory, including
-PUSH/POP, LDM/STM, barriers, exclusives, floating-point, SIMD
-and optional processor extensions.
+ungranted wide PUSH/POP and LDM/STM forms, barriers,
+exclusives, floating-point, SIMD and optional processor
+extensions. Restricted 16-bit stack and multiple-word
+forms are separately permitted by operations 54-60.
 
 "One actual Thumb branch listing translated from the bottom upward.english"
 in ../../../examples/ gives a source-derived machine-byte specimen
@@ -94,7 +108,7 @@ ENGLISH MAJOR C PROFILE BOUNDARY.
 The sole initial operation grant is:
     All and only these initial operations are permitted.english
 
-It lists 53 named families. No machine instruction outside a verified
+It lists 60 named families. No machine instruction outside a verified
 lowering of one of those named families is thereby permitted by the
 language. That is a complete statement of the INITIAL SOFTWARE GRANT,
 but it is NOT a complete statement of all the instructions executable
@@ -109,7 +123,7 @@ WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
 The open coverage inventory includes, without implying exhaustiveness:
 
   * every T32 encoding variant, width, restriction and alias even for
-    the 53 named operation families;
+    the 60 named operation families;
   * full multiply, multiply-accumulate, dual-multiply, long-multiply
     and signed/unsigned divide families;
   * saturating, parallel arithmetic, packing, byte reversal,
@@ -158,7 +172,7 @@ instruction set", an independent review SHALL:
    toolchain, and validate results independently. Report source,
    encode/decode, semantic execution and hardware evidence separately.
 
-Until then, do not describe the 53-entry grant as the entire physical ISA.
+Until then, do not describe the 60-entry grant as the entire physical ISA.
 
 TARGET-MACHINE DECLARATION REQUIREMENT.
 
