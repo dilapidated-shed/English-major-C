@@ -1,0 +1,359 @@
+ALL AND ONLY THESE INITIAL OPERATIONS ARE PERMITTED.
+
+Status: closed INITIAL SCALAR SUBSET of ARMv7-A T32, authored in English.
+It is NOT a complete catalogue of all T32 encodings or extensions.
+Source of architectural encoding and exceptional behavior: ARM DDI 0406C.d.
+Read "Given a machine - objects and execution.english" first.
+Read "Instruction set architecture - sources and unfulfilled coverage.english"
+for the authoritative reference and list of unfulfilled verification obligations.
+
+CONTRACT OF PERMISSION.
+
+An English Major C program whose architecture grant names THIS document is
+allowed to request exactly the operation families numbered below, and no
+others. A family is granted only in the legal ARMv7-A T32 instruction forms
+documented in ARM DDI 0406C.d, subject to the additional restrictions below.
+The ARM mnemonics in parentheses are mappings for later verification, not the
+names of the English Major C operations. Aliases are not automatically granted
+as independent operations. There is currently NO validated assembler,
+elaborator, encoding checker or compiler. An unsupported or unverified
+operand/encoding combination must be REJECTED, never guessed.
+
+A "general register" in this first grant denotes only one of R0 through R12.
+Use of SP, LR, or PC by an operation is disallowed except where specifically
+stated. A source operand may be a general register or an immediate literal
+ONLY when that numbered operation and the cited instruction encoding permit
+that kind of operand. Arbitrary constants cannot be assumed to fit one
+instruction. Source and destination aliasing is allowed ONLY as permitted by
+the relevant exact architectural instruction form.
+
+A register holds a bit pattern of length 32. "Thirty-two-bit addition" below
+means the low 32 bits of the full mathematical sum unless an operation
+explicitly retains more. Negative integers use two's-complement
+interpretation. The four elementary condition flags are N (result bit 31),
+Z (result equals zero), C (carry out of addition or no-borrow from subtraction,
+as applicable), and V (signed overflow). An operation described as
+"without changing condition flags" MUST preserve N, Z, C and V. A later
+lowering may not choose an instruction form that sets flags by default
+unless the source operation authorizes that effect.
+
+A memory address is a virtual byte address, not a part number or physical
+DRAM location. All memory effects include the ARM-defined address
+calculation, size, alignment, access checks, memory type, endianness,
+writeback restrictions and fault behavior for the selected encoding.
+Neither a failed access nor an architecture-invalid encoding is a no-op.
+An IT block condition applies only where legal for the mapped encoding.
+
+ARITHMETIC, COMPARISON, AND BIT OPERATIONS.
+
+Operation 01. "Copy all thirty-two bits from one general register into
+another general register without changing condition flags."
+Mapping: MOV (register), with a legal non-flag-setting T32 form.
+Effect: destination becomes source; all other general registers and
+N, Z, C, V remain unchanged.
+
+Operation 02. "Replace one general register with a value represented by
+one legal encoded immediate operand without changing condition flags."
+Mapping: MOV (immediate), exact form selected by encoder.
+Effect: destination becomes the zero-extended, rotated, or otherwise
+architecturally constructed immediate value defined by THAT encoding.
+This is NOT an arbitrary signed 32-bit literal facility.
+
+Operation 03. "Write an explicitly encoded sixteen-bit constant as the
+low sixteen bits of a general register, making its high sixteen bits zero."
+Mapping: MOVW. Effect: destination becomes unsigned immediate[15:0].
+
+Operation 04. "Replace only the high sixteen bits of one general register
+with an explicitly encoded sixteen-bit constant."
+Mapping: MOVT. Effect: destination[31:16] is the immediate; destination
+[15:0] is preserved. No flags change.
+
+Operation 05. "Add the thirty-two-bit contents of two general registers
+and retain the low thirty-two bits without changing condition flags."
+Mapping: non-flag-setting ADD (register). The encoding must actually
+permit flag preservation; do not silently substitute a narrow ADDS form.
+
+Operation 06. "Add the contents of a general register to a legally
+encodable immediate integer and retain the low thirty-two bits without
+changing condition flags."
+Mapping: non-flag-setting ADD (immediate). The permitted literal range
+and encoding determine availability.
+
+Operation 07. "Add two thirty-two-bit operands, retain the low
+thirty-two bits, and update negative, zero, carry, and overflow flags."
+Mapping: ADDS (legal register or immediate T32 form). N and Z describe
+the stored result; C is the unsigned carry out; V is signed overflow.
+
+Operation 08. "Add the two thirty-two-bit operands together with the
+incoming carry flag, retain the low thirty-two bits, and preserve flags."
+Mapping: non-flag-setting ADC (register or legal immediate form).
+Result = (first + second + old C) modulo 2^32.
+
+Operation 09. "Add the two thirty-two-bit operands together with incoming
+carry, retain the low thirty-two bits, and update arithmetic flags."
+Mapping: ADCS. Its old C is read BEFORE computing the new flags.
+
+Operation 10. "Subtract the second thirty-two-bit operand from the first,
+retain the low thirty-two bits, and preserve the condition flags."
+Mapping: non-flag-setting SUB, in a legal T32 form.
+
+Operation 11. "Subtract the second operand from the first, retain the low
+thirty-two bits, and update negative, zero, no-borrow, and overflow flags."
+Mapping: SUBS. A result with no unsigned borrow sets C; V records
+signed overflow.
+
+Operation 12. "Subtract the second operand and any incoming borrow from
+the first, retaining the low thirty-two bits without changing flags."
+Mapping: non-flag-setting SBC. Result = first - second - (1 - old C),
+modulo 2^32.
+
+Operation 13. "Subtract the first operand from the second and retain the
+low thirty-two bits without changing flags."
+Mapping: non-flag-setting RSB in a legal form. This reverses SUB's
+operand order and is not a semantic alias for SUB with unchanged operands.
+
+Operation 14. "Compare two encoded operands by performing subtraction
+for condition flags without retaining the arithmetic result."
+Mapping: CMP. Set N/Z/C/V as for first - second; preserve source
+operands. Equality is then Z=1. Signed less-than is N!=V; unsigned
+less-than is C=0.
+
+Operation 15. "Compare two encoded operands by performing addition
+for condition flags without retaining the arithmetic result."
+Mapping: CMN. Set N/Z/C/V as for first + second.
+
+Operation 16. "Test the bitwise intersection of two operands, preserving
+their original values and setting comparison flags as specified."
+Mapping: TST. The Z flag describes whether the bitwise AND is zero.
+The exact instruction's shifter-carry rule applies; V is preserved.
+Do NOT infer C from arbitrary arithmetic.
+
+Operation 17. "Produce the bitwise logical intersection of the two
+specified thirty-two-bit values without changing condition flags."
+Mapping: non-flag-setting AND. Destination gets first AND second.
+
+Operation 18. "Produce the bitwise inclusive union of two specified
+thirty-two-bit values without changing condition flags."
+Mapping: non-flag-setting ORR. Destination gets first OR second.
+
+Operation 19. "Produce the bitwise exclusive-or of two specified
+thirty-two-bit values without changing condition flags."
+Mapping: non-flag-setting EOR. Destination gets first XOR second.
+
+Operation 20. "Clear in the first value every bit selected by a set bit
+in the second value, without changing condition flags."
+Mapping: non-flag-setting BIC. Destination gets first AND (NOT second).
+
+Operation 21. "Invert each of the thirty-two bits of the selected source
+value and store the result without changing condition flags."
+Mapping: non-flag-setting MVN. Destination gets bitwise NOT source.
+
+Operation 22. "Shift a thirty-two-bit value left by the encoded number of
+bit positions and insert zero bits at the right."
+Mapping: LSL, non-flag-setting form. The result is truncated to 32 bits.
+Immediate/register count forms and special count cases are constrained
+by the ARM reference; they are NOT assumed interchangeable.
+
+Operation 23. "Shift an unsigned thirty-two-bit value right by the
+encoded number of bit positions and insert zero bits on the left."
+Mapping: LSR, non-flag-setting form, with ARM-defined count semantics.
+
+Operation 24. "Shift a signed thirty-two-bit value right by the encoded
+number of bit positions, replicating its original sign bit."
+Mapping: ASR, non-flag-setting form, with ARM-defined count semantics.
+
+Operation 25. "Rotate the thirty-two-bit value right by the encoded
+number of bit positions without losing rotated bits."
+Mapping: ROR, non-flag-setting form. RRX and special carry-based cases
+are NOT automatically included in this name.
+
+Operation 26. "Count the consecutive zero bits starting with the most
+significant bit of a general register."
+Mapping: CLZ. Destination is an integer between 0 and 32. Input zero
+produces 32.
+
+Operation 27. "Multiply the two selected thirty-two-bit values and
+retain only the low thirty-two bits without changing condition flags."
+Mapping: MUL (non-flag-setting T32 form). This is not a wide product.
+
+Operation 28. "Sign-extend the lowest eight bits of the specified
+general register into a thirty-two-bit signed bit pattern."
+Mapping: SXTB. No flags change, subject to encoding constraints.
+The version with optional rotation, if supported, must be selected
+explicitly by the exact instruction form.
+
+Operation 29. "Sign-extend the lowest sixteen bits of the specified
+general register into a thirty-two-bit signed bit pattern."
+Mapping: SXTH. No flags change, subject to encoding constraints.
+
+Operation 30. "Zero-extend the lowest eight bits of the specified
+general register into a thirty-two-bit bit pattern."
+Mapping: UXTB. No flags change, subject to encoding constraints.
+
+Operation 31. "Zero-extend the lowest sixteen bits of the specified
+general register into a thirty-two-bit bit pattern."
+Mapping: UXTH. No flags change, subject to encoding constraints.
+
+MEMORY AND ADDRESS OPERATIONS.
+
+Operation 32. "Load exactly four bytes from one permitted effective
+memory address into a general register and interpret them as one
+thirty-two-bit word."
+Mapping: LDR (immediate/register offset, legal T32 forms). The address
+is computed from a permitted base register, offset and addressing mode.
+This operation does not grant arbitrary address writeback, privileged
+unprivileged-access variants, or a load into PC.
+
+Operation 33. "Load one byte from a permitted effective memory address
+and extend it with zero bits into a general register."
+Mapping: LDRB. Flags are preserved.
+
+Operation 34. "Load one byte from a permitted effective memory address,
+interpret bit seven as the sign, and sign-extend it to thirty-two bits."
+Mapping: LDRSB. Flags are preserved.
+
+Operation 35. "Load two consecutive bytes from a permitted effective
+memory address as an unsigned halfword and extend it with zeros."
+Mapping: LDRH. Flags are preserved.
+
+Operation 36. "Load two consecutive bytes from a permitted effective
+memory address as a signed halfword and sign-extend it."
+Mapping: LDRSH. Flags are preserved.
+
+Operation 37. "Store exactly four bytes representing the low
+thirty-two bits of one general register to a permitted memory address."
+Mapping: STR. The exact byte ordering is that of the active machine
+and mapping; flags are preserved.
+
+Operation 38. "Store only the least significant eight bits of a general
+register to a permitted memory address."
+Mapping: STRB. Flags are preserved.
+
+Operation 39. "Store only the least significant sixteen bits of a general
+register to a permitted memory address."
+Mapping: STRH. Flags are preserved.
+
+Operation 40. "Compute a permitted immediate address relative to
+the architectural program-counter operand without loading memory."
+Mapping: ADR. The ARM-defined aligned-base and offset rules apply.
+The value of PC used by this instruction MUST NOT be replaced with
+the abstract execution index without the required adjustment.
+
+Operation 41. "Load a thirty-two-bit word from an architecture-defined
+literal address based upon the current instruction's PC-relative value."
+Mapping: LDR (literal). The read address follows the ARM-defined
+PC+4 and alignment rules, rather than an assumed next-instruction
+address. This does not transfer control.
+
+BRANCHING AND EXPLICIT CONTROL FLOW.
+
+Operation 42. "Replace the execution index with the named legal T32
+instruction address without modifying the link register."
+Mapping: B (unconditional, immediate target). A legal encoding and
+target range are mandatory. This does not change to A32 state.
+
+Operation 43. "Replace the execution index with the named legal T32
+instruction address only if the selected architectural condition holds;
+otherwise continue at the sequential successor."
+Mapping: B with a condition code. Conditions include equal (Z=1),
+not equal (Z=0), unsigned comparisons using C and Z, signed comparisons
+using N, V and Z, and remaining legal ARM conditions. The condition
+code and legal branch encoding are part of this operation, not an
+unverified source-level Boolean expression.
+
+Operation 44. "Branch forward to the permitted target if the entire
+tested general register contains zero, otherwise continue sequentially."
+Mapping: CBZ. Its direct register test does NOT consume N/Z/C/V and
+does not set them. This is not an arbitrary signed-value comparison.
+The selected encoding's permitted registers, forward range, and rule
+for exclusion from IT blocks must be honored.
+
+Operation 45. "Branch forward to the permitted target if the entire
+tested general register is nonzero, otherwise continue sequentially."
+Mapping: CBNZ. The same encoding/IT restrictions apply as for CBZ.
+
+Operation 46. "Mark one through four immediately following T32
+instructions as conditionally executed according to one condition and,
+where legally specified, its inverse."
+Mapping: IT (If-Then), including legal masks. The block's exact
+condition-state advancement, prohibited instructions, branch-position
+rules and flag interactions SHALL come from DDI 0406C.d. IT does
+not grant permission to execute a non-permitted instruction. An
+instruction whose IT condition fails has the ARM-specified
+nonexecuting effect, not an alternative arbitrary code path.
+
+Operation 47. "Branch to a permitted immediate T32 function entry and
+write the architecturally encoded return address into the link register."
+Mapping: BL (immediate). The return address retains the required
+Thumb-state indication in LR. This is NOT permission to enter A32
+state or an unspecified calling convention.
+
+Operation 48. "Branch to a permitted target obtained from a register,
+using the architecture's target-state indication and alignment rules."
+Mapping: BX (register). A branch into A32 state is disallowed by
+this profile; for an admitted target the required state is T32.
+The specified source register usage/encoding must be legal.
+
+Operation 49. "Branch to a permitted T32 target obtained from a
+register while saving the return location in the link register."
+Mapping: BLX (register) limited to target values that remain in
+T32 state. All state exchange and link effects must be validated.
+BLX forms that enter A32 state are excluded here.
+
+Operation 50. "Obtain an unsigned table entry from a byte table and
+branch using that entry as an indexed halfword displacement."
+Mapping: TBB. The base and index registers, effective load
+address, PC-relative branch base, scale, and legal table position
+are exactly as in the ARM reference. It is not a general arbitrary
+memory-indirect jump.
+
+Operation 51. "Obtain an unsigned table entry from a halfword table
+and branch using that entry as an indexed halfword displacement."
+Mapping: TBH. This differs from TBB in entry width and indexed
+address calculation. Target legality and memory faults still apply.
+
+Operation 52. "Perform an architectural no-operation instruction,
+normally advancing the execution index according to its encoding."
+Mapping: NOP. A no-op is not a guarantee of zero time, zero power,
+or no microarchitectural activity. This name does not include
+architectural hints such as YIELD, WFI, WFE, SEV, or DBG.
+
+BOUNDARIES AND REJECTIONS.
+
+This operation grant contains exactly FIFTY-TWO numbered entries.
+An implementation claiming that it supports this grant SHALL verify
+the count, unique names, exact encodings and legal operand variants;
+the existence of this file alone is not that verification.
+
+Unlisted operations are NOT authorized for direct English Major C
+source use: PUSH, POP, block transfers, exclusive/atomic loads or stores,
+memory barriers, supervisor calls, coprocessor operations, VFP,
+Advanced SIMD/NEON, division, saturation, arbitrary code execution,
+exception handling, mode-changing instructions, and all other
+unnamed ARM instructions remain outside this profile, even if supported
+by a real CPU.
+
+Architectural syntaxes, aliases, widths and encodings cannot be freely
+exchanged. Some 16-bit Thumb forms set flags when 32-bit Thumb forms
+can preserve them, and some forms may be unavailable in IT blocks.
+An exact machine encoding, or a verified construction of several
+permitted encodings, must be shown before an English operation is
+considered executable. Anything UNDEFINED, UNPREDICTABLE,
+implementation-defined but undeclared, absent from target features,
+or forbidden by user-mode privileges MUST fail rather than silently
+relaxing this contract.
+
+A program wishing to perform an operation not on this list must select
+a new explicitly versioned profile, give that operation a full long
+English name and a verified architectural mapping, and retain the
+reason it was admitted. The hardware architecture reference is
+not automatically a blanket grant.
+
+SOURCE-LEVEL SELECTION IS NOT COMPILER ACCEPTANCE.
+
+The very first target is written specification, not an emulator.
+Correctness requires, in order: validated parse, unambiguous operand
+types, proven permissible instruction selection, encoding evidence,
+semantic tests including rejected illegal cases, and execution
+on the selected target if claimed. The current revision has NOT
+completed those stages.
