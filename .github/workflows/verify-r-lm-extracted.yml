@@ -1,4 +1,4 @@
-name: Verify preserved R lm native QR disassembly
+name: Verify extracted R lm native QR disassembly
 
 on:
   pull_request:
@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  verify-reference-archive:
-    name: verify-reference-archive
+  verify-extracted-reference:
+    name: verify-extracted-reference
     runs-on: ubuntu-24.04
     steps:
       - name: Check out the exact proposed revision
