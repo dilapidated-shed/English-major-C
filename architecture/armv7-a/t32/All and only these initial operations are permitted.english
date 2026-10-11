@@ -358,9 +358,33 @@ Mapping: NOP. A no-op is not a guarantee of zero time, zero power,
 or no microarchitectural activity. This name does not include
 architectural hints such as YIELD, WFI, WFE, SEV, or DBG.
 
+ADDITIONAL IMMEDIATE-TO-REGISTER FORM WITH FLAG EFFECTS.
+
+Operation 53. "Write the unsigned eight-bit immediate value explicitly
+encoded in this instruction into the selected low general-purpose
+register after extending the value with zeros to thirty-two bits;
+set the negative and zero condition flags from that result while
+preserving the old carry and overflow condition flags."
+Mapping: MOVS (immediate), the 16-bit T32 T1 encoding outside an IT
+block. The first five bits of the instruction halfword are binary
+00100. The next three bits choose a destination register R0
+through R7. The lowest eight bits contain a literal between
+zero and 255, inclusive. The destination becomes that literal
+as a 32-bit value. Negative flag N becomes zero because
+its bit 31 is zero. Zero flag Z becomes one exactly when the
+literal is zero; otherwise Z becomes zero. Carry flag C and
+overflow flag V retain their old values. The 16-bit form
+has length TWO bytes. The destination is not SP, LR, or PC.
+Only the explicitly flag-setting immediate form OUTSIDE IT
+is admitted. A non-flag-setting MOV and a flag-setting
+MOVS are separate English operations: 02 cannot be
+silently substituted for 53. The behavior and encoding
+are subject to DDI 0406C.d; no assembler/compiler
+execution has yet been qualified.
+
 BOUNDARIES AND REJECTIONS.
 
-This operation grant contains exactly FIFTY-TWO numbered entries.
+This operation grant contains exactly FIFTY-THREE numbered entries.
 An implementation claiming that it supports this grant SHALL verify
 the count, unique names, exact encodings and legal operand variants;
 the existence of this file alone is not that verification.
