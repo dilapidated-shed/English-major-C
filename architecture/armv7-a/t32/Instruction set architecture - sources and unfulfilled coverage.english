@@ -150,11 +150,39 @@ UDF and halts at ungranted SVC, and another that
 halts at ungranted UDF. ARM UDF and SVC are distinct
 exception mechanisms, not short condition branches.
 
-Combined with the earlier 256-halfword 0xBA00..BAFF
-subtree, these cover 4352 DISJOINT HALFWORD VALUES
-completely at the decoder-classification level.
-They do NOT cover the full 16-bit or 32-bit Thumb ISA,
-all operation semantics, or a real device's features.
+"Every If Then and hint halfword.english" describes the
+complete BF00..BFFF 256-halfword subtree under
+ARM DDI 0406C.d A6.2.5 Table A6-7 and A8.8.55.
+Its full data table is:
+../../../fixtures/armv7-a-t32-if-then-and-hint-halfwords.tsv
+The subtree includes 214 conditionally admissible
+IT forms; 26 IT encodings rejected as UNPREDICTABLE;
+one exact permitted NOP, four named but ungranted
+hints, and eleven software-reserved unallocated hints.
+It does NOT mean that the full ITSTATE execution
+interpreter or every following-instruction context
+has already been implemented.
+
+"One If Then block governs a short and a long instruction.english"
+in ../../../examples/ translates a foreign diagnostic
+of an actual 16-bit IT followed by a two-byte MOV
+and a four-byte MOVW, with different register effects
+depending on the initial comparison flags, but no
+different execution-index sequence. Its diagnostic
+source was assembled and decoded, not run on ARM hardware.
+
+"2026-10-11-BFxx-Thumb-IT-and-hint-audit.english"
+in ../../../evidence/ captures its temporary
+clang/LLVM diagnostic, the difference between
+LLVM's apparently legal printed IT and the ARM
+UNPREDICTABLE condition, SHA256 hashes and blockers.
+
+Combined with the previous 256-halfword BA00..BAFF
+subtree and the 4096-halfword D000..DFFF subtree,
+these THREE disjoint regions cover 4608 individual
+16-bit halfword values at decoder-classification level.
+They DO NOT cover the full 16-bit or 32-bit Thumb ISA,
+all ITSTATE/exceptions, or a real device's features.
 
 "Eight Thumb bit operations translated until the first ungranted
 instruction.english" in ../../../examples/ contains
