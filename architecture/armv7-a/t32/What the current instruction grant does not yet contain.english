@@ -114,13 +114,35 @@ See "Every conditional-branch and supervisor-call
 halfword.english" and the two 4096-entry and
 224-entry condition/flag TSV fixtures.
 
-The prior finite 0xBA00..0xBAFF subtree remains
-separate, with 64 REV, 64 REV16, 64 UNDEFINED,
-and 64 REVSH halfwords. These two completed
-subtrees total exactly 4352 DISTINCT NUMERICAL
-16-bit halfword values, not a complete Thumb ISA.
-Uninspected instruction spaces and different 32-bit
-encodings remain separate open obligations.
+A THIRD completely enumerated sixteen-bit Thumb
+decoding subtree is BF00..BFFF, 256 halfwords,
+under "Every If Then and hint halfword.english":
+  214 potentially legal IT T1 encodings, with
+  additional surrounding ITSTATE/follower restrictions;
+  26 firstcond/mask patterns UNPREDICTABLE under
+  DDI 0406C.d A8.8.55 and REJECTED by the grant;
+  one exact NOP BF00, permitted by operation 52;
+  four architecturally named but UNGRANTED hints
+  YIELD, WFE, WFI and SEV;
+  eleven UNALLOCATED HINT patterns that execute as
+  NOP-like hints but software MUST NOT use.
+The 256 rows and permission distinctions are:
+fixtures/armv7-a-t32-if-then-and-hint-halfwords.tsv
+The full ITSTATE runtime interpreter and all legal
+following-instruction cases are NOT yet verified.
+Operation 46's permitted IT cases cannot excuse a
+T1 conditional B inside IT.
+
+The previously audited 0xBA00..0xBAFF subtree
+has 64 REV, 64 REV16, 64 UNDEFINED,
+and 64 REVSH halfwords. Combined with the
+0xD000..0xDFFF subtree and the BF00..BFFF
+subtree, the THREE COMPLETED DECODE SUBTREES
+account for exactly 256+4096+256=4608 DISTINCT
+NUMERICAL 16-bit halfword values, not an
+exhaustive ARM Thumb instruction set.
+Uninspected instruction spaces and 32-bit
+instruction encodings remain open obligations.
 
 DECODED-BUT-UNGRANTED: all 256 SVC T1 instruction encodings
 0xDF00..0xDFFF are recognized under DDI 0406C.d A6.2.6,
