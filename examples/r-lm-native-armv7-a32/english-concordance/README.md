@@ -80,6 +80,11 @@ demonstrates QEMU execution of the much smaller unknown-entry summation.
 It is **not execution of these QR instructions**. The ARM QR routines
 have not yet been run as complete numerical programs.
 
+The [first actual A32 QR call traced in long English](How%20the%20real%20A32%20machine%20prepares%20its%20first%20QR%20call.english)
+derives the nine dqrdc2_ pointer arguments instruction by instruction,
+including precise AAPCS32 incoming and outgoing stack offsets. It
+cross-checks Fortran only *after* deriving the actual machine effects.
+
 ## Linked ARM executable contains mixed A32 and Thumb instruction states
 
 The separate [linked ARM Linux hardfp QR archive](../../r-lm-native-armv7-linux-hardfp-linked/README.md)
