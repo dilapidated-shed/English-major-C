@@ -1,6 +1,6 @@
 # Idriç experiment: a source line may be an operation, a comment, or a declaration
 
-**Status:** source-model proposal only. The adjacent [Idriç declarations](english-source-categories.idric) have been committed for inspection but **have not been compiled by Idriç**. They are not a working lexer, English parser, or replacement for the small JavaScript prototype. No change to ICKY or Idriç's core compiler is made in this experiment.
+**Status:** source-model proposal only. The adjacent [Idriç declarations](EnglishMajorC/SourceCategories.idric) have been committed for inspection but **have not been compiled by Idriç**. They are not a working lexer, English parser, or replacement for the small JavaScript prototype. No change to ICKY or Idriç's core compiler is made in this experiment.
 
 ## Why this is smaller than a language-wide type system
 
