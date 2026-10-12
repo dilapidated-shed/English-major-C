@@ -1,0 +1,303 @@
+THE SAME BRANCH BYTES ACQUIRE A CONDITION FROM IF-THEN STATE.
+
+English Major C bottom-up machine-byte specimen.
+Status: an actually assembled/disassembled ARMv7-A T32
+diagnostic and two stated hypothetical architectural
+machine-state traces. NOT real ARM device execution,
+and NOT a functioning English Major C compiler.
+
+FOREIGN BYTE PROVENANCE.
+
+The following literal instruction halfwords were placed in
+one temporary Thumb instruction stream in a diagnostic
+Linux x86-64 environment:
+
+  .syntax unified
+  .arch armv7-a
+  .thumb
+  .text
+  .global branch_inside_it
+  .thumb_func
+  branch_inside_it:
+  .hword 0x2800,0xBF08,0xE000,0x2103,0x2204,0xDF03
+
+Clang 17.0.0, targeting armv7a-none-eabi in Thumb state,
+produced an ELF32 little-endian ARM object. LLVM objdump
+17.0.0, decoding under thumbv7-none-eabi, displayed:
+
+  offset 0x0000  halfword 2800  cmp   r0,#0
+  offset 0x0002  halfword BF08  it    eq
+  offset 0x0004  halfword E000  beq   0x0008
+  offset 0x0006  halfword 2103  movs  r1,#3
+  offset 0x0008  halfword 2204  movs  r2,#4
+  offset 0x000A  halfword DF03  svc   #3
+
+The apparent "beq" at offset 0x0004 matters. The RAW
+HALFWORD IS E000. Its top five bits are 11100.
+It is the T2 unconditional immediate B encoding,
+not the T1 condition-coded branch encoding D0xx.
+The effective EQ condition comes from the preceding
+IT EQ state, not from any condition-code bit field
+inside halfword E000.
+
+A disassembly printed without the surrounding IT
+context may call exactly E000 "b", while an IT-aware
+disassembler renders it "beq". Both spellings can
+be correct contextual descriptions of the same
+machine halfword. Neither changes the original
+instruction's legal encoding class.
+
+The source assembly, object and decoder output
+digests and the independent full E000..E7FF
+decode check are retained in the companion
+unconditional-branch audit receipt.
+
+MACHINE-STATE PREMISES.
+
+Execution is modeled under a symbolic ARMv7-A
+unprivileged application process in T32 state.
+Assume the machine code resides in an executable
+virtual-memory mapping with legal T32 entry boundaries,
+and no interrupt, external memory mutation or
+unrelated fault intervenes in the permitted steps.
+
+The starting register and flag values are declared
+separately for each trace. Registers not declared
+are UNKNOWN, not implicitly zero.
+No data-memory reads or writes occur in the
+permitted instructions described below.
+The translation stops before executing an
+ungranted SVC instruction at offset 0x000A.
+
+FIRST EXECUTION, WITH R0 EQUAL TO ZERO.
+
+Let the initial execution index be offset zero.
+Let R0=0, R1 and R2 unknown, and N/Z/C/V unknown.
+
+Step 1, offset 0x0000:
+  halfword 2800, CMP R0,#0.
+  The subtraction of zero from zero has result zero.
+  Set N=0, Z=1, C=1 (no unsigned borrow), V=0.
+  Preserve R0=0. No memory access.
+  Advance index by two bytes to 0x0002.
+
+Step 2, offset 0x0002:
+  halfword BF08, T32 IT T1 with condition EQ,
+  one following instruction slot.
+  Establish active ITSTATE for the instruction
+  beginning at offset 0x0004. IT does not
+  update the four comparison flags.
+  Advance index to 0x0004.
+
+Step 3, offset 0x0004:
+  halfword E000, B T2 immediate, operation 42.
+  Its encoded eleven-bit displacement is zero,
+  and the PC operand base equals offset 0x0008.
+  The sole following IT condition is EQ, Z=1.
+  The condition is true, so the B T2 takes
+  its encoded target at offset 0x0008.
+  The instruction is TWO bytes long but
+  does not select the sequential index 0x0006.
+  No register, LR, SP, flag or data memory
+  value is altered. The IT slot is consumed.
+
+  Therefore halfword 2103 at offset 0x0006
+  is NOT architecturally executed on this path.
+  There is no basis for setting R1 to three.
+
+Step 4, offset 0x0008:
+  halfword 2204, MOVS R2,#4.
+  Operation 53 replaces R2 with unsigned four.
+  N=0, Z=0; preserve C=1, V=0.
+  Next execution index is offset 0x000A.
+
+Step 5, offset 0x000A:
+  halfword DF03 is SVC T1, decoded as
+  supervisor-call immediate three.
+  It is not in the current closed 72-operation
+  English Major C execution grant.
+  STOP and report the OS/exception boundary,
+  rather than claiming the user-space program
+  performed a particular service or returned.
+
+The visited instruction addresses, including
+the final decoded-but-not-executed boundary, are:
+  0x0000, 0x0002, 0x0004, 0x0008, 0x000A.
+
+Known registers at the boundary:
+  R0=0; R1 UNKNOWN; R2=4;
+  N=0; Z=0; C=1; V=0.
+
+SECOND EXECUTION, WITH R0 EQUAL TO SEVEN.
+
+The SAME six halfwords are used at the
+SAME original addresses. Only the initial
+machine state differs.
+
+Begin at offset zero with R0=7.
+R1/R2 and initial flags are unknown.
+
+Step 1, CMP R0,#0, produces 7-0.
+  Set N=0, Z=0, C=1, V=0.
+  Continue to offset 0x0002.
+
+Step 2, BF08, establishes one-slot IT EQ,
+  and continues to offset 0x0004.
+
+Step 3, E000 is the SAME B T2 encoding.
+  Its normal effect would branch to
+  offset 0x0008 from its PC operand base.
+  But the active IT condition EQ is FALSE
+  because Z is zero.
+  Therefore do NOT perform the branch.
+  Advance across this TWO-byte instruction
+  to ordinary sequential offset 0x0006.
+  Complete the final IT slot and leave
+  the IT block. Preserve flags.
+
+Step 4, offset 0x0006, MOVS R1,#3,
+  sets R1=3; N=0, Z=0; C=1,V=0.
+  Continue to offset 0x0008.
+
+Step 5, offset 0x0008, MOVS R2,#4,
+  sets R2=4; N=0, Z=0; C=1,V=0.
+  Continue to offset 0x000A.
+
+Step 6, offset 0x000A, encounter DF03,
+  SVC T1; STOP as ungranted.
+  No syscall effect is claimed.
+
+The visited instruction addresses are:
+  0x0000, 0x0002, 0x0004,
+  0x0006, 0x0008, 0x000A.
+
+Known registers at the boundary:
+  R0=7; R1=3; R2=4;
+  N=0; Z=0; C=1; V=0.
+
+WHAT THIS EXAMPLE DEMONSTRATES.
+
+A 16-bit B T2 is syntactically unconditional
+because the halfword has no condition-code field.
+But its architectural data and branch effects
+can be conditional when it is legally placed
+in the FINAL slot of a preceding T32 IT block.
+
+The effect is not provided by the branch predictor,
+the cache, the numerical branch target,
+or some hidden data dependency.
+It is provided by the ITSTATE previously
+established by an ACTUAL IT machine instruction.
+
+By contrast, a T1 conditional B from D000..DDFF
+carries a condition in its own halfword and is
+NOT permitted anywhere inside an IT block.
+One cannot replace E000 in this example with
+D000 while preserving the same native legal
+IT sequence. The resulting program would be
+architecturally UNPREDICTABLE.
+
+The same program-counter address 0x0008 is reached
+on both paths, but the paths have different
+register effects, because one path skips the
+ordinary MOVS at offset 0x0006.
+
+A source translation which merely outputs
+R2=4 has omitted essential information:
+whether R1 was assigned, where the next
+instruction address came from, and what
+made the branch conditional.
+
+A direct conditional branch around a register
+assignment might implement a comparable
+high-level computation, but it would be DIFFERENT
+actual machine code and would need its own
+translation and evidence. That alternative
+belongs in a decision record, not in a false
+claim about the observed E000 halfword.
+
+SECONDARY BOUNDARY: A BREAKPOINT IN A FALSE IT SLOT.
+
+A future or external instruction stream might
+contain BF08 followed by BE01, with Z=0.
+The BF08 would declare IT EQ, whose condition
+is false for the following slot.
+However BE01 is BKPT T1, an always-unconditional
+debug-event instruction even inside an IT block.
+It is NOT a conditionally skipped register write
+or a conditionally skipped short B.
+
+The initial English Major C profile does
+not grant BKPT. It must classify BE01 as a
+breakpoint event and STOP, regardless of
+the false EQ condition, rather than silently
+turning the ungranted instruction into a NOP.
+
+This separate two-halfword counterexample
+was not executed on a processor and does
+not belong to the main six-halfword diagnostic.
+Its byte meanings are defined in the
+"Every breakpoint halfword and its
+conditional-execution exception.english"
+architecture file. The entire BE00..BEFF
+range is enumerated in a data-only TSV.
+
+CONSIDERED ALTERNATIVES RETAINED.
+
+(1) Encode T2 B in last slot of IT, as
+    the actual inspected diagnostic does.
+    Legal when all stated restrictions hold.
+
+(2) Use T1 conditional B outside IT.
+    This requires changing machine bytes,
+    branch-immediate range and surrounding
+    control flow. Not an explanation of
+    the original E000 bit pattern.
+
+(3) Use a wide T32 conditional B T3
+    after removing IT. Reach and encoding
+    differ. Must verify exact availability.
+
+(4) Use only arithmetic mask construction
+    and avoid a branch. This may preserve
+    some output values but not a byte-exact
+    translation or necessarily identical flags.
+
+(5) Use a predicated MOV rather than
+    a predicated branch. This may work
+    for short conditional data updates,
+    but would require a changed input program.
+
+(6) Rely on branch prediction to
+    increase speed. Physical hardware
+    details and measured distributions
+    are missing. No universal claim is made.
+
+(7) Attempt to skip an ungranted BKPT
+    merely by making its IT condition false.
+    Rejected because BKPT is always unconditional.
+    Only actual control flow which does not
+    select BKPT can avoid its event.
+
+(8) Interpret DF03 by guessing the
+    Linux/Android syscall table. Rejected;
+    the source/target ABI and exception
+    handler have not been declared.
+
+FUTURE REQUIRED ACCEPTANCE.
+
+Check exact six source halfwords against
+the diagnostic object's native .text bytes.
+Check T2 immediate range, instruction length,
+PC-relative target, and IT last-slot placement.
+Run both flag paths through a genuinely accepted
+English Major C semantic executor once available,
+including preserved unknown-register values.
+Confirm no phantom execution at skipped 0x0006.
+Confirm halt without executing ungranted DF03.
+Reject substitution of T1 conditional B inside IT.
+Reject a claim that false IT suppresses BKPT.
+Reject every implication that source/disassembly
+alone establishes physical CPU execution.
+
+END OF SOURCE-DERIVED B T2 / IT CONTRAST.
