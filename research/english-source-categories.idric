@@ -12,6 +12,7 @@ import Data.Text
 -- describe the result of that process; they DO NOT perform it.
 
 choice english_source_item one_of
+  machine_target_declaration Text
   executable_operation permitted_machine_operation
   nonexecuting_comment Text
   nonexecuting_explanation Text
