@@ -235,15 +235,70 @@ Mapping: STRH. Flags are preserved.
 
 Operation 40. "Compute a permitted immediate address relative to
 the architectural program-counter operand without loading memory."
-Mapping: ADR. The ARM-defined aligned-base and offset rules apply.
-The value of PC used by this instruction MUST NOT be replaced with
-the abstract execution index without the required adjustment.
+Mapping: the TWO-BYTE T32 ADR T1, whose encoding begins with
+binary 10100 followed by three bits selecting R0 through R7,
+and eight unsigned immediate bits. Calculate the PC operand
+as the CURRENT instruction byte address A plus FOUR, then
+align that value DOWN to a multiple of FOUR bytes before
+adding four times the encoded unsigned eight-bit immediate.
+Write the resulting 32-bit value into the selected low
+general-purpose register. The permitted displacement is
+0 through 1020 bytes inclusive in multiples of four.
+Do not read or write data memory at the result address.
+Do not branch, overwrite the execution index with the
+computed address, modify SP/LR or change N/Z/C/V.
+On successful normal execution this instruction occupies
+TWO bytes, advancing the execution index from A to A+2.
+Its data-register update is conditional upon any LEGAL
+enclosing ITSTATE predicate; the instruction's length
+and its own encoding do not change when skipped.
+
+For example, when A=0x00001002, PC operand is 0x1006,
+but the aligned PC base is 0x1004. Halfword 0xA001
+computes R0=0x1008, without a data read or branch.
+The complete assigned T1 interval A000..A7FF (2048
+low-register and immediate combinations) is recorded in
+"Every halfword that forms an address from the execution
+position or stack pointer.english" and the associated TSV
+in fixtures/armv7-a-t32-address-generation-halfwords.tsv.
+This name does NOT automatically grant wider or negative-
+displacement ADR encodings, A32 PC arithmetic, or
+instructions with PC as a destination.
 
 Operation 41. "Load a thirty-two-bit word from an architecture-defined
 literal address based upon the current instruction's PC-relative value."
-Mapping: LDR (literal). The read address follows the ARM-defined
-PC+4 and alignment rules, rather than an assumed next-instruction
-address. This does not transfer control.
+Mapping: the TWO-BYTE T32 LDR (literal) T1 encoding.
+The first five bits are 01001; the next three bits
+select destination R0 through R7; the last eight bits
+are an unsigned literal imm8. Let the current instruction
+address be A. Calculate the data address as
+Align(A+4,4) + 4*imm8, under the declared 32-bit
+address, endian, mapping and access-permission rules.
+Read exactly one FOUR-BYTE DATA WORD from that virtual
+address and write the assembled 32-bit data value
+to the selected register. The register receives
+the MEMORY CONTENTS, not the numerical address itself.
+The encoded displacement is 0..1020 in increments of four.
+This instruction has NO implicit branch, PC write,
+SP/LR write or N/Z/C/V update. It has an actual
+data-memory READ which may fault; it does not
+perform an instruction fetch from the resulting
+word address merely by loading its data.
+The two-byte sequential successor is A+2 on
+normal completion. If a legal IT condition is false,
+the ordinary data read and destination write are
+suppressed, while instruction sequencing still
+accounts for the two-byte encoding and ITSTATE.
+
+For example, at A=0x1002, halfword 0x4901 reads
+one data word from Align(0x1006,4)+4 = 0x1008
+into R1, subject to the mapping's readable status.
+The complete assigned 4800..4FFF region is in
+"Every PC-relative data-word load halfword.english"
+and fixtures/armv7-a-t32-pc-relative-word-load-halfwords.tsv.
+LDR literal's other possible ARM encodings or
+PC destination variants are NOT licensed by
+this single explicitly granted T1 form.
 
 BRANCHING AND EXPLICIT CONTROL FLOW.
 
@@ -870,9 +925,44 @@ negative eight; the destination becomes 0xFFFFFFF8.
 Example halfwords 0xF347,0x0685 encode SBFX R6,R7,#2,#6.
 Length four bytes; it does not change SP, LR, or execution state.
 
+ADDITIONAL LOW-REGISTER STACK-RELATIVE ADDRESS CONSTRUCTION.
+
+Operation 73. "Take the existing thirty-two-bit numerical value in
+the stack-pointer register, add an explicitly encoded unsigned
+integer representing between zero and one thousand twenty bytes
+in multiples of four, and write that sum into one selected
+low general-purpose register without changing the stack pointer,
+any comparison flag, or any data memory."
+Mapping: TWO-BYTE T32 ADD (SP plus immediate) encoding T1.
+The highest five bits are binary 10101. Three destination
+bits select only R0 through R7. The final eight bits
+represent imm8 as an unsigned number from zero through
+255, and the actual BYTE increment is four times imm8.
+For current SP value S, destination Rd becomes
+(S + 4*imm8) modulo 2^32. SP remains EXACTLY S,
+not the computed destination. R0 through R12 other
+than Rd, LR, memory and the comparison flags N/Z/C/V
+are preserved. Normal execution advances the
+execution index by TWO bytes rather than branching
+or loading from the calculated address. The resulting
+bit pattern alone does not prove the destination
+denotes readable, writable or mapped memory.
+Any enclosing ITSTATE predicate must be LEGAL
+and governs whether the register assignment occurs.
+
+This is NOT operation 59, which increases SP itself;
+nor operation 60, which decreases SP. For example,
+with SP=0x2000, 0xA801 writes R0=0x2004 but leaves
+SP=0x2000. It does not perform a PUSH, POP,
+stack allocation or a data-memory access.
+All 2048 halfwords A800..AFFF are enumerated
+under the existing A000..AFFF address-generation
+source and fixture. This permission excludes
+wider T32 SP-immediate encodings by default.
+
 BOUNDARIES AND REJECTIONS.
 
-This operation grant contains exactly SEVENTY-TWO numbered entries.
+This operation grant contains exactly SEVENTY-THREE numbered entries.
 An implementation claiming that it supports this grant SHALL verify
 the count, unique names, exact encodings and legal operand variants;
 the existence of this file alone is not that verification.
