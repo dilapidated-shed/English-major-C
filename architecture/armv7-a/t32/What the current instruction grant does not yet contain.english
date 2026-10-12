@@ -3,7 +3,7 @@ WHAT THE CURRENT INSTRUCTION GRANT DOES NOT YET CONTAIN.
 Status: architecture COVERAGE LEDGER, not an operation grant.
 It is part of the work required before anyone can honestly
 call this a full ARMv7-A T32 instruction set definition.
-Current allowed operations: numbered 01 through 64, all and
+Current allowed operations: numbered 01 through 72, all and
 only those in the closed initial grant in this directory.
 
 Primary standard: ARM DDI 0406C.d, A6 T32 encoding and A8
@@ -18,7 +18,7 @@ in that guide is NOT evidence that it belongs to ARMv7-A T32.
 READING THE STATUS OF A FAMILY.
 
 COVERED-SUBSET: at least one machine effect is named in the
-present 64-operation grant, but encoding-by-encoding validation
+present 72-operation grant, but encoding-by-encoding validation
 and exhaustive forms remain unfinished.
 UNGRANTED: the hardware may provide this instruction family,
 but the English Major C profile does not yet name permitted
@@ -143,15 +143,34 @@ ordinary modulo-2^32 addition.
 
 PART THREE. REARRANGEMENT, PACKING AND FLAGS.
 
-UNGRANTED: extract or insert a contiguous subset of
-bits using explicit starting bit and width, zero
-or sign extension, and preserve surrounding bits.
-Sources: BFC, BFI, UBFX, SBFX.
+COVERED-SUBSET: operations 69 through 72 now grant one
+specified four-byte T32 form apiece for BFC, BFI, UBFX
+and SBFX with source and destination general registers
+R0..R12 and nonempty contiguous bit intervals
+that fit entirely within positions 0..31. They
+distinguish zero-extension from sign-extension and
+clear from insertion. General instruction aliases,
+registers outside the declared set, unrelated forms
+and any encoding not yet independently checked
+remain ungranted.
 
-UNGRANTED: reverse the bit order or reverse selected
-byte order within a 32-bit value. Sources: RBIT,
-REV, REV16, REVSH. These are not generic ROR
-operations and do not change data memory endianness.
+COVERED-SUBSET: operations 65-67 grant the TWO-byte
+T32 T1 REV, REV16 and REVSH forms with low-register
+source/destination R0-R7. Operation 68 grants a
+specified FOUR-byte RBIT form with general-register
+operands R0-R12. REV and RBIT have different bit
+permutations. REVSH sign-extends; it does not merely
+zero-extend a byte-swapped halfword. These operations
+do not change memory byte ordering or endian state.
+
+A COMPLETE SMALL DECODE SUBTREE has separately been
+accounted for: 0xBA00..0xBAFF includes 64 REV,
+64 REV16, 64 unallocated/UNDEFINED halfwords and
+64 REVSH, with all 256 individual data rows under
+fixtures/armv7-a-t32-byte-reversal-halfwords.tsv.
+See "Every halfword in one complete Thumb decode
+region.english". That closed subtree is NOT
+a complete audit of all T32 instructions.
 
 UNGRANTED: rotate a 32-bit value through the incoming
 carry flag, producing the appropriate resulting
