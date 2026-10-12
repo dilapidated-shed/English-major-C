@@ -257,9 +257,39 @@ instruction address only if the selected architectural condition holds;
 otherwise continue at the sequential successor."
 Mapping: B with a condition code. Conditions include equal (Z=1),
 not equal (Z=0), unsigned comparisons using C and Z, signed comparisons
-using N, V and Z, and remaining legal ARM conditions. The condition
-code and legal branch encoding are part of this operation, not an
-unverified source-level Boolean expression.
+using N, V and Z, and the remaining legal ARM condition codes.
+The condition code and legal branch encoding are part of this operation,
+not an unverified source-level Boolean expression.
+
+A VERIFIED SUBSET of this operation is the 16-bit Thumb B T1 encoding
+whose first four bits are binary 1101 and whose next four bits encode
+exactly one of the fourteen condition codes 0000 through 1101.
+The final eight bits are a signed two's-complement displacement,
+scaled by two bytes, giving an even offset from -256 through +254.
+The branch target on a true condition is the instruction's byte
+address plus FOUR plus that signed offset. A false condition advances
+the execution index by TWO bytes. In either case R0..R12, SP, LR
+and N/Z/C/V remain unchanged by the branch itself.
+A T1 conditional B is architecturally NOT ALLOWED inside an IT
+block; entering it in an IT block is UNPREDICTABLE. Permission
+for a differently encoded B cannot be inferred from this T1 rule.
+
+Hexadecimal DE00..DEFF belong to the separate UDF T1 class,
+not an encoded "always" branch. Hexadecimal DF00..DFFF belong
+to SVC T1, not an encoded "never" branch. Neither is granted
+as an executable English Major C operation by this entry.
+All 4096 encoded halfwords D000..DFFF are enumerated in
+fixtures/armv7-a-t32-conditional-branch-and-exception-halfwords.tsv
+and defined under "Every conditional-branch and supervisor-call
+halfword.english". Fourteen flag conditions are separately
+cross-checked over all sixteen N/Z/C/V states in
+fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv.
+
+Other ARMv7-A T32 B forms, including wider T32 conditional
+branch encodings, still require form-specific validation of their
+widths, offset fields, IT restrictions, processor features
+and legal destination conditions; this name alone is not
+a blanket permission for any mnemonic displayed as B.
 
 Operation 44. "Branch forward to the permitted target if the entire
 tested low general-purpose register contains zero, otherwise continue
