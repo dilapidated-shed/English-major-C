@@ -1,0 +1,294 @@
+ONE IF-THEN BLOCK GOVERNS A SHORT AND A LONG INSTRUCTION.
+
+A bottom-up English Major C example of the native ARMv7-A T32 ITSTATE
+mechanism. The example begins with ACTUAL diagnostic object-file bytes
+and does not pretend to be a compiled English Major C program.
+It deliberately keeps the machine instructions in their actual
+native order without inventing a higher-level source history.
+
+The object was produced by the foreign diagnostic compiler clang
+17.0.0, target armv7a-none-eabi in Thumb state, from:
+
+    .syntax unified
+    .arch armv7-a
+    .thumb
+    .text
+    .global it_example
+    .thumb_func
+    it_example:
+        cmp r0, #0
+        ite eq
+        moveq r1, r0
+        movwne r2, #0x1234
+        nop
+
+This is a diagnostic assembler test, not a maintained ICK or Android
+NDK build. The foreign decoder was LLVM objdump 17.0.0,
+--triple=thumbv7-none-eabi.
+
+The diagnostic source SHA256 is:
+    30034378db9ad959282ba2c29a0c10ccd70884d2ecb1058df15ee532143dffc4
+The diagnostic ELF32 ARM object SHA256 is:
+    c2398cb4d78a63d12d0aff64ceb54351877b21f7a11e08887c3ded518043899c
+
+THE ACTUAL DECODED MACHINE INSTRUCTIONS.
+
+Offset zero:
+    0x2800, a TWO-byte compare of R0 with the immediate zero.
+
+Offset two:
+    0xBF0C, a TWO-byte IT instruction with condition EQ and
+    mask hexadecimal C. The diagnostic renders ITE EQ.
+
+Offset four:
+    0x4601, a TWO-byte MOV (register) from R0 to R1,
+    governed by the first IT condition EQ.
+
+Offset six:
+    0xF241 followed by 0x2234, one FOUR-byte MOVW (immediate)
+    instruction writing hexadecimal 0x1234 to R2,
+    governed by the second IT condition NE.
+
+Offset hexadecimal A:
+    0xBF00, a TWO-byte NOP following the completed IT block.
+
+The first halfword at offset six and the next halfword at offset
+eight belong to the SAME native instruction. The second halfword
+at offset eight is NOT an independent instruction whose effects
+can be separately scheduled or skipped.
+
+THE EXACT DECLARED SOURCE OPERATION IDENTITIES.
+
+The compare maps to the existing signed/unsigned bit-pattern
+comparison operation 14 (CMP), which sets N, Z, C, and V using
+thirty-two-bit subtraction but does not keep an arithmetic result.
+
+The IT maps to the existing operation 46, whose actual state
+effect is an ITSTATE transition for TWO following instruction slots.
+
+The MOV register maps to operation 01, which copies the 32-bit
+pattern of its source register while preserving the four
+condition flags. Its selected native instruction has exactly
+the required non-flag-setting behavior.
+
+The MOVW maps to operation 03, which writes a sixteen-bit
+immediate as the LOW sixteen bits of a destination and sets
+the HIGH sixteen bits to zero, preserving condition flags.
+
+The NOP maps to the exact native BF00 form of operation 52.
+
+No instruction outside the closed current 72-operation vocabulary
+is needed to explain the normal-completion effects of this
+short specimen. However, this source-level argument does NOT
+constitute an independently accepted implementation of ITSTATE
+or proof that every other permitted instruction is correct.
+
+PART ONE. WHAT BF0C MEANS AS AN EXECUTION CONTRACT.
+
+At offset two the halfword BF0C has:
+  firstcond = binary 0000, the EQ condition;
+  mask = binary 1100, whose trailing-zero count is two;
+  number of following instruction slots = 4-2 = TWO.
+
+Its first following instruction uses EQ, the condition Z=1.
+Its second following instruction uses the inverse NE, Z=0.
+
+Both following instructions are distinct instruction SLOTS,
+but the first takes two bytes and the second takes FOUR.
+The IT block therefore spans six bytes of following machine
+instructions, from offsets 0x0004 through 0x0009 inclusive.
+After the second conditional instruction has been passed,
+ITSTATE is no longer active for the subsequent NOP.
+
+The IT instruction itself changes neither R0 nor R1 nor R2.
+It does not update N, Z, C or V. It establishes the conditional
+state which will govern the next two instructions.
+It is NOT a two-way direct branch and does not itself
+replace the execution index with a distant branch target.
+
+PART TWO. FIRST ACTUAL-BYTE TRACE, INPUT R0 EQUAL TO ZERO.
+
+State is declared at offset 0x0000:
+    R0=0;
+    initial R1 and R2 are unknown;
+    initial N/Z/C/V are unknown;
+    executable mapping and T32 state assumed valid;
+    no exception or asynchronous interruption occurs.
+
+At offset 0x0000, CMP R0,#0 computes the bit pattern of 0-0,
+which is zero. N becomes zero, Z becomes one, C becomes one
+(no unsigned borrow), and V becomes zero (no signed overflow).
+R0 remains zero. The next execution index is offset 0x0002.
+
+At offset 0x0002, BF0C establishes two conditional slots.
+The EQ condition for slot one will be true, and its inverse
+NE for slot two will be false if flags remain unchanged.
+The instruction itself leaves those flags unchanged.
+The next execution index is offset 0x0004.
+
+At offset 0x0004, MOV R1,R0 occupies TWO bytes and is
+governed by the EQ condition. Z is one, so the permitted
+register copy occurs: R1 becomes 0. R0 is preserved and
+the condition flags are preserved. ITSTATE advances to
+the second slot. The next index is offset 0x0006.
+
+At offset 0x0006, the first halfword F241 denotes the
+beginning of a FOUR-byte MOVW instruction, whose second
+halfword 2234 begins at offset 0x0008. The current IT slot
+uses NE. Since Z is one, the NE condition is false.
+The destination-register effect is suppressed: R2 keeps its
+prior UNKNOWN value. The full four-byte instruction
+still occupies addresses 0x0006 through 0x0009.
+After its conditional non-execution and the appropriate
+ITSTATE update, the next execution index is offset 0x000A.
+Do NOT invent an independent instruction at 0x0008.
+
+At offset 0x000A, BF00 is the ordinary TWO-byte NOP
+outside the completed IT block. It changes no general
+register or condition flag. Ordinary execution makes
+the next index offset 0x000C, beyond the supplied fixture.
+
+The visited instruction-boundary offsets are:
+    0x0000, 0x0002, 0x0004, 0x0006, 0x000A.
+At the first unavailable instruction boundary, 0x000C,
+the known values are:
+    R0=0; R1=0; R2 is unknown;
+    N=0; Z=1; C=1; V=0.
+
+No return, operating system call, branch or other
+instruction is invented after offset 0x000C.
+
+PART THREE. SECOND TRACE, SAME MACHINE BYTES, INPUT R0 EQUAL TO SEVEN.
+
+Begin again at offset 0x0000 with:
+    R0=7;
+    R1 and R2 unknown;
+    initial flags unknown.
+
+At offset zero, CMP R0,#0 computes 7-0 and sets:
+    N=0; Z=0; C=1; V=0.
+R0 remains seven; next index 0x0002.
+
+At 0x0002, BF0C establishes the exact same two-slot
+IT block as in the first trace. The instruction bytes
+did not change between runs.
+
+At 0x0004, MOV R1,R0 is conditional on EQ, which is now
+FALSE because Z=0. R1 remains UNKNOWN. The processor's
+architectural sequential execution still advances
+across the TWO-byte slot to 0x0006, and ITSTATE
+advances to the second condition.
+
+At 0x0006, the FOUR-byte MOVW R2,#0x1234 is governed
+by NE, which is now TRUE. The native operation writes
+the exact 32-bit value 0x00001234 to R2.
+The flags N=0,Z=0,C=1,V=0 remain unchanged.
+The next architectural instruction boundary is 0x000A.
+
+At 0x000A, BF00 executes NOP outside IT and
+ordinary sequential execution reaches 0x000C.
+
+The visited instruction-boundary offsets are the SAME:
+    0x0000, 0x0002, 0x0004, 0x0006, 0x000A.
+But the register effects are DIFFERENT:
+    R0=7;
+    R1 remains unknown;
+    R2=0x00001234;
+    N=0; Z=0; C=1; V=0.
+
+A change in conditional execution can thus change
+register effects without changing the ordered
+instruction addresses visited. It is incorrect
+to infer from identical execution-index traces
+that identical register writes occurred.
+
+PART FOUR. WHY THIS IS NOT A BRANCH-TO-SKIP CONSTRUCTION.
+
+No conditional B opcode appears in this diagnostic.
+The machine fetches the conditionally governed instruction
+encodings in sequential order and uses architectural
+ITSTATE to determine whether their normal data effects
+occur. The first instruction is TWO bytes and the
+second is FOUR, but the IT block has exactly TWO SLOTS.
+
+An alternative sequence might use a CMP and two
+explicit B conditional instructions to select
+different straight-line blocks. Such a program
+could produce the same final register values
+for selected inputs, but its actual branch
+targets, instruction fetches and possible
+prediction effects would differ.
+
+The source representation MUST retain whether
+the native bytes contained IT or actual B.
+An interpreter that materializes only the final
+register values has not yet provided the complete
+instruction-by-instruction English translation
+that this language experiment demands.
+
+PART FIVE. RETAINED ALTERNATIVES AND THEIR CONSEQUENCES.
+
+Alternative A: represent IT as a first-class state transition
+and every following instruction as a distinct operation.
+This best matches the actual instruction bytes and preserves
+instruction-size and flag-state evidence. It requires
+ITSTATE in the abstract machine.
+
+Alternative B: normalize an IT block to conditional branch
+edges and then ordinary register writes. This may help
+later higher-level intermediate representations, but a
+machine-faithful first translation must keep the original
+bytes and the normalization proof.
+
+Alternative C: use a conditional move or select when a target
+architecture supports an appropriately matched instruction.
+Its availability and effects must be verified per ISA,
+not assumed from the English word "conditional".
+
+Alternative D: choose a source-level masking operation to
+compute the same result without IT or B. Arithmetic/bitwise
+work and register/flag effects differ and require independent
+equivalence testing.
+
+Alternative E: compile the same English source on a different
+ARM architectural target, possibly one that deprecates
+multi-slot IT or restricts allowed instruction forms. A
+different target feature profile and legality proof would
+be required.
+
+Alternative F: store the original IT block's bits as plain
+DATA and let a separate interpreter inspect them. The CPU
+would execute the interpreter's instructions, not directly
+the byte pattern being interpreted. That representation
+is distinct from the native sequence observed above.
+
+No alternative is selected as a universally faster
+implementation merely by counting branches or instructions.
+
+PART SIX. NEGATIVE CASES AN ACCEPTED LANGUAGE MUST REJECT.
+
+1. Treat BF0C as a branch to the second data operation.
+2. Count BF0C as FOUR following instructions because its mask
+   has four bit positions.
+3. Claim that four instruction bytes always represent two IT slots.
+4. Execute the second halfword 2234 as its own instruction.
+5. Fail to advance from offset 0x0006 to 0x000A after the
+   four-byte conditional MOVW is skipped.
+6. Change N/Z/C/V during MOV R1,R0 or MOVW R2,#0x1234
+   when their specified native forms preserve flags.
+7. Perform MOVW's R2 write in the R0=0 trace.
+8. Perform MOV's R1 write in the R0=7 trace.
+9. Treat R2's unknown initial value as zero when MOVW is skipped.
+10. Claim that an identical sequence of instruction-boundary
+    addresses implies identical register changes.
+11. Place an explicitly prohibited T1 conditional B inside
+    the same IT block without changing the language/ISA contract.
+12. Claim a physical ARM run, real branch-prediction behavior
+    or independently accepted English Major C compiler from
+    the existence of this diagnostic object and source text.
+
+This diagnostic confirms byte encoding and the stated
+source-level architectural reasoning only. It is not
+a completed executable English Major C implementation.
+
+END OF TWO-WIDTH ITSTATE TRACE.
