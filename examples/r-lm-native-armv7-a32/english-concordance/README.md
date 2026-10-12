@@ -80,6 +80,27 @@ demonstrates QEMU execution of the much smaller unknown-entry summation.
 It is **not execution of these QR instructions**. The ARM QR routines
 have not yet been run as complete numerical programs.
 
+## Linked ARM executable contains mixed A32 and Thumb instruction states
+
+The separate [linked ARM Linux hardfp QR archive](../../r-lm-native-armv7-linux-hardfp-linked/README.md)
+does include a numerical QEMU execution of the Fortran routines. Its
+`linked-executable.armv7-hardfp.disasm.txt` is **not** another uniformly
+four-byte A32 listing. The runtime startup region around `_start`
+includes Thumb instructions: for example `0x924: bc02 pop {r1}`
+(2 bytes) and `0x91c: f04f 0b00 mov.w fp,#0` (4 bytes).
+It also includes a `blx` instruction that changes instruction-set
+state while crossing the target boundary.
+
+Consequently a full English-machine translation of the **linked**
+numerical execution must decode **both A32 and T32**, track CPSR.T
+(ARM-versus-Thumb instruction state), decode two- versus four-byte
+Thumb encodings correctly, and represent branch/interworking effects.
+It must not copy this fixed A32 `+4` sequential-successor rule onto
+the Thumb startup code. Moreover the linked test's **hardfp** ABI
+is not interchangeable with the unlinked softfp A32 archive covered
+by these three ledgers. These are explicit follow-on obligations,
+not silently covered by the 1,149 instruction records above.
+
 ## Acceptance limits
 
 `verify-arm-English-concordance.mjs` verifies the English ledgers against
