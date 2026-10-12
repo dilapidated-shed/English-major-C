@@ -29,13 +29,21 @@ An initial byte-level bottom-up witness is [One actual Thumb branch listing tran
 
 [Actual Thumb word transfers translated into English.english](examples/Actual%20Thumb%20word%20transfers%20translated%20into%20English.english) reads four pinned Android ART assembler expectation halfwords, `C409`, `CC09`, `B014` and `B094`, as independent instruction specimens. It does not pretend their original fixture arrays constitute one executed program.
 
-The closed initial scalar operation grant now contains **64** entries, not the full ARMv7-A T32 ISA. Presence of an instruction in hardware is not equivalent to its authorization in this initial English Major C profile.
+The closed initial scalar operation grant now contains **72** entries, not the full ARMv7-A T32 ISA. Presence of an instruction in hardware is not equivalent to its authorization in this initial English Major C profile.
 
 [Actual wide Thumb multiple-word operations in long English.english](examples/Actual%20wide%20Thumb%20multiple-word%20operations%20in%20long%20English.english) adds four precise, separately named 32-bit T32 STMIA and LDMDB operations, with and without base-register writeback. Each is anchored to a separate pinned AOSP expected-disassembly entry. The specification does not silently equate a four-byte Thumb encoding with two consecutive two-byte instructions.
 
+## Bit operations and a fully accounted-for decode region
+
+[Exactly how register bits are rearranged.english](architecture/armv7-a/t32/Exactly%20how%20register%20bits%20are%20rearranged.english) defines operations 65–72: the restricted native forms of REV, REV16, REVSH, RBIT, BFC, BFI, UBFX and SBFX. These are actual long English operation names, not commentary substituting for short native mnemonics.
+
+[Every halfword in one complete Thumb decode region.english](architecture/armv7-a/t32/Every%20halfword%20in%20one%20complete%20Thumb%20decode%20region.english) and [its complete 256-row data table](fixtures/armv7-a-t32-byte-reversal-halfwords.tsv) account for **every** 16-bit T32 encoding with first byte 0xBA. The partition is 64 REV, 64 REV16, 64 UNDEFINED (reject), and 64 REVSH. This is intentionally an exhaustive **subtree**, not the complete Thumb ISA.
+
+[Eight Thumb bit operations translated until the first ungranted instruction.english](examples/Eight%20Thumb%20bit%20operations%20translated%20until%20the%20first%20ungranted%20instruction.english) starts from inspected ARMv7-A T32 bytes assembled by a separate diagnostic tool, applies the eight permitted long-English operations in actual byte order, and stops at TEQ because it remains outside the present operation grant. It does not invent a successful translation for TEQ, ORN, or RRX.
+
 ## Assembly-to-English decompilation target
 
-[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 64-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
+[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 72-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
 
 ## Contract status
 
