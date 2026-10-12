@@ -61,7 +61,7 @@ The ARMv7-A T32 draft currently lives in:
   architecture/armv7-a/t32/All and only these initial operations are permitted.english
   architecture/armv7-a/t32/Instruction set architecture - sources and unfulfilled coverage.english
 
-It currently grants 72 families of operations, NOT every instruction
+It currently grants 73 families of operations, NOT every instruction
 that ARMv7-A T32 can execute. A disassembled instruction outside that
 grant has not vanished from the physical machine. It requires either an
 independently specified extension to the language's operation grant or
