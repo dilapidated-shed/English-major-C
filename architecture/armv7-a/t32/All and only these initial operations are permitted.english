@@ -249,8 +249,54 @@ BRANCHING AND EXPLICIT CONTROL FLOW.
 
 Operation 42. "Replace the execution index with the named legal T32
 instruction address without modifying the link register."
-Mapping: B (unconditional, immediate target). A legal encoding and
-target range are mandatory. This does not change to A32 state.
+Mapping: B (unconditional immediate, T32), subject to architecture-defined
+conditional-execution state. A specific admitted form is the
+TWO-BYTE B T2 encoding whose five highest bits are 11100 and
+whose eleven low bits are an encoded immediate imm11.
+Interpret imm11 as an ELEVEN-bit two's-complement integer, multiply
+it by TWO to get a signed BYTE displacement ranging from -2048
+through +2046 inclusive, and add that displacement to the
+current instruction's architectural PC-operand base, which for
+this form is the instruction address plus FOUR. The resulting
+halfword-aligned address must be a verified executable T32
+instruction entry. This instruction does not write LR, SP,
+R0 through R12, data memory, N, Z, C or V.
+
+OUTSIDE an IT block, an admitted B T2 normally takes
+its target without consulting N/Z/C/V.
+IN THE LAST SLOT of a legal IT block, the branch's
+control-transfer effect occurs ONLY IF the enclosing ITSTATE
+condition holds; otherwise ordinary sequential execution
+advances the execution index by TWO bytes and consumes
+the final IT slot. Putting a B T2 into any earlier IT
+slot is architecturally UNPREDICTABLE and REJECTED.
+This distinction comes from DDI 0406C.d A8.8.18,
+encoding T2; it does NOT apply identically to the
+separate T1 conditional B (operation 43).
+
+The complete 2048-halfword encoding region E000..E7FF
+is described by "Every short unconditional branch
+halfword.english" and the associated row-by-row data
+file fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv.
+For example, E000 has displacement zero and selects
+current instruction address plus FOUR if its normal
+branch effect occurs; E7FE has displacement -4,
+and E7FF has displacement -2, selecting an address
+equal to the sequential two-byte successor while
+still being a taken branch outside IT.
+
+An ARM disassembler can render E000 as "B" outside IT
+but "BEQ" when it is the last slot after IT EQ.
+Those are the SAME encoded instruction bytes,
+with the effective condition provided by ITSTATE,
+not by changing the encoded halfword to a T1
+condition-coded B. The exact original bytes,
+ITSTATE and program address must be retained.
+This admission does NOT automatically grant the
+FOUR-BYTE T32 B T4 encoding or any A32 instruction.
+An out-of-range address, invalid target state,
+non-executable mapping, or unproved entry boundary
+must block source-level executable lowering.
 
 Operation 43. "Replace the execution index with the named legal T32
 instruction address only if the selected architectural condition holds;
