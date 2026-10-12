@@ -1,0 +1,525 @@
+AN ADDRESS, A LOAD, AND A BRANCH DISAGREE ABOUT THE SAME BYTES.
+
+Status: bottom-up English Major C description of a REAL,
+temporary ARMv7-A T32 object-file byte sequence.
+The bytes were assembled and read back.
+The model's register and memory effects are a stated
+architectural interpretation, NOT observed physical
+processor execution or a working English Major C compiler.
+
+THE EXACT MACHINE-BYTE ARTIFACT.
+
+A short temporary ARM Thumb assembly source
+contained precisely the following directives:
+
+    .syntax unified
+    .arch armv7-a
+    .thumb
+    .text
+    .global address_read_branch
+    .thumb_func
+    address_read_branch:
+        .hword 0xA000
+        .hword 0x4901
+        .hword 0xE002
+        .hword 0xBE00
+        .word 0x12345678
+        .hword 0xBF00
+        .hword 0xDF01
+
+The foreign diagnostic compiler was
+clang 17.0.0 with target armv7a-none-eabi
+and Thumb state selected. It created
+an ELF32 little-endian ARM object.
+LLVM objdump 17.0.0 produced its
+ordinary linear machine-code disassembly
+and raw contents listing.
+
+The raw .text bytes, in ascending
+address order, were independently
+confirmed to equal EXACTLY:
+
+    00 A0 01 49 02 E0 00 BE
+    78 56 34 12 00 BF 01 DF
+
+There are sixteen bytes.
+The instruction encodings and the
+explicit data word are stored
+in the same .text section.
+The existence of the bytes establishes
+neither a safe executable memory mapping
+nor a program run on an actual ARM CPU.
+
+SHA256 of transient diagnostic source:
+    7bcf3e392d1dc62a9aece9425abfc198509509e9acaca4d6cdb2b3a93b71b3ad
+SHA256 of transient ELF32 ARM object:
+    e5627dbcebaffeed79ccb3851d0e6b7533b1e2d8f6fb8eb5b6a79d063895d10b
+SHA256 of transient linear decoder output:
+    c89da3af7a3c63df506f5958b89f4e169142de9b5422bcca2f6ad986415febd4
+SHA256 of transient raw section dump:
+    1f619f98b570557f15d4b4b1924b9728bfaa08d30842c2347a8eeb510e73225a
+
+These are IDs of temporary diagnostic files,
+not a promise that their toolchain can be
+reconstructed bit-for-bit without its
+full executable and dependency identity.
+The object is not an English Major C build.
+
+PART ONE. THE LINEAR DISASSEMBLER'S OUTPUT.
+
+At relative byte offset 0x0000, LLVM displayed:
+    a000  adr r0, #0
+
+At offset 0x0002:
+    4901  ldr r1, [pc, #4]
+
+At offset 0x0004:
+    e002  b 0x000C
+
+At offset 0x0006:
+    be00  bkpt #0
+
+At offset 0x0008:
+    5678  ldrsb r0, [r7, r1]
+
+At offset 0x000A:
+    1234  asrs r4, r6, #8
+
+At offset 0x000C:
+    bf00  nop
+
+At offset 0x000E:
+    df01  svc #1
+
+The two lines at offsets 0x0008 and
+0x000A are misleading FOR THIS PATH:
+the original assembler explicitly placed
+a single ordinary 32-bit literal DATA WORD
+there, not those two named instructions.
+
+The decoder can interpret the two
+halfwords 0x5678 and 0x1234 as
+native instruction encodings.
+But their ability to be decoded is
+NOT evidence that the execution index
+ever selected their addresses.
+
+The name and decoding output of a
+disassembler are observational evidence
+about byte interpretation, not a
+complete causal instruction trace.
+
+PART TWO. DECLARE A PRECISE MACHINE ENVIRONMENT.
+
+Assume the .text section is loaded
+at virtual BYTE ADDRESS 0x00001000,
+aligned to a four-byte boundary.
+
+Assume the complete sixteen-byte
+region is executable as T32 code at
+its declared actual instruction
+entry points. Assume also that
+the four-byte region at
+0x00001008–0x0000100B
+can be READ as ordinary little-endian
+data, and contains the exact
+bytes 78, 56, 34, 12.
+
+The assumption of readable data
+is separate from executable
+permission. Do not generalize
+that all executable memory
+must also be readable on all
+ARM operating systems.
+
+Assume a single architectural
+execution thread with no
+intervening asynchronous interrupt,
+no external mutation of bytes or
+registers, and no unrelated fault
+before the explicitly unsupported
+instruction boundary.
+
+The instruction index begins
+at 0x00001000.
+Every general-purpose register
+including R0 and R1 is initially
+UNKNOWN unless written below.
+The four condition flags N/Z/C/V
+are also initially UNKNOWN.
+SP and LR are initially UNKNOWN.
+No stack frame or valid return
+address is assumed.
+
+PART THREE. FIRST OPERATION: CALCULATE AN ADDRESS AS DATA.
+
+At execution index 0x00001000,
+the next encoded halfword is A000.
+Its five high bits are 10100,
+selecting the T1 ADR family.
+The low register destination
+field is zero, selecting R0.
+The immediate byte is zero,
+so the scaled BYTE offset is zero.
+
+The instruction is the English
+operation number 40, whose name
+spells out computing an aligned
+PC-relative address without
+reading data memory.
+
+The architectural PC operand
+value is 0x1000+4=0x1004.
+Round it down to four-byte
+alignment; it remains 0x1004.
+
+Add the offset zero. Store
+the numerical value 0x1004
+in R0. Preserve all other
+general-purpose registers,
+SP, LR, and the N/Z/C/V flags.
+
+IMPORTANT: 0x1004 happens to
+be the address of the actual
+branch instruction located
+two instructions later.
+Merely storing that address
+in R0 does not branch there.
+
+The ADR itself is two bytes,
+so the execution index advances
+normally to 0x1002. It does
+not take R0 as a new instruction
+address.
+
+After operation one:
+    R0=0x00001004;
+    memory unchanged;
+    execution index=0x00001002.
+
+PART FOUR. SECOND OPERATION: READ DATA AT A COMPUTED ADDRESS.
+
+At execution index 0x00001002,
+the next halfword is 4901.
+Its fixed five high bits 01001
+select literal T1 LDR.
+The register field chooses R1.
+The imm8 value is one, giving
+a BYTE displacement of four.
+
+The architectural PC operand
+value is 0x1002+4=0x1006.
+Align it down to a multiple
+of four, giving 0x1004.
+Add the scaled offset four,
+giving DATA ADDRESS 0x1008.
+
+Now and ONLY now request the
+four-byte data-memory read
+from that address. The
+assumed little-endian four
+bytes are 78,56,34,12,
+so the register receives
+the bit pattern 0x12345678.
+
+The instruction writes
+R1=0x12345678, NOT R1=0x1008.
+It preserves R0=0x1004,
+does not branch, and does
+not alter N/Z/C/V.
+
+The instruction is two bytes.
+The sequential execution index
+becomes 0x00001004.
+
+PART FIVE. THIRD OPERATION: USE A BRANCH TO SKIP BOTH A BREAKPOINT
+AND THE SOURCE'S ORDINARY DATA WORD.
+
+At execution index 0x00001004,
+the halfword E002 is the
+existing operation 42, a
+T32 B T2 short immediate branch.
+
+Its immediate field is the
+eleven-bit unsigned encoding 2,
+interpreted as signed integer
+positive two and then scaled
+by two bytes. Its byte
+displacement is +4.
+
+Its architectural PC base
+is 0x1004+4=0x1008.
+The chosen branch target is
+0x1008+4=0x100C.
+
+This is an ordinary taken
+branch outside IT, not a
+flag-dependent branch or
+a function call. N/Z/C/V
+are not consulted or changed.
+LR remains unknown and
+unchanged by this B operation.
+
+Consequently the execution
+index becomes 0x0000100C.
+The halfword at 0x1006,
+BKPT encoding BE00, is
+NOT architecturally executed.
+The four bytes of literal
+DATA at 0x1008–0x100B
+are NOT architecturally
+executed as instructions.
+
+This distinction is about
+architectural control flow.
+A physical instruction-fetch
+unit might speculatively
+fetch bytes it later discards,
+but doing so is NOT proof
+that those bytes caused
+register or debug effects.
+
+PART SIX. FOURTH OPERATION: THE PERMITTED NO-OP.
+
+At instruction address 0x100C,
+the halfword BF00 is the
+exact permitted native NOP
+under operation number 52.
+
+It does not change R0, R1,
+any other register, flags
+or data memory. It is
+two bytes long, so the
+execution index becomes
+0x0000100E.
+
+PART SEVEN. STOP AT THE FIRST UNGRANTED ARCHITECTURAL OPERATION.
+
+At 0x100E, the halfword
+DF01 is architecturally
+SVC T1 with immediate
+number one.
+
+The native ARM decoder
+understands it as a
+supervisor-call exception
+request. English Major C's
+present permission set
+does not grant SVC because
+the process-specific
+OS exception/ABI contract
+has not been declared.
+
+Stop translation at
+that address. Do not
+claim the operating system
+performed a service,
+returned a result, or
+terminated a process.
+
+At the blocked boundary,
+the known architectural
+state has:
+    execution index 0x100E;
+    R0 = 0x00001004;
+    R1 = 0x12345678;
+    SP = UNKNOWN;
+    LR = UNKNOWN;
+    N/Z/C/V = their unknown
+              unchanged initial values;
+    ordinary data memory
+       unchanged by these
+       successfully modeled instructions.
+
+The ordered instruction-entry addresses
+visited in this trace are:
+    0x1000, 0x1002, 0x1004,
+    0x100C, 0x100E (blocked).
+
+None of the instruction-looking
+bytes at 0x1008 or 0x100A
+was executed in that trace.
+
+PART EIGHT. SAME DATA BYTES, DIFFERENT ARCHITECTURAL ROLE.
+
+The literal word's bit pattern
+is 0x12345678. It could
+be regarded as an unsigned
+number, a signed number,
+an address, a packed
+representation, or
+two 16-bit halfword
+instruction encodings.
+
+Those interpretations
+do NOT cause native execution
+on their own.
+
+One actual LDR reads the
+four bytes as one DATA WORD.
+The native execution index
+never points to either
+of the literal's halfword
+addresses in the traced path.
+The linear disassembler's
+LDRSB/ASRS display is
+therefore a DECODE POSSIBILITY,
+not a successful execution
+trace for the current run.
+
+Likewise ADR computes
+the address of another
+instruction and stores it
+in R0, but execution
+continues sequentially
+instead of jumping to R0.
+
+This demonstrates three
+non-interchangeable operations
+on closely related addresses:
+  compute a numerical address;
+  read data from a numerical address;
+  transfer execution to another
+  actual instruction address.
+
+PART NINE. ALTERNATIVES AND THEIR REASONS.
+
+Choice A: interleave literal
+data and instruction bytes,
+using an explicit branch
+to skip the data.
+This is the observed object
+layout. It is valid under
+the stated execution entry
+and readable memory assumptions
+but can mislead a linear
+disassembler if its
+code/data distinctions
+are ignored.
+
+Choice B: store the literal
+in a separate data section.
+Benefits: clearer data provenance
+and possibly distinct permissions.
+Costs: different linkage and
+address reach. The raw machine
+code would differ, so it cannot
+be claimed as the observed one.
+
+Choice C: compute a pointer
+with ADR, and then load
+through that pointer.
+This may reproduce a
+numerical result, but it
+requires a separate actual
+load with its own memory
+effects. It is not the
+one-instruction translation
+of 4901.
+
+Choice D: build the integer
+constant directly through
+MOVW/MOVT instead of using
+literal memory. Avoids a
+memory data read but changes
+the native instruction
+sequence and observable
+fault/caching behavior.
+
+Choice E: execute the literal
+bytes as instructions by
+branching to 0x1008.
+This is a DIFFERENT PROGRAM.
+It would require verifying
+that 0x1008 is an authorized
+instruction entry and that
+both halfword decodings and
+their effects are permitted.
+It is not the program whose
+branch E002 goes to 0x100C.
+
+Choice F: rely on linear
+disassembler output alone.
+Rejected because code/data
+classification and
+reachability are missing.
+The actual literal is
+clearly data in the
+assembler source, while a
+decoder sees possible
+instructions at the same
+offsets.
+
+Choice G: interpret the
+same bytes through an
+English Major C runtime.
+This requires a real
+parser/interpreter,
+a chosen executable grant,
+and explicit instruction
+fetch versus data read.
+It is a possible later
+implementation strategy,
+not one already executed.
+
+Choice H: abstract the
+actual machine into a
+higher-level function
+which returns 0x12345678.
+This discards the execution-index
+path, the ADR address update,
+the branch, and the
+ungranted SVC boundary.
+That may be a later
+justified abstraction
+but it is not the desired
+first bottom-up translation.
+
+PART TEN. REQUIRED FUTURE INDEPENDENT ACCEPTANCE.
+
+A checker must reject:
+  1. giving R0=0x1002
+     after ADR A000;
+  2. treating ADR as a
+     branch to R0=0x1004;
+  3. giving R1=0x1008
+     after LDR 4901;
+  4. using A+4 unaligned
+     as the LDR base at A=0x1002;
+  5. moving the execution index
+     from branch E002 to 0x1008;
+  6. executing BE00 despite
+     its skipped instruction address;
+  7. executing the two
+     literal halfwords 5678/1234
+     as LDRSB/ASRS on this path;
+  8. assuming all executable
+     memory is readable on
+     every possible target;
+  9. asserting the data read
+     never faults without the
+     actual mapping contract;
+ 10. changing comparison
+     flags without a
+     flag-setting operation;
+ 11. pretending the
+     ungranted SVC was
+     executed or returned;
+ 12. treating the linear
+     disassembly of the
+     literal word as proof
+     of architectural
+     machine instruction execution;
+ 13. announcing that this
+     diagnostic is an
+     accepted English Major C
+     compiler or device run.
+
+The diagnostic assembled and disassembled
+real bytes, and the expected register/index
+state was checked by simple arithmetic.
+No real ARM core, operating system exception,
+or independently accepted English Major C
+executable was run.
+
+END OF THE CODE-AND-DATA AMBIGUITY SPECIMEN.
