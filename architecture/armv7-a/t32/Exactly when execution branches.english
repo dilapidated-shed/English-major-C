@@ -315,6 +315,55 @@ targets ARMv7-A, and it must neither retroactively
 remove legal ARMv7 forms nor assume they are
 advisable for every future AArch32 target.
 
+PART EIGHT-A. EVERY IT AND HINT ENCODING, WITH ALL RESTRICTIONS.
+
+The other closed finite T32 control subgroup is
+BF00..BFFF, sixteen-bit Thumb IT and hint operations.
+It is exhaustively specified in
+"Every If Then and hint halfword.english",
+and its 256 individual bit patterns are recorded in
+fixtures/armv7-a-t32-if-then-and-hint-halfwords.tsv.
+
+If the low four bits of a BFxx halfword equal zero,
+the machine decodes a hint, NOT an IT instruction.
+BF00 is the permitted NOP. BF10/20/30/40 decode
+as YIELD/WFE/WFI/SEV respectively, but are NOT
+granted source operations. Eleven remaining BFx0
+forms are unallocated reserved hints; they may
+behave as NOP but ARM says software MUST NOT use them.
+
+If the low mask is nonzero, the instruction is in
+IT's encoding family. The four-bit firstcond F
+makes the encoding UNPREDICTABLE. A firstcond E
+is allowed only when the mask has exactly one set
+bit; the other masks in that firstcond group are
+UNPREDICTABLE. IT cannot be nested inside IT.
+
+This finite decode identifies 214 conditionally
+admissible IT encodings, 26 unpredictable encodings,
+one permitted NOP, four ungranted named hints, and
+eleven reserved software-prohibited hints.
+
+An IT instruction counts following INSTRUCTIONS,
+not following bytes. A two-byte MOV and a four-byte
+MOVW are TWO instruction slots, occupying SIX bytes
+of following instruction stream. The ITSTATE changes
+which data-register effects occur, while ordinary
+sequential execution can visit exactly the same
+instruction addresses for different flag states.
+
+This is why even an executable English operation
+with an elaborate human explanation must distinguish
+ITSTATE effects from a branch replacing the execution
+index. A disassembler printing "it al" is not
+sufficient legality evidence: LLVM 17 displays
+both BFE8 (potentially legal IT AL) and BFF8
+(architecturally UNPREDICTABLE firstcond F) that
+way. Source semantics must check raw encoded bits.
+
+The source-derived byte-level example is:
+examples/One If Then block governs a short and a long instruction.english
+
 PART NINE. THE EXECUTION-INDEX INVARIANTS.
 
 The next instruction address is one of the
