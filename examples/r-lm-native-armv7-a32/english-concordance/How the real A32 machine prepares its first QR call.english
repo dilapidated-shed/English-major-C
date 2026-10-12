@@ -157,8 +157,8 @@ The exact outbound call arguments at 0x005C are therefore:
   [FrameStackPointer + 16] => work.
 
 Now, and only after deriving those pointers, cross-check the
-source Fortran statement in ../r-lm-native-x86-64/dqrls.f,
-which reads (relative to this file: ../../r-lm-native-x86-64/dqrls.f):
+source Fortran statement in ../../r-lm-native-x86-64/dqrls.f,
+which reads:
 
   call dqrdc2(x,n,n,p,tol,k,qraux,jpvt,work)
 
