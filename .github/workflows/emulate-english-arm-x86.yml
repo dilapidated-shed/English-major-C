@@ -38,9 +38,12 @@ jobs:
       - name: Pin and inspect the actual cross-toolchain
         run: |
           set -euo pipefail
-          ndk="${ANDROID_HOME:-/usr/local/lib/android/sdk}/ndk/${NDK_VERSION}"
+          sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          ndk="$sdk_root/ndk/${NDK_VERSION}"
           if [ ! -x "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" ]; then
-            sdkmanager --install "ndk;${NDK_VERSION}"
+            sdk_manager="$sdk_root/cmdline-tools/16.0/bin/sdkmanager"
+            test -x "$sdk_manager" || { echo "No verified NDK installation path" >&2; exit 1; }
+            "$sdk_manager" --sdk_root="$sdk_root" --install "ndk;${NDK_VERSION}"
           fi
           test -x "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
           echo "NDK_ROOT=$ndk" >> "$GITHUB_ENV"
