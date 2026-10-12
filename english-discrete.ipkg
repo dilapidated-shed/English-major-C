@@ -1,0 +1,6 @@
+package english_discrete
+sourcedir = "research"
+modules = EnglishMajorC.SourceCategories,
+          EnglishMajorC.DiscreteInterpreter
+main = EnglishMajorC.DiscreteInterpreter
+executable = english-discrete

@@ -1,0 +1,224 @@
+module EnglishMajorC.DiscreteInterpreter
+
+import Data.List
+import Data.Text
+import System
+import System.File
+import EnglishMajorC.SourceCategories
+
+-- Independent source recognizer. No model, JavaScript parser, fixture answer,
+-- assembly emitter, or opaque-string execution participates in this module.
+-- Token spans count Unicode characters from zero, not UTF-8 bytes.
+
+choice source_token one_of
+  written_word Text
+  quoted_name Text
+  full_stop
+  comma
+  opening_parenthesis
+  closing_parenthesis
+
+record located_token where
+  constructor located
+  character_start : Number
+  character_end : Number
+  token : source_token
+
+choice scanning_mode one_of
+  between_words
+  in_word Number (List Char)
+  in_quoted_name Number (List Char)
+
+punctuation : Char → Maybe source_token
+punctuation '.' = Just full_stop
+punctuation ',' = Just comma
+punctuation '(' = Just opening_parenthesis
+punctuation ')' = Just closing_parenthesis
+punctuation _ = Nothing
+
+scan_characters : Number → scanning_mode → List Char → List located_token → Either Text (List located_token)
+scan_characters offset between_words [] found = Right (reverse found)
+scan_characters offset (in_word start letters) [] found =
+  Right (reverse (located start offset (written_word (pack (reverse letters))) :: found))
+scan_characters offset (in_quoted_name start letters) [] found = Left "Unclosed quotation mark"
+scan_characters offset between_words (character :: rest) found =
+  if isSpace character
+     then scan_characters (offset + 1) between_words rest found
+  else if character ≟ '"'
+     then scan_characters (offset + 1) (in_quoted_name offset []) rest found
+  else case punctuation character of
+    Just token ⇒ scan_characters (offset + 1) between_words rest (located offset (offset + 1) token :: found)
+    Nothing ⇒ scan_characters (offset + 1) (in_word offset [character]) rest found
+scan_characters offset (in_word start letters) (character :: rest) found =
+  let finished = located start offset (written_word (pack (reverse letters))) :: found in
+  if isSpace character
+     then scan_characters (offset + 1) between_words rest finished
+  else if character ≟ '"'
+     then Left "Separate a quoted name from the preceding word"
+  else case punctuation character of
+    Just token ⇒ scan_characters (offset + 1) between_words rest (located offset (offset + 1) token :: finished)
+    Nothing ⇒ scan_characters (offset + 1) (in_word start (character :: letters)) rest found
+scan_characters offset (in_quoted_name start letters) (character :: rest) found =
+  if character ≟ '"'
+     then case letters of
+       [] ⇒ Left "A quoted name cannot be empty"
+       _ ⇒ scan_characters (offset + 1) between_words rest
+              (located start (offset + 1) (quoted_name (pack (reverse letters))) :: found)
+  else if character < ' ' || character ≟ '\\'
+     then Left "Multiline and escaped quoted names are not admitted by this grammar"
+     else scan_characters (offset + 1) (in_quoted_name start (character :: letters)) rest found
+
+-- Whole comments may contain balanced parentheses. A close followed by source
+-- outside the comment is NOT a whole nonexecuting item.
+balanced_comment : Number → List Char → Bool
+balanced_comment depth [] = depth ≟ 0
+balanced_comment depth ('(' :: rest) = balanced_comment (depth + 1) rest
+balanced_comment 0 (')' :: rest) = False
+balanced_comment (S depth) (')' :: rest) =
+  case depth of
+    0 ⇒ case rest of
+      [] ⇒ True
+      _ ⇒ False
+    _ ⇒ balanced_comment depth rest
+balanced_comment depth (_ :: rest) = balanced_comment depth rest
+
+recognize_tokens : List source_token → Maybe english_source_item
+recognize_tokens [written_word "Put", written_word "zero", written_word "into", quoted_name destination, written_word "without", written_word "changing", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (put_zero_into_register_without_changing_flags destination))
+recognize_tokens [written_word "Put", written_word "65535", written_word "into", written_word "the", written_word "low", written_word "sixteen", written_word "bits", written_word "of", quoted_name destination, written_word "and", written_word "zero", written_word "into", written_word "its", written_word "high", written_word "sixteen", written_word "bits", full_stop] =
+  Just (executable_operation (put_low_sixteen_bits_in_register destination))
+recognize_tokens [written_word "Put", written_word "65535", written_word "into", written_word "the", written_word "high", written_word "sixteen", written_word "bits", written_word "of", quoted_name destination, written_word "without", written_word "changing", written_word "its", written_word "low", written_word "sixteen", written_word "bits", full_stop] =
+  Just (executable_operation (put_high_sixteen_bits_in_register destination))
+recognize_tokens [written_word "Compare", quoted_name left, written_word "with", written_word "zero", written_word "and", written_word "update", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (compare_register_with_zero_and_update_flags left))
+recognize_tokens [written_word "Compare", quoted_name left, written_word "with", quoted_name right, written_word "and", written_word "update", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (compare_two_registers_and_update_flags left right))
+recognize_tokens [written_word "Load", written_word "exactly", written_word "four", written_word "bytes", written_word "from", written_word "the", written_word "address", written_word "in", quoted_name address, written_word "into", quoted_name destination, full_stop] =
+  Just (executable_operation (load_four_bytes_from_named_address_into_register address destination))
+recognize_tokens [written_word "Increase", quoted_name address, written_word "by", written_word "four", written_word "without", written_word "changing", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (advance_named_address_by_four_without_changing_flags address))
+recognize_tokens [written_word "Decrease", quoted_name count, written_word "by", written_word "one", written_word "without", written_word "changing", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (decrease_named_count_by_one_without_changing_flags count))
+recognize_tokens [written_word "Add", quoted_name source, written_word "to", quoted_name destination, written_word "and", written_word "keep", written_word "only", written_word "the", written_word "lowest", written_word "thirty-two", written_word "result", written_word "bits", written_word "without", written_word "changing", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (add_named_register_contents_without_changing_flags source destination))
+recognize_tokens [written_word "If", written_word "the", written_word "zero", written_word "flag", written_word "is", written_word "one", comma, written_word "replace", written_word "the", written_word "execution", written_word "index", written_word "with", written_word "the", written_word "instruction", written_word "named", quoted_name target, full_stop] =
+  Just (executable_operation (replace_execution_index_when_zero_flag_is_one target))
+recognize_tokens [written_word "Replace", written_word "the", written_word "execution", written_word "index", written_word "with", written_word "the", written_word "instruction", written_word "named", quoted_name target, full_stop] =
+  Just (executable_operation (replace_execution_index_unconditionally target))
+recognize_tokens [written_word "Copy", quoted_name source, written_word "into", quoted_name destination, written_word "without", written_word "changing", written_word "the", written_word "condition", written_word "flags", full_stop] =
+  Just (executable_operation (copy_register_contents_without_changing_flags source destination))
+recognize_tokens [written_word "Replace", written_word "the", written_word "execution", written_word "index", written_word "with", written_word "the", written_word "instruction", written_word "address", written_word "in", written_word "the", written_word "link", written_word "register", full_stop] =
+  Just (executable_operation return_to_link_register_instruction_address)
+recognize_tokens [written_word "Name", written_word "register", written_word physical, quoted_name alias, full_stop] =
+  if elem physical ["zero", "one", "two", "three", "twelve"]
+     then Just (register_name_declaration physical alias) else Nothing
+recognize_tokens [written_word "Name", written_word "the", written_word "following", written_word "instruction", quoted_name name, full_stop] =
+  Just (following_instruction_name name)
+recognize_tokens [written_word "This", written_word "program", written_word "uses", written_word "ARMv7-A", written_word "Thumb", written_word "instructions", full_stop] =
+  Just (machine_target_declaration "ARMv7-A T32")
+recognize_tokens _ = Nothing
+
+-- Named operand roles remain distinct all the way to the comparison boundary.
+operation_fields : permitted_machine_operation → (Text, List (Text, Text), Text, Text)
+operation_fields (put_zero_into_register_without_changing_flags destination) =
+  ("put_zero_into_register_without_changing_flags", [("destination_register", destination)], "preserve", "sequential")
+operation_fields (put_low_sixteen_bits_in_register destination) =
+  ("put_low_sixteen_bits_in_register", [("destination_register", destination)], "preserve", "sequential")
+operation_fields (put_high_sixteen_bits_in_register destination) =
+  ("put_high_sixteen_bits_in_register", [("destination_register", destination)], "preserve", "sequential")
+operation_fields (compare_register_with_zero_and_update_flags left) =
+  ("compare_register_with_zero_and_update_flags", [("left_register", left)], "update", "sequential")
+operation_fields (compare_two_registers_and_update_flags left right) =
+  ("compare_two_registers_and_update_flags", [("left_register", left), ("right_register", right)], "update", "sequential")
+operation_fields (load_four_bytes_from_named_address_into_register address destination) =
+  ("load_four_bytes_from_named_address_into_register", [("address_register", address), ("destination_register", destination)], "preserve", "sequential")
+operation_fields (advance_named_address_by_four_without_changing_flags address) =
+  ("advance_named_address_by_four_without_changing_flags", [("address_register", address)], "preserve", "sequential")
+operation_fields (decrease_named_count_by_one_without_changing_flags count) =
+  ("decrease_named_count_by_one_without_changing_flags", [("count_register", count)], "preserve", "sequential")
+operation_fields (add_named_register_contents_without_changing_flags source destination) =
+  ("add_named_register_contents_without_changing_flags", [("source_register", source), ("destination_register", destination)], "preserve", "sequential")
+operation_fields (replace_execution_index_when_zero_flag_is_one target) =
+  ("replace_execution_index_when_zero_flag_is_one", [("destination_label", target)], "preserve", "conditional_zero_branch")
+operation_fields (replace_execution_index_unconditionally target) =
+  ("replace_execution_index_unconditionally", [("destination_label", target)], "preserve", "unconditional_branch")
+operation_fields (copy_register_contents_without_changing_flags source destination) =
+  ("copy_register_contents_without_changing_flags", [("source_register", source), ("destination_register", destination)], "preserve", "sequential")
+operation_fields return_to_link_register_instruction_address =
+  ("return_to_link_register_instruction_address", [], "preserve", "return_through_lr")
+
+quote_json : Text → Text
+quote_json text = "\"" ++ foldr (\character, result ⇒ escape character ++ result) "" (unpack text) ++ "\""
+  where
+    escape : Char → Text
+    escape '"' = "\\\""
+    escape '\\' = "\\\\"
+    escape '\n' = "\\n"
+    escape '\r' = "\\r"
+    escape '\t' = "\\t"
+    escape character = pack [character]
+
+nonoperation : Text → Text
+nonoperation status = "{\"status\":" ++ quote_json status ++ ",\"candidates\":[]}"
+
+join_fields : List Text → Text
+join_fields [] = ""
+join_fields [field] = field
+join_fields (field :: rest) = field ++ "," ++ join_fields rest
+
+render_operation : List Text → List Text → permitted_machine_operation → Text
+render_operation registers labels operation =
+  let (name, operands, flags, index_effect) = operation_fields operation
+      valid = all (\(role, value) ⇒ if role ≟ "destination_label" then elem value labels else elem value registers) operands
+      fields = join_fields (map (\(role, value) ⇒ quote_json role ++ ":" ++ quote_json value) operands)
+  in if valid
+     then "{\"status\":\"interpreted\",\"candidates\":[{\"rank\":1,\"operation\":" ++ quote_json name ++ ",\"operands\":{" ++ fields ++ "},\"effects\":{\"flags\":" ++ quote_json flags ++ ",\"index\":" ++ quote_json index_effect ++ "}}]}"
+     else nonoperation "unsupported"
+
+render_item : List Text → List Text → english_source_item → Text
+render_item registers labels (executable_operation operation) = render_operation registers labels operation
+render_item _ _ (nonexecuting_comment _) = nonoperation "comment"
+render_item _ _ (nonexecuting_explanation _) = nonoperation "explanation"
+render_item _ _ (machine_target_declaration _) = nonoperation "declaration"
+render_item _ _ (register_name_declaration _ _) = nonoperation "declaration"
+render_item _ _ (following_instruction_name _) = nonoperation "declaration"
+
+begins_with : List Char → List Char → Bool
+begins_with [] _ = True
+begins_with (_ :: _) [] = False
+begins_with (first :: rest) (other :: remaining) = first ≟ other && begins_with rest remaining
+
+interpret_source : List Text → List Text → Text → Text
+interpret_source registers labels source =
+  let text = trim source in
+  if begins_with (unpack "(NOTE:") (unpack text) && balanced_comment 0 (unpack text)
+     then render_item registers labels (nonexecuting_comment source)
+  else if begins_with (unpack "(WHY? BECAUSE:") (unpack text) && balanced_comment 0 (unpack text)
+     then render_item registers labels (nonexecuting_explanation source)
+  else case scan_characters 0 between_words (unpack source) [] of
+    Left _ ⇒ nonoperation "unsupported"
+    Right tokens ⇒ case recognize_tokens (map token tokens) of
+      Nothing ⇒ nonoperation "unsupported"
+      Just item ⇒ render_item registers labels item
+
+-- The caller supplies the declared register and label names, one per line.
+-- It binds their full machine context, input bytes and executable digest.
+-- Parsing never generates ARM instructions or grants execution permission.
+covering
+main : IO ()
+main = do
+  arguments ← getArgs
+  case arguments of
+    [_, registers_file, labels_file, source_file] ⇒ do
+      registers ← readFile registers_file
+      labels ← readFile labels_file
+      source ← readFile source_file
+      case (registers, labels, source) of
+        (Right register_text, Right label_text, Right source_text) ⇒
+          putStrLn (interpret_source (lines register_text) (lines label_text) source_text)
+        _ ⇒ do
+          putStrLn "Input file could not be read."
+          exitFailure
+    _ ⇒ do
+      putStrLn "Usage: english-discrete REGISTER_NAMES LABEL_NAMES SOURCE_SENTENCE"
+      exitFailure
