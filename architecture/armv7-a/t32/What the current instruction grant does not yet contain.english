@@ -23,6 +23,12 @@ and exhaustive forms remain unfinished.
 UNGRANTED: the hardware may provide this instruction family,
 but the English Major C profile does not yet name permitted
 effects/encodings for it.
+DECODED-BUT-UNGRANTED: the architectural encoding has been
+identified (including any exception-generating behavior),
+but the closed English Major C operation grant does not
+authorize it as an executable source operation. A decoded
+UDF or SVC is an example; these two have different
+architectural effects and may NOT be conflated.
 TARGET-DEPENDENT: extension or feature/privilege conditions
 must be verified before any admission.
 NOT-ARMV7-A-ASSUMED: later-architecture or another profile's
@@ -94,15 +100,51 @@ multiple encoding widths and full legal conditional
 combinations are NOT yet covered. Sources: B, BL,
 BX, BLX, CBZ, CBNZ, IT, TBB, TBH.
 
-UNGRANTED: supervisor-service/OS requests. SVC and
-the OS service ABI are not ordinary user-register
-arithmetic and cannot be approximated by a label
-saying "call the kernel". Source: guide C2.145.
+COVERED-SUBSET: the ENTIRE 4096-halfword 16-bit decode
+space 0xD000..0xDFFF has now been individually enumerated,
+using ARM DDI 0406C.d A6.2.6 Table A6-8:
+  14 distinct T1 condition-code groups, 256 encodings
+  each, totaling 3584 conditional branches;
+  256 permanently undefined UDF T1 encodings;
+  256 SVC T1 supervisor-call encodings.
+Only the B T1 class is granted through operation 43,
+and ONLY outside an IT block. DDI 0406C.d A8.8.18
+expressly declares T1 B in IT UNPREDICTABLE.
+See "Every conditional-branch and supervisor-call
+halfword.english" and the two 4096-entry and
+224-entry condition/flag TSV fixtures.
 
-UNGRANTED: deliberate permanently undefined instruction,
-breakpoint and debug entry, whose exact trap/debug
-effects require the environment. Sources: UDF, BKPT,
-DBG, guide C2.162, C2.18, C2.32.
+The prior finite 0xBA00..0xBAFF subtree remains
+separate, with 64 REV, 64 REV16, 64 UNDEFINED,
+and 64 REVSH halfwords. These two completed
+subtrees total exactly 4352 DISTINCT NUMERICAL
+16-bit halfword values, not a complete Thumb ISA.
+Uninspected instruction spaces and different 32-bit
+encodings remain separate open obligations.
+
+DECODED-BUT-UNGRANTED: all 256 SVC T1 instruction encodings
+0xDF00..0xDFFF are recognized under DDI 0406C.d A6.2.6,
+Table A6-8. SVC is architecturally a supervisor exception
+request that can be issued by unprivileged user-mode code;
+it is not simply a forbidden privileged instruction.
+The required exception context, state save, return path,
+OS/ABI-specific service convention and effects are
+not part of the current language grant. A decoder
+recognizing DF01 must not claim a successful English Major C
+system call occurred.
+
+DECODED-BUT-UNGRANTED: all 256 UDF T1 encodings
+0xDE00..0xDEFF belong to the permanently undefined
+exception-generating class under Table A6-8.
+This includes 0xDEF9 and 0xDEFE, whose diagnostic
+LLVM 17 spellings are "__brkdiv0" and "trap".
+Those foreign aliases do not make extra operations.
+UDF differs from SVC and from normal instruction
+fall-through. The current English Major C grant
+contains no general exception-taking operation.
+UNGRANTED: other deliberate breakpoint and debug
+entry mechanisms (BKPT, DBG), whose exact effect
+and environment still need separate specifications.
 
 PART TWO. ARITHMETIC THAT REAL PROGRAMS MAY NEED.
 
