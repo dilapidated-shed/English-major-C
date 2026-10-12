@@ -497,7 +497,7 @@ translation for each of these distinct defects:
   * loading an invalid table entry and pretending
     the machine checked high-level array bounds;
   * claiming that an unsupported ARM mnemonic is
-    already authorized by the 72-operation profile;
+    already authorized by the 73-operation profile;
   * confusing an address's T32-indication bit with
     the least significant bit of the target's address.
 
