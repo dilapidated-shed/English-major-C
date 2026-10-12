@@ -226,7 +226,7 @@ Together the five disjoint decoder subtrees cover
   E000..E7FF: 2048 values
 or 6912 individual 16-bit halfword values at
 decoder-classification level. The separate
-initial executable vocabulary still has 72
+initial executable vocabulary at that earlier stage had 72
 long English operation names. These checks
 do NOT cover the full 16-bit or 32-bit Thumb
 ISA, complete ITSTATE and debug exceptions,
@@ -255,12 +255,58 @@ forms are separately permitted by operations 54-60.
 in ../../../examples/ gives a source-derived machine-byte specimen
 and exposes the distinct MOV versus MOVS flag behavior.
 
+"Every halfword that forms an address from the execution position
+or stack pointer.english" declares the COMPLETE finite 4096-halfword
+A000..AFFF subtree. It has 2048 T32 ADR T1 forms using
+Align(PC+4,4) plus the unsigned immediate times four, and 2048
+T32 ADD (SP plus immediate) T1 forms producing a new
+low-register value without modifying SP. Existing operation 40
+is explicitly limited to the ADR T1 encoding; the latter
+SP-relative register-producing form is separately named
+new long operation 73. The complete data table is:
+../../../fixtures/armv7-a-t32-address-generation-halfwords.tsv
+
+"Every PC-relative data-word load halfword.english" declares
+the COMPLETE 2048-halfword 4800..4FFF T32 LDR literal T1
+subtree. It calculates Align(PC+4,4)+4*imm8 and then performs
+an actual FOUR-BYTE DATA-MEMORY READ, subject to mapping
+and access permissions. Existing operation 41 is now
+limited to that exact narrow T1 form. Its data rows are:
+../../../fixtures/armv7-a-t32-pc-relative-word-load-halfwords.tsv
+
+"An address a load and a branch disagree about the same bytes.english"
+in ../../../examples/ preserves a REAL assembled 16-byte
+ELF32 ARM .text section and the precise code/data ambiguity:
+its literal bytes 78 56 34 12 are one declared DATA WORD,
+which a linear LLVM disassembler nonetheless prints as
+two potential instruction encodings. The actual branch
+skips their addresses; a preceding LDR reads their word
+value; an ADR merely calculates a numerical address.
+The language trace stops before an ungranted SVC.
+
+"2026-10-11-PC-relative-address-and-data-load-audit.english"
+in ../../../evidence/ records actual foreign compiler/decoder
+diagnostics of all 6144 newly classified halfwords,
+observed artifact SHA256 digests and the precise
+limits of arithmetic and memory-model verification.
+
+The earlier FIVE disjoint subtrees classified 6912
+numerical two-byte Thumb halfword values. The added
+4096 Axxx and 2048 48xx..4Fxx forms are disjoint from
+those five, giving exactly SEVEN fully enumerated
+decoder-classification subtrees containing
+13056 DISTINCT numerical sixteen-bit halfword values.
+This is NOT completeness of the ARMv7-A T32 ISA,
+even of every instruction form underlying the 73
+currently permitted long English operations.
+The verified target processor and runtime remain unspecified.
+
 ENGLISH MAJOR C PROFILE BOUNDARY.
 
 The sole initial operation grant is:
     All and only these initial operations are permitted.english
 
-It lists 72 named families. No machine instruction outside a verified
+It lists 73 named families. No machine instruction outside a verified
 lowering of one of those named families is thereby permitted by the
 language. That is a complete statement of the INITIAL SOFTWARE GRANT,
 but it is NOT a complete statement of all the instructions executable
@@ -275,7 +321,7 @@ WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
 The open coverage inventory includes, without implying exhaustiveness:
 
   * every T32 encoding variant, width, restriction and alias even for
-    the 72 named operation families;
+    the 73 named operation families;
   * full multiply, multiply-accumulate, dual-multiply, long-multiply
     and signed/unsigned divide families;
   * saturating, parallel arithmetic, packing, byte reversal,
@@ -324,7 +370,7 @@ instruction set", an independent review SHALL:
    toolchain, and validate results independently. Report source,
    encode/decode, semantic execution and hardware evidence separately.
 
-Until then, do not describe the 72-entry grant as the entire physical ISA.
+Until then, do not describe the 73-entry grant as the entire physical ISA.
 
 TARGET-MACHINE DECLARATION REQUIREMENT.
 
