@@ -2,6 +2,11 @@ CHOICES FOR MISSING-VALUE BRANCHING AND EXECUTION.
 
 An English Major C decision record.
 Status: competing designs RETAINED; no optimized sequence selected.
+This document records the earlier R-specific comparison question.
+It does NOT prescribe the semantics of the first English Major C
+unknown-entry example, nor impose an R type system, R NA/NaN,
+or an ICK compiler stage upon it. The later human correction
+is recorded in "Why the first compiler emits assembly directly.english".
 Example: R's sum(..., na.rm=TRUE), notably the integer path called
 "isum" in the previously discussed R implementation.
 Architecture: symbolic ARMv7-A T32, unless another architecture is
@@ -293,7 +298,8 @@ Possible advantage: different prediction-versus-extra-work
 tradeoff on that architecture.
 
 Possible disadvantage: it is not an ARMv7-A T32 instruction;
-cannot be treated as the assembly produced by ICK for ARM.
+cannot be treated as the ARM assembly produced by this project's
+independent English-to-assembly compiler.
 Even on x86 it can be inferior to a predictable branch.
 
 Conditions: a distinct, versioned x86-64 machine profile.
@@ -357,8 +363,9 @@ For any proposed equivalence or speed advantage, the test SHALL bind:
   B. exact instruction bytes, boundaries, ISA state and disassembly;
   C. comparison oracle for R integer/real NA, NaN, infinities, overflow,
      empty/long inputs and other relevant observable behavior;
-  D. ICK revision and qualified compiler path for ARM experiments,
-     explicitly distinct from Debian amd64 build artifacts;
+  D. exact English Major C compiler revision and emitted assembly,
+     plus independently declared ARM assembler/linker provenance;
+     ICK is not an English Major C compiler stage;
   E. complete actual-target CPU/SoC and instruction-feature manifest;
   F. test sets with zero missingness, all missingness, rare missingness,
      approximately balanced missingness, random versus clustered missing

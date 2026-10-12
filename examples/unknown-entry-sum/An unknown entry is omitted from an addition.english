@@ -1,0 +1,27 @@
+This program uses ARMv7-A Thumb instructions.
+
+Name register zero "address of the next entry".
+Name register one "number of entries remaining".
+Name register two "running total".
+Name register three "current entry".
+Name register twelve "unknown marker".
+
+Name the following instruction "prepare the total".
+Put zero into "running total" without changing the condition flags.
+Put 65535 into the low sixteen bits of "unknown marker" and zero into its high sixteen bits.
+Put 65535 into the high sixteen bits of "unknown marker" without changing its low sixteen bits.
+
+Name the following instruction "check whether any entries remain".
+Compare "number of entries remaining" with zero and update the condition flags.
+If the zero flag is one, replace the execution index with the instruction named "return the result".
+Load exactly four bytes from the address in "address of the next entry" into "current entry".
+Increase "address of the next entry" by four without changing the condition flags.
+Decrease "number of entries remaining" by one without changing the condition flags.
+Compare "current entry" with "unknown marker" and update the condition flags.
+If the zero flag is one, replace the execution index with the instruction named "check whether any entries remain".
+Add "current entry" to "running total" and keep only the lowest thirty-two result bits without changing the condition flags.
+Replace the execution index with the instruction named "check whether any entries remain".
+
+Name the following instruction "return the result".
+Copy "running total" into "address of the next entry" without changing the condition flags.
+Replace the execution index with the instruction address in the link register.

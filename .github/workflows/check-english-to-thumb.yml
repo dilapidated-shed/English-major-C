@@ -1,0 +1,35 @@
+name: Check English-to-Thumb source translation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-first-compiler:
+    name: Exact-source compiler and rejection cases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the actual change head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Use Node 22 for the compiler itself
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify the small allowed and rejected English grammar
+        run: node --test tests/compile-english-assembly.test.mjs
+      - name: Compile the reviewed English source and compare the committed assembly
+        run: |
+          node tools/compile-english-assembly.mjs \
+            'examples/unknown-entry-sum/An unknown entry is omitted from an addition.english' \
+            "${RUNNER_TEMP}/generated-thumb.s"
+          cmp "${RUNNER_TEMP}/generated-thumb.s" examples/unknown-entry-sum/generated-thumb.s
+
+# This workflow checks ONLY source translation and its checked-in assembly.
+# It does not assemble/link an ARM binary, run a physical device, or replace
+# the required independent ai-ci / Flexible Pipes promotion boundary.
