@@ -59,6 +59,20 @@ or effects. Fortran alone is not an exhaustive executable representation of
 those outside libraries either. No complete R interpreter executable was
 captured. Do not claim a whole-process machine trace.
 
+## Exact machine call boundaries
+
+The separate [full CALL inventory](Every%20recorded%20call%20and%20its%20missing%20machine%20boundary.english)
+classifies all 64 statically printed call instructions across the
+overlapping object and executable listings: 6 to captured internal code,
+56 to library procedures without captured implementation bodies, and
+2 indirect calls whose runtime target depends on state not present in
+the disassembly. These are static call sites, not runtime call counts.
+
+The [first actual dqrls call walkthrough](Following%20the%20first%20actual%20QR%20call%20one%20memory%20operation%20at%20a%20time.english)
+explains why changing RSP makes different stack offsets address different
+by-reference Fortran arguments, and why the pre-link CALL placeholder
+must not be mistaken for a concrete destination.
+
 ## Verification levels, do not conflate
 
 - **Evidence checked in ancestor draft PR #5:** pinned files, numerical smoke,
