@@ -35,6 +35,11 @@ jobs:
           sudo apt-get install -y qemu-user
           qemu-arm --version
           qemu-x86_64 --version
+      - name: Install Android command-line tools only, not retired tools package
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+          log-accepted-android-sdk-licenses: 'false'
       - name: Pin and inspect the actual cross-toolchain
         run: |
           set -euo pipefail
