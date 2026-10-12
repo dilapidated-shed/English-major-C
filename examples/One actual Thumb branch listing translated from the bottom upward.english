@@ -19,7 +19,7 @@ high-level source. It starts with encoded machine instructions.
 
 Architecture assumed for the English interpretation:
 ARMv7-A in T32 instruction state, unprivileged, with the
-exact initial 53-operation profile in the architecture directory.
+current closed 72-operation profile in the architecture directory.
 This is a valid target choice for the *interpretation*;
 no concrete mobile CPU was observed during this work.
 
