@@ -133,16 +133,59 @@ following-instruction cases are NOT yet verified.
 Operation 46's permitted IT cases cannot excuse a
 T1 conditional B inside IT.
 
-The previously audited 0xBA00..0xBAFF subtree
-has 64 REV, 64 REV16, 64 UNDEFINED,
-and 64 REVSH halfwords. Combined with the
-0xD000..0xDFFF subtree and the BF00..BFFF
-subtree, the THREE COMPLETED DECODE SUBTREES
-account for exactly 256+4096+256=4608 DISTINCT
-NUMERICAL 16-bit halfword values, not an
-exhaustive ARM Thumb instruction set.
-Uninspected instruction spaces and 32-bit
-instruction encodings remain open obligations.
+FOURTH COMPLETE SIXTEEN-BIT DECODER SUBTREE:
+0xE000..0xE7FF contains 2048 distinct
+short B T2 immediate-branch encodings.
+All were enumerated in:
+fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv
+and their signed displacement/PC operand/IT-state
+semantics are specified in:
+"Every short unconditional branch halfword.english".
+This is a COVERED-SUBSET under EXISTING operation 42:
+  11100 imm11, two bytes long;
+  signed displacement = 2*SignExtend(imm11,11);
+  relative to the branch's instruction address plus FOUR;
+  permitted outside IT or as LAST slot of IT;
+  inside a nonfinal IT slot is UNPREDICTABLE.
+The ISA calls it an unconditional B encoding because
+its halfword has no condition-code field; in a
+legal IT last slot its branch EFFECT nevertheless
+depends on ITSTATE. An actual native E000 is rendered
+"B" outside IT and "BEQ" after IT EQ by LLVM.
+The contextual display does not change raw bytes.
+
+FIFTH COMPLETE SIXTEEN-BIT DECODER SUBTREE:
+0xBE00..0xBEFF contains 256 BKPT T1
+encodings with unsigned immediates 0..255.
+All were enumerated in:
+fixtures/armv7-a-t32-breakpoint-halfwords.tsv
+and their effects/IT exception are specified in:
+"Every breakpoint halfword and its
+conditional-execution exception.english".
+This entire BKPT group is DECODED-BUT-UNGRANTED
+because the profile lacks an authorized
+debug-event and environment/exception contract.
+A BKPT is unconditionally executed EVEN
+INSIDE an IT block; a false IT condition
+does not suppress its event.
+This differs from predicated ordinary data
+instructions, B T2 in its final IT slot,
+and T1 conditional B forbidden inside IT.
+
+The already audited 0xBA00..0xBAFF region has
+64 REV, 64 REV16, 64 UNDEFINED, 64 REVSH.
+The 0xBF00..0xBFFF region has 214 context-
+permitted IT, 26 unpredictable IT, one NOP,
+four named hints and eleven unallocated hints.
+The 0xD000..0xDFFF region contains 3584
+conditional B T1, 256 UDF and 256 SVC.
+These FIVE COMPLETED DECODER SUBTREES
+account for exactly 256+256+4096+2048+256
+=6912 DISTINCT NUMERICAL 16-bit halfwords,
+NOT the complete Thumb ISA or every encoding
+of any of the long named permitted operations.
+Remaining sixteen-bit regions and all
+uninspected 32-bit combinations remain open.
 
 DECODED-BUT-UNGRANTED: all 256 SVC T1 instruction encodings
 0xDF00..0xDFFF are recognized under DDI 0406C.d A6.2.6,
@@ -164,9 +207,18 @@ Those foreign aliases do not make extra operations.
 UDF differs from SVC and from normal instruction
 fall-through. The current English Major C grant
 contains no general exception-taking operation.
-UNGRANTED: other deliberate breakpoint and debug
-entry mechanisms (BKPT, DBG), whose exact effect
-and environment still need separate specifications.
+DECODED-BUT-UNGRANTED: all 256 BKPT T1
+encodings 0xBE00..0xBEFF now have an
+explicit instruction-class table and semantics
+boundary, separate from UDF and SVC.
+A native BKPT requests a debug event; its
+halt/exception behavior depends on actual
+target debug configuration. BKPT is always
+unconditional even in IT. This source grant
+does not authorize intentional BKPT execution.
+UNGRANTED: other debug hint/event entry
+mechanisms (including DBG) still require
+their own native and environment contracts.
 
 PART TWO. ARITHMETIC THAT REAL PROGRAMS MAY NEED.
 
