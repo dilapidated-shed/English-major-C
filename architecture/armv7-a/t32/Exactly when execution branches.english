@@ -129,6 +129,47 @@ Z=0 it proceeds from 0x00003000 to 0x00003002. The
 instructions at intermediate addresses are not executed
 merely because they lie in the numerical interval.
 
+PART FOUR-A. A COMPLETE TWO-BYTE CONDITIONAL-BRANCH DECODE REGION.
+
+The initial operation 43 now pins the exact Thumb T1 conditional
+branch encoding for first four bits 1101, next four bits a
+condition from 0000 through 1101, and eight displacement bits.
+The immediate is an eight-bit signed two's-complement integer,
+scaled by two. The resulting displacement is -256 through
++254 bytes, and the branch target is current instruction address
+plus FOUR bytes plus the displacement.
+
+**The 16-bit T1 conditional B encoding is NEVER legal inside
+an IT block.** ARM DDI 0406C.d A8.8.18 labels it
+"Not permitted in IT block" and declares such usage
+UNPREDICTABLE. The separate rule permitting a PC-changing
+operation in the last IT slot applies only to instructions
+whose own exact encoding permits that context. It does not
+override the T1 prohibition. T2 and T3/T4 have their own
+distinct form-specific rules and must not inherit a
+made-up universal branch rule.
+
+The complete 0xD000 through 0xDFFF subtree is provided in
+"Every conditional-branch and supervisor-call halfword.english".
+All 4096 encodings are also individually recorded in
+fixtures/armv7-a-t32-conditional-branch-and-exception-halfwords.tsv,
+including 256 UDF and 256 SVC encodings that are decoded
+but UNGRANTED by the current English Major C operation list.
+
+If the source supplies an immediate displacement of ZERO,
+the target when taken is the current instruction address
+plus four, NOT its sequential successor plus two.
+A taken branch and an untaken branch can sometimes have the
+same numerical successor (for example D0FF), but their
+architectural predicates and branch decisions remain
+distinct; their performance may also differ.
+
+The finite condition truth table for all four-flag
+combinations and all fourteen T1 conditions is
+fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv.
+It is data about encoding/flag semantics, NOT a program
+which has executed every branch on a CPU.
+
 PART FIVE. HOW A REGULAR BRANCH DIFFERS FROM CALLING.
 
 Operation 42: a direct unconditional B replaces the
