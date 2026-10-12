@@ -4,6 +4,8 @@ English Major C is an experimental programming language specified in ordinary En
 
 **First executable experiment:** [An unknown entry is omitted from an addition](examples/unknown-entry-sum/README.md) supplies a direct English-to-Thumb assembler compiler, a source-line-aligned native listing, rejection tests, and a complete architectural trace. Its single-architecture/no-ICK/no-premature-types decision is in [the direct compiler decision record](decisions/Why%20the%20first%20compiler%20emits%20assembly%20directly.english). This experiment is not R-compatible and has not yet run on ARM hardware.
 
+**Frontend research, not yet implemented:** [Idriç source-item choices](research/Idri%C3%A7%20source%20items%20are%20operations%20or%20comments.md) model executable operations, nonexecuting comments, explanations, register-name declarations, instruction labels, and the selected machine as different source categories. These declarations have not been checked by the Idriç compiler; the current English text compiler still uses its original small sentence recognizer. ICKY is not an active dependency of this first experiment.
+
 **Start here:** [Given a machine: objects, processes, and execution](architecture/armv7-a/t32/Given%20a%20machine%20-%20objects%20and%20execution.english). Read the closed operation grant next, then the architecture provenance and alternatives record.
 
 ## Given these exact documents
