@@ -54,6 +54,6 @@ The archived objects' hashes can vary if build directories, compiler revision or
 3. It does not demonstrate ARM execution or numerical output, or physical MIRO A1/Android acceptance.
 4. It does not translate assembly into English Major C/Fortran/assembly, establish instruction-by-instruction semantics, or qualify the ICK/NDK build path.
 5. Ordinary R `lm` minimizes **squared vertical residuals**, distinct from the earlier proposed **sum of unsquared perpendicular distances** line-fitting problem.
-6. Neither this capture workflow nor its green build constitutes a deployed non-bypassable Flexible Pipes receipt or independent ai-ci acceptance. Track as [Flexible Pipes #98](https://github.com/isomorphisms/flexible-pipes/issues/98); keep the PR draft/unmerged until resolved.
+6. This is a **one-off research capture**, not a Flexible Pipes assignment or a maintained ICK/NDK production build. Its project-specific GitHub Actions checks verify archived object bytes, disassembly, and deliberately corrupted artifacts. No separate ai-ci QR acceptance test is required.
 
 R source provenance and GPL licensing remain recorded in [the original archive](../r-lm-native-x86-64/README.md) and [its license copy](../r-lm-native-x86-64/COPYING-R.txt). This directory is preserved as raw, bottom-up machine evidence only.
