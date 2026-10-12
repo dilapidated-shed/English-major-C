@@ -52,7 +52,9 @@ async function freePort() {
   const server=createServer(); await new Promise((resolve,reject)=>{server.once('error',reject); server.listen(0,'127.0.0.1',resolve);});
   const port=server.address().port; await new Promise(resolve=>server.close(resolve)); return port;
 }
-function quote(path) {assert(!/["\r\n]/.test(path)); return '"'+path+'"';}
+// GDB restore/dump retain quote characters as filename data. The generated
+// research workspace therefore uses a deliberately restricted plain path.
+function quote(path) {assert(/^[A-Za-z0-9_./-]+$/.test(path),'GDB evidence paths cannot contain whitespace or metacharacters'); return path;}
 async function machineTrace(arch,elf,initialState,steps,name) {
   const directory=join(output,name); mkdirSync(directory,{recursive:true});
   const image=join(directory,'diagnostic.elf'), memory=join(directory,'initial-memory.bin');
@@ -62,7 +64,7 @@ async function machineTrace(arch,elf,initialState,steps,name) {
   let stderr='',spawnError;
   child.stderr.on('data',b=>stderr+=b); child.once('error',e=>spawnError=e);
   const registers=arch==='arm'?aregs:xregs, status=arch==='arm'?'cpsr':'eflags';
-  const commands=['set pagination off','set confirm off','set language c','set remotetimeout 10','set tcp connect-timeout 10','file '+quote(image),'target remote 127.0.0.1:'+port,'restore '+quote(memory)+' binary '+hex(MEMORY_START)];
+  const commands=['set pagination off','set confirm off','set language c','set debuginfod enabled off','set remotetimeout 10','set tcp connect-timeout 10','file '+quote(image),'target remote 127.0.0.1:'+port,'restore '+quote(memory)+' binary '+hex(MEMORY_START)];
   for(const r of registers) commands.push('set $'+r+' = '+hex(initialState.registers[r]));
   commands.push('set $'+status+' = '+hex(initialState.flags));
   const capture=index=>{
@@ -75,8 +77,6 @@ async function machineTrace(arch,elf,initialState,steps,name) {
   capture(0); for(let i=1;i<=steps;i++){commands.push('stepi');capture(i);}
   commands.push('kill','quit');
   const script=join(directory,'steps.gdb'); writeFileSync(script,commands.join('\n')+'\n');
-  // GDB performs bounded connection retries. The original bytes never run
-  // freely: every requested step has a recorded state and complete workspace.
   await new Promise(resolve=>setTimeout(resolve,100));
   let gdb;
   try {
@@ -137,8 +137,6 @@ for(const arch of ['arm','x86']) {
     if(index===0){baseline=actual;baselineExpected=expected;}
   }
   const first=initial(arch,6,2), modified=Buffer.from(text);
-  // Valid but wrong instructions: ARM MOV R6,R2 instead of R6,R3;
-  // x86 OR EAX,EAX instead of XOR EAX,EAX. Neither crashes the prefix.
   if(arch==='arm'){assert.equal(modified.readUInt32LE(4),0xe1a06003);modified.writeUInt32LE(0xe1a06002,4);}
   else {assert.equal(modified.subarray(2,4).toString('hex'),'31c0');modified[2]=0x09;}
   const badActual=await machineTrace(arch,diagnosticElf(elf.machine,modified),first,rows.length,arch+'-wrong-native');
@@ -146,8 +144,6 @@ for(const arch of ['arm','x86']) {
   const wrongEnglish=arch==='arm'?source.replace('copy the four-byte value in register r3 into register r6','copy the four-byte value in register r2 into register r6'):source.replace('write zero into the four-byte view of register rax and update logic flags','copy the eight-byte value in register rbx into register rax');
   assert.notEqual(wrongEnglish,source);
   const badState=initial(arch,6,2), badOps=parseEnglish(wrongEnglish,arch);
-  // Do not let a later call-boundary assertion count as semantic rejection:
-  // compare the mutated state directly after each actual decoded instruction.
   const badExpected=[snapshot(badState)];
   for(let i=0;i<badOps.length;i++){badOps[i].run(badState);badState.registers[arch==='arm'?'r15':'rip']=BigInt(CODE_ADDRESS+rows[i].offset+rows[i].bytes.length);badExpected.push(snapshot(badState));}
   report.negativeTests.push({arch,kind:'wrong English meaning',rejection:expectMismatch(()=>compare(badExpected,baseline,arch+' English mutant'),'changed English meaning')});
@@ -162,7 +158,6 @@ const linkedListing=pinnedFile(join(linkedFolder,'linked-executable.armv7-hardfp
 const inventory=mixedArmInventory(linkedElf,linkedListing);
 writeFileSync(join(output,'linked-mode-map.json'),json(inventory));
 writeFileSync(join(output,'linked-mode-map.tsv'),'section\taddress\tmode\tbytes\tsequential-address\tassembly\n'+inventory.records.map(r=>[r.section,hex(r.address),r.mode,r.bytes,r.sequential===null?'data':hex(r.sequential),r.assembly].join('\t')).join('\n')+'\n');
-// Test the actual Thumb BLX from _start; no loader or library is involved.
 const site=inventory.records.find(r=>r.address===0x940);
 assert(site&&site.mode==='t'&&site.length===4&&site.bytes==='fff774ee','Pinned interworking instruction changed');
 const bits=Buffer.from(site.bytes,'hex'), firstHalf=bits.readUInt16LE(0),secondHalf=bits.readUInt16LE(2);
