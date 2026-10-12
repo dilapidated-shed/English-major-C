@@ -170,6 +170,47 @@ fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv.
 It is data about encoding/flag semantics, NOT a program
 which has executed every branch on a CPU.
 
+PART FOUR-B. ALL SHORT B T2 BRANCH ENCODINGS.
+
+A distinct, independently bounded two-byte Thumb instruction
+is the B T2 immediate encoding E000..E7FF.
+Every one of its 2048 possible eleven-bit immediate
+values is enumerated in
+fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv.
+Its exact signed-offset, PC+4 and instruction-entry
+rules are detailed in
+"Every short unconditional branch halfword.english".
+
+The B T2 is not a T1 Dxxx conditional branch.
+It has no encoded condition field and does not
+change the arithmetic flags or the link register.
+Its signed PC-relative displacement ranges from
+-2048 to +2046 bytes in even steps.
+
+B T2 can be permitted OUTSIDE IT and as the
+LAST instruction slot INSIDE a legal IT block.
+In the latter context, the governing IT predicate
+determines whether its normal branch effect
+occurs. A false IT condition suppresses that
+effect and execution advances two bytes instead.
+A B T2 placed earlier in IT is UNPREDICTABLE.
+
+A native halfword E000 outside IT can be printed
+"B"; the SAME halfword under one-slot IT EQ can
+be printed "BEQ". The disassembler is displaying
+the effective condition from ITSTATE.
+A faithful English translation MUST preserve
+the same native halfword E000 and the preceding
+actual IT operation. It must not reclassify
+the E000 bytes as a D000 T1 conditional B.
+
+The numerical equality of a branch target and
+the sequential A+2 address, as for E7FF,
+does not prove that no branch operation occurred.
+The machine's actual control-transfer effect
+and the address selected by that effect are
+separate statements.
+
 PART FIVE. HOW A REGULAR BRANCH DIFFERS FROM CALLING.
 
 Operation 42: a direct unconditional B replaces the
@@ -363,6 +404,42 @@ way. Source semantics must check raw encoded bits.
 
 The source-derived byte-level example is:
 examples/One If Then block governs a short and a long instruction.english
+
+PART EIGHT-B. AN INSTRUCTION INSIDE IT THAT IGNOREs THE PREDICATE.
+
+The machine also has BKPT T1 encodings BE00..BEFF,
+which produce architecture-defined breakpoint
+debug events. The complete 256-halfword decode
+is recorded in
+"Every breakpoint halfword and its
+conditional-execution exception.english",
+and the data-only row inventory is:
+fixtures/armv7-a-t32-breakpoint-halfwords.tsv.
+
+BKPT is ALWAYS UNCONDITIONAL, including when
+it appears inside an active IT block whose
+condition is false. Therefore, an ordinary
+source assumption that "every instruction
+inside IT has suppressed effects when its
+predicate fails" is INCORRECT.
+
+The initial English Major C source profile
+does not grant BKPT execution at all.
+The architecture can decode the bytes,
+but executing them would request a debug
+event with target-dependent halt/exception
+consequences. No ordinary successful
+execution-index successor is asserted
+without an explicit debug environment.
+
+A T1 conditional B in IT is prohibited;
+a B T2 in its final IT slot is conditionally
+executed; BKPT in IT is unconditional.
+These are three different rules applied
+to different actual native instruction
+encodings. The word "conditional" cannot
+be assigned to an instruction merely
+because it is textually inside an IT block.
 
 PART NINE. THE EXECUTION-INDEX INVARIANTS.
 
