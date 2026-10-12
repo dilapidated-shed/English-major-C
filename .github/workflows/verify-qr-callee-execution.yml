@@ -1,0 +1,60 @@
+name: Execute English QR callee initialization against original machine bytes
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calls-and-callee-states:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out the exact proposed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify revision and execution environment
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          echo "exact_source_head=$EXPECTED_HEAD"
+          uname -srm
+          node --version
+          sudo apt-get update -qq
+          sudo apt-get install -y qemu-user gdb-multiarch
+          qemu-arm --version
+          qemu-x86_64 --version
+          gdb-multiarch --version
+      - name: Execute real calls and compare all integer and floating state
+        run: |
+          set -euo pipefail
+          node --check experiments/qr-callee/callee-state.mjs
+          node --check experiments/qr-callee/check-callee-execution.mjs
+          node experiments/qr-callee/check-callee-execution.mjs "$RUNNER_TEMP/qr-callee-evidence"
+          cat "$RUNNER_TEMP/qr-callee-evidence/receipt.json"
+      - name: Retain exact source for independent reproduction
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qr-callee-evidence/source"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/qr-callee-evidence/source"
+      - name: Preserve per-step memory and FP bits with debugger logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qr-callee-original-machine-evidence
+          path: ${{ runner.temp }}/qr-callee-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+# No replacement routine is compiled. The diagnostic load image contains
+# archived object bytes with two explicit, inspected ELF relocations per ISA.
+# Stops before BLAS dnrm2 or at an early dimension guard destination.
+# Floating payload transfers are checked; full QR arithmetic is not claimed.
