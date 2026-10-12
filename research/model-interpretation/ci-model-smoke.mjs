@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {selectModel,downloadModel,hashFile} from './model-io.mjs';
 import {runModel} from './run-local.mjs';
+import {conditions} from './format-control.mjs';
 export const runtime={tag:'b11560',source_revision:'b13a93a3d5fa44b57899d86467a4de463e7415a7',bytes:17718608,sha256:'55d446939872f9370bbdad57517fece1aebaca99251f4e12c801e4dc9d807512',url:'https://github.com/ggml-org/llama.cpp/releases/download/b11560/llama-b11560-bin-ubuntu-x64.tar.gz'};
 export function requirePublicHost(environment,event) {
   if(environment.GITHUB_ACTIONS!=='true' || environment.RUNNER_ENVIRONMENT!=='github-hosted' || environment.RUNNER_OS!=='Linux' || environment.RUNNER_ARCH!=='X64' || event?.repository?.private!==false)throw new Error('Only the declared standard public Linux x64 job may provision this runtime');
@@ -57,15 +58,22 @@ export async function runPublicSmoke(id) {
   const executable=await obtainRuntime(work),cache=join(work,'weights'),out=join(work,'results');
   process.env.LD_LIBRARY_PATH=dirname(executable)+(process.env.LD_LIBRARY_PATH?':'+process.env.LD_LIBRARY_PATH:'');
   await downloadModel(model,cache);
-  const result=await runModel(id,cache,executable,out,true);
   console.log('EMC_MODEL_RUNTIME '+JSON.stringify({source_head:source,archive:runtime,binary_sha256:await hashFile(executable),version:command(executable,['--version'])}));
-  for(const name of await readdir(out)) {
-    if(name.endsWith('.request.json') || name.endsWith('.response.txt') || name==='server-props.json')console.log('EMC_MODEL_RAW '+JSON.stringify({file:name,text:await readFile(join(out,name),'utf8')}));
+  const results=[];
+  // Match model, source, context, prompt, seed and decoding across both arms.
+  // Only JSON-schema generation constraints differ. Restart the server for
+  // each arm so a previous answer never becomes another arm's conversation.
+  for(const condition of conditions) {
+    const conditionOut=join(out,condition);
+    const result=await runModel(id,cache,executable,conditionOut,true,condition);
+    for(const name of await readdir(conditionOut)) {
+      if(name.endsWith('.request.json') || name.endsWith('.response.txt') || name==='server-props.json')console.log('EMC_MODEL_RAW '+JSON.stringify({condition,file:name,text:await readFile(join(conditionOut,name),'utf8')}));
+    }
+    console.log('EMC_MODEL_RESULTS '+JSON.stringify(result));
+    results.push(result);
   }
-  console.log('EMC_MODEL_RESULTS '+JSON.stringify(result));
-  // Completion of an experiment is not accuracy acceptance. Report errors and
-  // exact wrong answers, without altering their labels or granting execution.
-  return result;
+  // Completion of an experiment is not accuracy acceptance.
+  return results;
 }
 if(process.argv[1] && fileURLToPath(import.meta.url)===resolve(process.argv[1])) {
   try {if(process.argv.length!==3)throw new Error('Usage: node ci-model-smoke.mjs MODEL_ID');await runPublicSmoke(process.argv[2]);}

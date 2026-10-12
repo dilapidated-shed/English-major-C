@@ -18,11 +18,20 @@ choice source_token one_of
   opening_parenthesis
   closing_parenthesis
 
-record located_token where
-  constructor located
-  character_start : Number
-  character_end : Number
-  token : source_token
+-- The pinned Idriç compiler supports lowercase `choice` names, but its
+-- inherited `record` grammar requires a capitalized identifier. Keep this
+-- maintained Idriç spelling and the same three fields using one explicit case.
+choice located_token one_of
+  located Number Number source_token
+
+character_start : located_token → Number
+character_start (located start _ _) = start
+
+character_end : located_token → Number
+character_end (located _ end _) = end
+
+token : located_token → source_token
+token (located _ _ value) = value
 
 choice scanning_mode one_of
   between_words

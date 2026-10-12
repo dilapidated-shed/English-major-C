@@ -7,7 +7,8 @@ import {createServer} from 'node:net';
 import {resolve,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {selectModel,verifyWeight,hashFile} from './model-io.mjs';
-import {messagesFor,makeReceipt,verifyReceipt,digest,validatePrediction} from './experiment.mjs';
+import {messagesFor,makeReceipt,verifyReceipt,digest,validatePrediction,namedPromptRevision,baselinePromptRevision} from './experiment.mjs';
+import {conditions,controlledRequest,assessReply,summarizeAssessments,observedTopKey} from './format-control.mjs';
 
 export function loopbackEndpoint(value) {
   const url = new URL(value);
@@ -28,7 +29,8 @@ async function unusedPort() {
   await new Promise((yes,no)=>socket.close(error=>error?no(error):yes()));
   return port;
 }
-export async function runModel(id,cache,executable,out,smoke=false) {
+export async function runModel(id,cache,executable,out,smoke=false,condition=null) {
+  if(condition!==null && !conditions.includes(condition)) throw new Error('Unknown format-control condition');
   const model=selectModel(id), weight=resolve(cache,model.file);
   if (!isAbsolute(executable) || !(await stat(executable)).isFile()) throw new Error('Supply the absolute path of an existing local llama-server executable');
   await verifyWeight(weight,model);
@@ -46,7 +48,7 @@ export async function runModel(id,cache,executable,out,smoke=false) {
   child.stdout.pipe(log,{end:false});child.stderr.pipe(log,{end:false});
   let childError=null, ended=false;
   child.on('error',e=>{childError=e;ended=true;}); child.on('exit',()=>{ended=true;});
-  const records=[], failures=[];
+  const records=[], failures=[], observations=[];
   try {
     let ready=false;
     for(let attempt=0;attempt<180;attempt++) {
@@ -65,17 +67,28 @@ export async function runModel(id,cache,executable,out,smoke=false) {
     await writeFile(resolve(out,'server-props.json'),JSON.stringify(props,null,2));
     for(const testCase of selected) {
       if(ended) throw new Error('Local model server exited during evaluation');
-      const messages=messagesFor(testCase,corpus.context);
-      const request={messages,temperature:0,seed:7,max_tokens:768,stream:false,response_format:{type:'json_object'},chat_template_kwargs:{enable_thinking:false}};
+      const request=condition
+        ? controlledRequest(testCase,corpus.context,condition)
+        : {messages:messagesFor(testCase,corpus.context),temperature:0,seed:7,max_tokens:768,stream:false,response_format:{type:'json_object'},chat_template_kwargs:{enable_thinking:false}};
+      const messages=request.messages;
       const requestText=JSON.stringify(request);
       const response=await fetch(new URL('v1/chat/completions',base),{method:'POST',redirect:'error',headers:{'Content-Type':'application/json'},body:requestText,signal:AbortSignal.timeout(240000)});
       const raw=await response.text();
       await writeFile(resolve(out,`${testCase.id}.request.json`),requestText);
       await writeFile(resolve(out,`${testCase.id}.response.txt`),raw);
       if(!response.ok) throw new Error(`Inference request failed with HTTP ${response.status}`);
+      let decoded;
+      try { decoded=JSON.parse(raw); } catch { decoded=null; }
+      const assessment=assessReply(testCase,corpus.context,decoded);
+      const observation={case_id:testCase.id,condition:condition ?? 'baseline-json',
+        source_sha256:digest(testCase.source),context_sha256:digest(corpus.context),
+        raw_response_sha256:digest(raw),request_sha256:digest(request),
+        observed_top_key:observedTopKey(decoded,corpus.context),assessment};
+      observations.push(observation);
+      console.log('EMC_MODEL_ASSESSMENT '+JSON.stringify(observation));
       try {
-        const prediction=parseReply(JSON.parse(raw),corpus.context);
-        const receipt=makeReceipt(testCase,corpus.context,prediction,{kind:'model',identity:model.id,family:model.family,model_revision:model.revision,weight_sha256:model.sha256,runtime_sha256:runtimeHash,prompt_sha256:digest(messages),chat_template_sha256:digest(props.chat_template),raw_response_sha256:digest(raw),finish_reason:'stop',settings:{temperature:0,seed:7,max_tokens:768,enable_thinking:false},runtime_arguments:args});
+        const prediction=parseReply(decoded,corpus.context);
+        const receipt=makeReceipt(testCase,corpus.context,prediction,{kind:'model',identity:model.id,family:model.family,model_revision:model.revision,weight_sha256:model.sha256,runtime_sha256:runtimeHash,prompt_revision:condition ? namedPromptRevision : baselinePromptRevision,condition:condition ?? 'baseline-json',request_sha256:digest(request),prompt_sha256:digest(messages),chat_template_sha256:digest(props.chat_template),raw_response_sha256:digest(raw),finish_reason:'stop',settings:{temperature:0,seed:7,max_tokens:768,enable_thinking:false},runtime_arguments:args});
         const score=verifyReceipt(testCase,corpus.context,receipt);
         records.push({receipt,score});
         console.log(JSON.stringify({case_id:testCase.id,model:id,exact_top1:score.exact_top1}));
@@ -84,7 +97,7 @@ export async function runModel(id,cache,executable,out,smoke=false) {
         console.log(JSON.stringify(failures.at(-1)));
       }
     }
-    const result={status:'EXPERIMENT_COMPLETED_NOT_ACCEPTED',model,actual_model_inference:true,scope:smoke?'10-case-smoke':'48-case-corpus',total_cases:selected.length,valid_outputs:records.length,invalid_outputs:failures.length,exact_top1:records.filter(r=>r.score.exact_top1).length,corpus_sha256:digest(corpus),records,failures,automatically_authorized:false};
+    const result={status:'EXPERIMENT_COMPLETED_NOT_ACCEPTED',model,actual_model_inference:true,scope:smoke?'10-case-smoke':'48-case-corpus',total_cases:selected.length,valid_outputs:records.length,invalid_outputs:failures.length,exact_top1:records.filter(r=>r.score.exact_top1).length,corpus_sha256:digest(corpus),condition:condition ?? 'baseline-json',assessment_summary:summarizeAssessments(observations),observations,records,failures,automatically_authorized:false};
     await writeFile(resolve(out,'results.json'),JSON.stringify(result,null,2));
     return result;
   } finally {
