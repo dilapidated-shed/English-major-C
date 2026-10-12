@@ -619,20 +619,150 @@ A concrete permitted halfword pair is 0xE934,0x4800,
 loading {R11,LR} through R4 and changing R4 by negative
 eight bytes. Its original R4 must not be among destinations.
 
+
+BIT REARRANGEMENT AND EXPLICIT EXTRACTION OF REGISTER FIELDS.
+
+The next eight operation names expose exactly which bits of a register
+are used, which bits are overwritten, and whether sign extension occurs.
+The values manipulated by these operations are REGISTER DATA. Merely
+rearranging an instruction-looking bit pattern does not execute it.
+The selected encodings are Thumb state and are specifically restricted
+below. None of these operations reads data memory, writes data memory,
+alters SP or LR, changes the instruction state, or changes N/Z/C/V.
+A normally executed instruction advances the execution index by its
+actual two-byte or four-byte length. An instruction inside an
+otherwise legal IT block is subject to its existing IT condition.
+Architectural encoding legality remains governed by DDI 0406C.d.
+
+Operation 65. "Reverse the positions of the four successive eight-bit
+portions of a selected thirty-two-bit general-register value, so that
+the original lowest-addressed portion of the word's bit representation
+becomes the highest-significance portion of the result, and store the
+rearranged thirty-two bits without changing the condition flags."
+Mapping: REV, 16-bit T32 T1 form only, with source Rm and destination Rd
+each selected from R0 through R7. Its halfword has the form
+1011101000 Rm(three bits) Rd(three bits), also expressible as
+0xBA00 + (Rm-number << 3) + Rd-number. Bits 7:0 and bits 31:24
+exchange places; bits 15:8 and bits 23:16 exchange places.
+A source value 0x12345678 produces 0x78563412. This instruction
+does not change system endianness or memory byte order.
+Length: two bytes. Example: 0xBA0A means REV R2, R1.
+
+Operation 66. "Reverse the order of the two eight-bit portions inside
+each of the two sixteen-bit portions of a thirty-two-bit register,
+without moving a bit from the lower halfword into the upper halfword
+or from the upper halfword into the lower halfword."
+Mapping: REV16, 16-bit T32 T1 form only, with Rm and Rd each R0-R7.
+Encoding: 0xBA40 + (Rm-number << 3) + Rd-number. For an input
+0x12345678, return 0x34127856. This changes only the destination
+register, leaves N/Z/C/V unchanged, and has length two bytes.
+Example: 0xBA63 means REV16 R3, R4.
+
+Operation 67. "Take only the original least significant sixteen bits
+of a thirty-two-bit register, interchange their lower and upper
+eight-bit portions, then copy the sign bit of the resulting sixteen-bit
+value into all sixteen higher destination bits."
+Mapping: REVSH, 16-bit T32 T1 form only, with Rm and Rd each R0-R7.
+Encoding: 0xBAC0 + (Rm-number << 3) + Rd-number. If the original
+low sixteen bits are hexadecimal 0x80FF, the swapped halfword is
+0xFF80, whose highest bit is one. The result is 0xFFFFFF80, the
+32-bit two's-complement bit representation of negative 128.
+The original upper sixteen source bits do not influence the result.
+Flags remain unchanged. Length: two bytes. Example: 0xBAF5
+means REVSH R5, R6.
+
+Operation 68. "Reverse the order of all thirty-two individual bits of
+one general register, putting original bit zero at destination bit
+thirty-one, original bit one at destination bit thirty, and so on."
+Mapping: RBIT, 32-bit T32 T1 form; Rd and Rm are restricted to
+R0 through R12 and neither SP nor PC is accepted. The mapping
+is a single FOUR-byte instruction, not a two-byte REV. A source
+0x0000000D, whose lowest four bits read 1101 from high to low,
+produces 0xB0000000. Preserve N/Z/C/V. Example halfword pair
+0xFA98,0xF7A8 encodes RBIT R7,R8. A data reversal does not
+select a new branch target merely because the result can
+represent an executable address.
+
+Operation 69. "Replace exactly a specified contiguous nonempty
+interval of bits in one thirty-two-bit destination register with
+zeros while retaining all bits outside that interval exactly."
+Mapping: BFC, 32-bit T32 T1 form only. Rd is one of R0 through
+R12. Let first_bit be an integer 0..31. Let number_of_bits be an
+integer 1..(32-first_bit). All first_bit through
+first_bit+number_of_bits-1 inclusive are cleared; all other
+destination bits are unchanged. The encoded field describes
+the highest bit position, rather than directly storing the
+requested count. R0..R12 are legal destinations, not SP or PC.
+There is no source register. Flags preserved. Length four bytes.
+A destination 0xA5A5FFFF with first_bit=8 and number_of_bits=8
+becomes 0xA5A500FF. Halfwords 0xF36F,0x230F encode
+BFC R3,#8,#8.
+
+Operation 70. "Replace the selected contiguous destination bit interval
+with the same number of consecutive least significant bits of a
+selected source register, preserving destination bits outside
+the interval and ignoring source bits above the requested width."
+Mapping: BFI, 32-bit T32 T1 form only. Both destination Rd and
+source Rn are in R0 through R12; neither SP nor PC is permitted.
+Require first_bit in 0..31 and number_of_bits in
+1..(32-first_bit). The low number_of_bits source bits are shifted
+left by first_bit and inserted only into that interval of the old
+destination value. The old source and destination values are
+read before overwriting Rd, including when Rn and Rd are the
+same physical register. N/Z/C/V are preserved. Length four bytes.
+If destination was 0x12345678, source was 0x000000AB,
+first_bit=8, count=8, the destination becomes 0x1234AB78.
+Halfwords 0xF362,0x230F encode BFI R3,R2,#8,#8.
+
+Operation 71. "Read a declared contiguous nonempty interval of bits
+from one thirty-two-bit source register, place its least-significant
+selected bit into destination bit zero, place the remaining selected
+bits consecutively above it, and set every higher destination bit
+to zero."
+Mapping: UBFX, 32-bit T32 T1 form only. Source and destination
+registers are each R0 through R12. Require first_bit 0..31,
+number_of_bits 1..(32-first_bit). The instruction encodes
+number_of_bits-1, not the literal width itself. Preserve the
+condition flags. If source is 0x000005A0, first_bit=4,
+count=7, the result is 0x0000005A. Four-byte encoding
+0xF3C5,0x1406 represents UBFX R4,R5,#4,#7.
+There is no memory access and no implicit signed interpretation.
+
+Operation 72. "Read a declared contiguous nonempty interval of bits
+from one thirty-two-bit source register, shift that bit interval
+down to destination bit zero, and fill every destination bit
+above the interval with copies of the selected interval's
+highest bit."
+Mapping: SBFX, 32-bit T32 T1 form only, with source/destination
+in R0 through R12, first_bit 0..31, number_of_bits
+1..(32-first_bit). The sign source is bit number
+first_bit+number_of_bits-1 of the ORIGINAL source,
+not original bit 31 unless that bit belongs to the selection.
+The encoding contains number_of_bits-1. Flags are preserved.
+If source is 0x000000E0, first_bit=2, and number_of_bits=6,
+the extracted six-bit value is 111000 binary, representing
+negative eight; the destination becomes 0xFFFFFFF8.
+Example halfwords 0xF347,0x0685 encode SBFX R6,R7,#2,#6.
+Length four bytes; it does not change SP, LR, or execution state.
+
 BOUNDARIES AND REJECTIONS.
 
-This operation grant contains exactly SIXTY-FOUR numbered entries.
+This operation grant contains exactly SEVENTY-TWO numbered entries.
 An implementation claiming that it supports this grant SHALL verify
 the count, unique names, exact encodings and legal operand variants;
 the existence of this file alone is not that verification.
 
-Unlisted operations are NOT authorized for direct English Major C
-source use: PUSH, POP, block transfers, exclusive/atomic loads or stores,
-memory barriers, supervisor calls, coprocessor operations, VFP,
-Advanced SIMD/NEON, division, saturation, arbitrary code execution,
-exception handling, mode-changing instructions, and all other
-unnamed ARM instructions remain outside this profile, even if supported
-by a real CPU.
+Operations OUTSIDE the exact forms named by this numbered grant
+are NOT authorized for direct English Major C source use.
+The grant now contains PARTICULAR narrow PUSH, POP, LDMIA, STMIA,
+and SP-arithmetic forms, and PARTICULAR wide STMIA and LDMDB forms.
+It does not authorize other PUSH/POP aliases, register-list
+combinations, addressing variants, or exceptions merely by sharing
+an assembler mnemonic. Exclusive/atomic memory operations, DMB/DSB/ISB,
+supervisor calls, coprocessor operations, VFP, Advanced SIMD/NEON,
+division, saturation, arbitrary native-code execution, privileged
+exception handling, mode-changing instructions, and every other
+unnamed machine instruction remain outside this profile.
 
 Architectural syntaxes, aliases, widths and encodings cannot be freely
 exchanged. Some 16-bit Thumb forms set flags when 32-bit Thumb forms
