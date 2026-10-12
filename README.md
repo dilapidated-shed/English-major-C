@@ -51,6 +51,8 @@ The complete [4,096-row instruction-class table](fixtures/armv7-a-t32-conditiona
 
 The `BA00–BAFF` and `D000–DFFF` exhaustive subtrees are disjoint and account for **4,352 individual 16-bit halfword values** in total. Most of ARMv7-A T32 still remains unenumerated, including other 16-bit and 32-bit instruction groups. These two decoder subtrees do not expand the separately declared set of **72 permitted long-named operations**.
 
+[The exact diagnostic audit receipt](evidence/2026-10-11-Dxxx-Thumb-decode-audit.english) records tool versions, SHA256 digests for transient assembler/decoder artifacts, all **4,096** independently checked halfword classifications, **3,584** independently checked branch displacements, the two unexpected LLVM aliases for `UDF`, and **2,366** arithmetic condition comparisons. These are limited diagnostic/source checks, **not** first-party compiler, executable-English, or physical-device acceptance.
+
 ## Assembly-to-English decompilation target
 
 [What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 72-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
