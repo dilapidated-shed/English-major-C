@@ -316,12 +316,49 @@ as for CBZ.
 Operation 46. "Mark one through four immediately following T32
 instructions as conditionally executed according to one condition and,
 where legally specified, its inverse."
-Mapping: IT (If-Then), including legal masks. The block's exact
-condition-state advancement, prohibited instructions, branch-position
-rules and flag interactions SHALL come from DDI 0406C.d. IT does
-not grant permission to execute a non-permitted instruction. An
-instruction whose IT condition fails has the ARM-specified
-nonexecuting effect, not an alternative arbitrary code path.
+Mapping: IT (If-Then), T32 T1 encoding with first eight bits
+binary 10111111, followed by a four-bit firstcond and a
+NONZERO four-bit mask. If firstcond is hexadecimal F,
+REJECT as architecturally UNPREDICTABLE. If firstcond
+is hexadecimal E (AL), only a mask with exactly ONE
+set bit is accepted; all other masks are REJECTED as
+UNPREDICTABLE. For firstcond 0 through D, the fifteen
+nonzero masks are admitted at the encoding-classification
+stage. Together, these are 214 conditionally admissible
+encoding patterns, not 240 unconditionally legal programs.
+If an IT block is already active, another IT is UNPREDICTABLE
+and SHALL be REJECTED. The number of following instruction
+SLOTS is four minus the number of trailing zero bits in the
+four-bit mask; each slot holds one whole T32 instruction,
+which itself may occupy TWO or FOUR bytes. IT changes
+the architectural ITSTATE, not the N/Z/C/V flags or an
+ordinary general-purpose register, and is itself TWO bytes.
+Its exact Then/Else condition sequence is determined by
+the architecture's firstcond/mask state machine; decoding
+the slot count alone is insufficient.
+
+Every following instruction must separately be permitted
+in its actual IT context, including restrictions on
+flag-setting forms and PC-changing instructions. In
+particular, the TWO-BYTE T1 conditional B encoding
+from D000..DDFF is NOT permitted inside IT, even if
+it is in the last slot. The exact ITSTATE advancement,
+exception entry/return, prohibited branches, and
+architectural restrictions SHALL come from ARM DDI
+0406C.d. No IT opcode authorizes executing an otherwise
+unpermitted native instruction or an unverified instruction
+boundary. A following instruction whose legal IT
+condition fails has the architecture-defined nonexecuting
+effect, while its full instruction encoding still
+occupies its actual two- or four-byte instruction span.
+
+The complete 256-halfword IT/hint region BF00..BFFF is
+documented under "Every If Then and hint halfword.english"
+and individually tabulated in
+fixtures/armv7-a-t32-if-then-and-hint-halfwords.tsv.
+Twenty-six firstcond/mask combinations are REJECTED
+as unpredictable despite an independent disassembler's
+ability to print mnemonic-like text for those encodings.
 
 Operation 47. "Branch to a permitted immediate T32 function entry and
 write the architecturally encoded return address into the link register."
@@ -384,9 +421,21 @@ be treated as a successful branch.
 
 Operation 52. "Perform an architectural no-operation instruction,
 normally advancing the execution index according to its encoding."
-Mapping: NOP. A no-op is not a guarantee of zero time, zero power,
-or no microarchitectural activity. This name does not include
-architectural hints such as YIELD, WFI, WFE, SEV, or DBG.
+Mapping: the specifically permitted TWO-BYTE Thumb T1 NOP
+encoding hexadecimal BF00. On ordinary successful execution
+the execution index advances by two bytes and this operation
+does not modify R0..R12, SP, LR or N/Z/C/V.
+A no-op is not a guarantee of zero time, zero power,
+or no microarchitectural activity. This operation name
+does NOT authorize the separately allocated hints
+BF10 (YIELD), BF20 (WFE), BF30 (WFI), BF40 (SEV),
+or any of the eleven other BFx0 encodings that
+ARM identifies as UNALLOCATED HINTS. Those eleven
+can execute as NOPs at the architecture level,
+but the ARM specification states software MUST NOT
+use them; this closed source profile REJECTS them.
+No 32-bit Thumb NOP encoding is granted solely by
+sharing an assembler mnemonic with BF00.
 
 ADDITIONAL IMMEDIATE-TO-REGISTER FORM WITH FLAG EFFECTS.
 
