@@ -1,6 +1,6 @@
 # Conventional 32-bit ARM disassembly of the native numerical QR path used by R `lm()`
 
-**Status: captured traditional machine instructions; no English translation and no ARM execution claimed.**
+**Status: captured traditional machine instructions. The separate [softfp execution package](softfp-execution/README.md) now executes these exact archived objects under QEMU Linux ARM.** No executable English translation or physical-device execution is claimed.
 
 This artifact repeats the existing [x86-64 standalone R QR experiment](../r-lm-native-x86-64/README.md) using the **same three R-sourced Fortran routine inputs**: `dqrls.f`, `dqrdc2.f`, and `dqrsl.f`, inherited unchanged from [the x86 archive PR #5](https://github.com/dilapidated-shed/English-major-C/pull/5). They remain in `../r-lm-native-x86-64/`; no copied or independently modified source is represented as R upstream.
 
@@ -51,7 +51,7 @@ The archived objects' hashes can vary if build directories, compiler revision or
 
 1. It does not execute the R interpreter or its `lm()` C entry point; it captures the source used by their numerical path.
 2. It does not include dynamically linked BLAS, Fortran-runtime, or mathematical-library instructions. Calls are recorded as boundaries.
-3. It does not demonstrate ARM execution or numerical output, or physical MIRO A1/Android acceptance.
+3. This original object capture alone does not demonstrate execution. The [EMC-2 softfp follow-up](softfp-execution/README.md) separately demonstrates Linux ARM QEMU execution and numerical output using these objects; physical MIRO A1/Android acceptance remains unproven.
 4. It does not translate assembly into English Major C/Fortran/assembly, establish instruction-by-instruction semantics, or qualify the ICK/NDK build path.
 5. Ordinary R `lm` minimizes **squared vertical residuals**, distinct from the earlier proposed **sum of unsquared perpendicular distances** line-fitting problem.
 6. This is a **one-off research capture**, not a Flexible Pipes assignment or a maintained ICK/NDK production build. Its project-specific GitHub Actions checks verify archived object bytes, disassembly, and deliberately corrupted artifacts. No separate ai-ci QR acceptance test is required.
