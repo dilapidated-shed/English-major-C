@@ -1,0 +1,259 @@
+AUDIT RECEIPT: ARMv7-A T32 D000 THROUGH DFFF FINITE DECODE.
+
+Date of source work: 2026-10-11.
+Work origin: https://github.com/isomorphisms/flexible-pipes/issues/91
+Source PR: https://github.com/dilapidated-shed/English-major-C/pull/3
+Status: inspected and committed source plus transient diagnostic checks.
+NOT English Major C compiler/interpreter acceptance.
+NOT full ARMv7-A ISA qualification.
+NOT a physical ARM execution report.
+NOT independent AICI acceptance.
+
+I. SPECIFICATION THAT WAS CHECKED.
+
+Primary architecture:
+ARM DDI 0406C.d, publication ID040418,
+A6.2.6 Table A6-8, A8.8.18 T1, UDF T1, SVC T1.
+
+Committed specification:
+architecture/armv7-a/t32/
+Every conditional-branch and supervisor-call halfword.english
+
+Committed full encoding inventory:
+fixtures/armv7-a-t32-conditional-branch-and-exception-halfwords.tsv
+
+Committed all-four-flag predicate table:
+fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv
+
+Source-derived trace:
+examples/A conditional branch chooses which exceptional instruction is next.english
+
+The declaration "every Dxxx halfword" is scoped to exactly
+hexadecimal D000 through DFFF. It includes 4096 distinct
+16-bit instruction halfwords. It DOES NOT cover other
+Thumb 16-bit halfwords or the two-halfword combinations
+used to represent 32-bit Thumb instructions.
+
+II. FOREIGN DIAGNOSTIC COMPILER AND DECODER.
+
+The diagnostic host was a Linux x86-64 container.
+Observed clang version: 17.0.0, built from LLVM project revision
+10999b6d034fe318f3d56c83bddb6572593a8bb0.
+Observed llvm-objdump version: LLVM 17.0.0.
+The exact tool executable file digests were NOT recorded.
+The diagnostic selected target:
+  clang --target=armv7a-none-eabi -mthumb
+  llvm-objdump --triple=thumbv7-none-eabi -d
+
+The foreign diagnostic generated a temporary assembler source with:
+    .syntax unified
+    .arch armv7-a
+    .thumb
+    .text
+    .global all_d
+    .thumb_func
+    all_d:
+and a sequence of .hword directives listing every unsigned halfword
+from 0xD000 through 0xDFFF in strictly ascending numerical order.
+Sixteen halfwords were written per .hword directive line.
+
+The ephemeral assembler input contained no first-party maintained
+application program, no English Major C frontend and no ICK output.
+The assembler produced an ELF32 ARM object.
+The decoder produced an ordinary sequential disassembly of
+the object's .text bytes; it did not execute the branches.
+
+SHA256 of the ephemeral diagnostic assembly source:
+  307d73b3687c5e91d173e0206178738e4e51dad64aebe940f682aeef837e7de8
+SHA256 of the diagnostic ELF32 object:
+  8414f37af17957dadf957b013b6617898df79cfa62cbdbb0a22335543b1e1650
+SHA256 of the decoder's text output:
+  3abc6984c04a724c43d2ab20fac1e9fb1c4158beb0e179e7108bf0a278a69642
+
+These digests bind the specific transient observed artifacts.
+The artifacts themselves were NOT committed to this repository,
+so their SHA256 values are not a source-code reproducibility
+guarantee and are not evidence of a future regenerated result.
+
+III. WHAT THE INDEPENDENT CHECK OBSERVED.
+
+The complete disassembly contained 4096 decoded instruction
+halfwords in the expected increasing order. Each printed raw
+halfword matched hexadecimal D000+(instruction-byte-offset/2).
+
+All fourteen condition-code classes were present:
+  EQ, NE, CS/HS, CC/LO, MI, PL, VS, VC,
+  HI, LS, GE, LT, GT, LE.
+
+Each of those fourteen groups contained exactly 256
+different immediate bytes. The total was 3584 T1
+conditional branch encodings.
+
+For EVERY one of those 3584 conditional branches,
+the diagnostic printed signed byte displacement was
+checked against the independently calculated rule:
+    signed_imm8 = imm8, if imm8 < 128;
+                  imm8 - 256, otherwise;
+    signed_displacement_in_bytes = 2*signed_imm8.
+No discrepancy was observed.
+
+The group 0xDE00 through 0xDEFF contained exactly
+256 UDF-class encodings. The group 0xDF00 through
+0xDFFF contained exactly 256 SVC-class encodings.
+
+The first attempt to compare mnemonic names LITERALLY
+failed. Although ARM Table A6-8 classifies all 256
+DE encodings as UDF, LLVM 17 prints:
+  0xDEF9 as "__brkdiv0" rather than "udf";
+  0xDEFE as "trap" rather than "udf".
+The first attempt counted 254 literal "udf" entries,
+one "__brkdiv0", and one "trap"; its original regular
+expression also missed the underscore-prefixed entry.
+
+The check was repaired by keeping the real encoded
+halfword and ARM normative UDF classification fixed,
+while recognizing the two foreign mnemonic spellings
+as decoder aliases. After that explicit normalization:
+  4096 decoded halfwords matched in numerical order;
+  3584 branch displacements matched;
+  3584 condition branches grouped correctly;
+  256 UDF-class encodings matched;
+  256 SVC-class encodings matched;
+  zero remaining differences were observed.
+
+No source-language meaning was changed merely to make
+LLVM print a preferred word. No physical processor ran
+any of the decoded instructions.
+
+IV. REPOSITORY-LEVEL DATA INTEGRITY CHECK.
+
+The stored TSV table was fetched back through GitHub
+from the actual draft source branch. Each of its
+4096 data rows was separately re-evaluated using:
+  first high nibble must be D;
+  next high nibble 0..D => conditional B T1;
+  next high nibble E => UDF T1;
+  next high nibble F => SVC T1;
+  low byte is unsigned 0..255;
+  conditional B displacement is the signed low byte
+  multiplied by two;
+  other two classes have no branch displacement;
+  B T1 has English grant operation 43 OUTSIDE IT;
+  UDF T1 and SVC T1 have no permission in this profile.
+The row count and every field matched the expected
+class and formula. This is a data readback/format and
+semantic arithmetic check, not native device execution.
+
+V. ALL POSSIBLE ARCHITECTURAL FOUR-FLAG COMBINATIONS.
+
+A second committed table describes every combination
+of the four predicate flags N, Z, C and V. Each is
+either zero or one, giving exactly sixteen bit patterns.
+
+The table provides fourteen branches per pattern,
+giving 16*14=224 independent rows.
+For each row the chosen predicate, whether the branch
+is taken, and the successor for an example instruction
+at 0x1000 with zero displacement are stated.
+Every one of the 224 rows was independently checked
+against the specified Boolean condition formulas.
+No discrepancy was observed.
+
+A separate transient arithmetic oracle formed a
+32-bit subtraction and its N, Z, C, V flags for every
+ordered pair from this 13-value set:
+  0x00000000, 0x00000001, 0x00000002, 0x00000003,
+  0x7FFFFFFE, 0x7FFFFFFF,
+  0x80000000, 0x80000001,
+  0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF,
+  0x55555555, 0xAAAAAAAA.
+
+There were 169 ordered pairs. Fourteen condition-code
+predicates for each made 2366 results.
+Those results were compared with independent unsigned
+and signed integer relational or arithmetic-overflow
+oracles where applicable. All 2366 checked results agreed.
+These are limited arithmetic checks for selected inputs,
+not exhaustive proof over all 2^64 ordered input pairs,
+not actual ARM register execution and not an AICI verdict.
+
+VI. SMALL BRANCH AND EXCEPTION PROVENANCE.
+
+A separate transient diagnostic assembled the instruction
+halfwords:
+    0x2000, 0xD100, 0xD000, 0xDEFE,
+    0x2103, 0xD000, 0xDF01
+
+The expected decode classes in order are MOVS, BNE,
+BEQ, UDF, MOVS, BEQ, SVC.
+The foreign disassembler printed "trap" for DEFE.
+This alias does not change ARM's architectural
+classification or confer a permitted English operation.
+
+SHA256 of that ephemeral source text:
+  2aba930caece53d992f6359efb61e4b58b835db40e5ed5b8049caf3a382e29da
+SHA256 of that diagnostic object:
+  a1af4d48efb121b6ff968d008f684841fd29036aea4a637228ee26d58434ac29
+
+A small independent temporary state model was evaluated
+with these exact halfwords, narrow MOVS flag effects,
+the branch condition predicates and T1 branch displacement
+rules. Starting at offset zero, it produced:
+  0x0000, 0x0002, 0x0004, 0x0008,
+  0x000A, 0x000C;
+  stop: ungranted SVC at 0x000C;
+  R0=0, R1=3, N=0, Z=0, C/V unknown.
+
+Starting at offset 0x0002 with entering Z=0, it produced:
+  0x0002, 0x0006;
+  stop: ungranted UDF at 0x0006.
+No registers were invented for this second path.
+
+This is a restricted independent arithmetic trace
+calculation, not an executed ARM machine-state trace
+and not an English Major C interpreter.
+
+VII. DEFECTS AND ASSUMPTIONS NOT TO HIDE.
+
+1. A decoder mnemonic is not always the canonical
+   architectural instruction name: the UDF aliases
+   in LLVM 17 are retained as observed evidence.
+2. Full enumeration of a decode interval establishes
+   classification of that interval only, not the
+   entire ARM ISA and not all exceptional effects.
+3. A conditional B T1 is UNPREDICTABLE inside IT.
+   Merely invoking the generic rule that branches
+   must be the last instruction in an IT block
+   is not sufficient for this encoding.
+4. Native SVC may be issued by unprivileged user code
+   to request a supervisor exception, but its
+   OS-specific effect is outside this grant.
+5. UDF does not behave like a successful no-op.
+6. A zero-specified branch displacement is not a
+   branch to the instruction's A+2 sequential successor.
+7. A tool run on x86-64 does not show that the
+   target ARM machine executed the code.
+8. The diagnostic tools are LLVM-family programs,
+   so using clang and llvm-objdump is not an
+   independent cross-vendor toolchain qualification.
+   Their decoder agrees with ARM's published
+   classification for this finite region, but this
+   check does not formally prove the ARM pseudocode.
+
+VIII. PROMOTION BLOCKERS.
+
+A full ARMv7-A T32 claim remains blocked on all remaining
+decode leaves, each instruction's exceptional effects,
+ITSTATE validity, ARM architecture feature/privilege
+profiles, optional SIMD/VFP and other extension
+coverage, an actual machine/OS target declaration,
+a working English Major C source processor, independent
+behavioral fixtures with hostile variants, a qualified
+ICK/NDK pipeline where maintained builds are attempted,
+and independent AICI acceptance tied to the exact head.
+
+This file must never be summarized as a complete
+source-language implementation or a full CPU acceptance
+merely because a transient decoder agreed on 4096 rows.
+
+END OF OBSERVED DIAGNOSTIC RECEIPT.
