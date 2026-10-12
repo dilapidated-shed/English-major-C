@@ -137,7 +137,8 @@ async function native(program,first,steps,label,code=program.code){
   const capture=i=>{
     const cast=arm?'(unsigned long long)(unsigned int)':'(unsigned long long)';
     commands.push('printf "STATE '+i+' '+gprs.map(r=>r+'=%llx').join(' ')+' flags=", '+gprs.map(r=>cast+'$'+r).join(', '));
-    commands.push('output/x $'+flags,'echo  fpstatus=','output/x $'+fpstatus,'echo \\n');
+    // GDB echo strips leading whitespace; printf must retain the field separator.
+    commands.push('output/x $'+flags,'printf " fpstatus="','output/x $'+fpstatus,'echo \\n');
     commands.push('dump binary memory '+join(dir,'memory-'+i+'.bin')+' '+hex(MEMORY_START)+' '+hex(MEMORY_START+MEMORY_SIZE));
     fprs.forEach((r,k)=>commands.push((k?'append':'dump')+' binary value '+join(dir,'floating-'+i+'.bin')+' $'+r));
   };
