@@ -61,7 +61,19 @@ The `BA00–BAFF` and `D000–DFFF` exhaustive subtrees are disjoint and account
 
 [The BFxx diagnostic receipt](evidence/2026-10-11-BFxx-Thumb-IT-and-hint-audit.english) preserves LLVM disassembly observations, including a case where LLVM prints `it al` for a form the ARM reference declares **UNPREDICTABLE**. The decoder display alone cannot grant executable source semantics.
 
-Across the three completed decoder subtrees `BA00–BAFF`, `BF00–BFFF`, and `D000–DFFF`, **4,608 distinct numerical 16-bit halfword values** are now individually accounted for. This is not the complete Thumb ISA and does not establish a working ITSTATE executor. The separately declared initial executable vocabulary remains **72 long-named operations**.
+The three earlier decoder subtrees `BA00–BAFF`, `BF00–BFFF`, and `D000–DFFF` account for **4,608 distinct numerical 16-bit halfword values**. The additional complete `E000–E7FF` and `BE00–BEFF` subtrees described below bring the cumulative count to **6,912**, without enlarging the separately declared set of **72 long-named permitted operations** or proving a complete Thumb ISA.
+
+## Exhaustive short branches and breakpoint encodings
+
+[Every short unconditional branch halfword.english](architecture/armv7-a/t32/Every%20short%20unconditional%20branch%20halfword.english) specifies every one of the **2,048** two-byte T32 B T2 encodings `E000–E7FF`, including exact signed eleven-bit displacements, PC-relative targets, and the rule that B T2 may appear **outside IT or as its last instruction slot**. The complete [2,048-row table](fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv) gives a separate record for every machine halfword. This narrows existing operation 42, not the operation count.
+
+[Every breakpoint halfword and its conditional-execution exception.english](architecture/armv7-a/t32/Every%20breakpoint%20halfword%20and%20its%20conditional-execution%20exception.english) accounts for all **256** `BE00–BEFF` BKPT T1 encodings, preserved in a [256-row table](fixtures/armv7-a-t32-breakpoint-halfwords.tsv). All remain **decoded but ungranted**: unlike ordinary IT-predicated instructions, BKPT requests a debug event **even when an enclosing IT predicate is false**, and the actual debug/OS response depends on the target.
+
+[The same branch bytes acquire a condition from If Then state.english](examples/The%20same%20branch%20bytes%20acquire%20a%20condition%20from%20If%20Then%20state.english) demonstrates why LLVM displays the very same halfword `E000` as `b` outside IT, but `beq` when preceded by `IT EQ`. Two stated machine states take different paths, and both stop at the first ungranted `SVC`. The condition is inherited from **ITSTATE**, not encoded in the `E000` halfword itself.
+
+The [E000/BE00 audit receipt](evidence/2026-10-11-E000-and-BE00-Thumb-decode-audit.english) records actual temporary diagnostic tool versions and SHA256s, 2,048 checked short-branch encodings and target calculations, 256 checked BKPT encodings, and explicit limitations.
+
+The five now completely classified disjoint subtrees `BA00–BAFF`, `BE00–BEFF`, `BF00–BFFF`, `D000–DFFF`, and `E000–E7FF` total **6,912 numerical 16-bit halfword values**. That is a decoder-classification statement, not complete ARMv7-A T32 semantics, execution authority, exception handling, a working frontend, or evidence of a processor run.
 
 ## Assembly-to-English decompilation target
 
