@@ -1,0 +1,5 @@
+sample: x=(0,1,2,3,4,5); y=(1,2,2,4,4,6)
+rank=2
+intercept=0.809523809523811
+slope=0.942857142857143
+sum_of_squared_vertical_errors=1.27619047619048
