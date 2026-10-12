@@ -16,7 +16,7 @@ const sources = [
   { filename: 'dqrsl.x86-64.disasm.txt', count: 662,
     sha256: 'ce2660259bd9dd68a76f1e00b9082c6a92d2d04071686ff97543e0386fed25fe' },
   { filename: 'linked-executable.x86-64.disasm.txt', count: 1543,
-    sha256: '97bd72262cbef21da2115c435b41d0bb015ff9b20436240ed25' },
+    sha256: '97bd72262cbef21da2115c435b41eb50685723541d0bb015ff9b20436240ed25' },
 ];
 
 function requireCondition(condition, message) {
