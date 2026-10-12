@@ -127,6 +127,35 @@ as a permitted operation. Its 256 data rows are under
 That exhaustive subtree proof does not count as exhaustive
 coverage of all 16-bit T32 or all 32-bit T32 encodings.
 
+"Every conditional-branch and supervisor-call halfword.english"
+defines the ENTIRE 0xD000 through 0xDFFF sixteen-bit Thumb
+decoding subtree, using DDI 0406C.d A6.2.6 Table A6-8
+and A8.8.18 for conditional B T1. The 4096-row table:
+../../../fixtures/armv7-a-t32-conditional-branch-and-exception-halfwords.tsv
+has 3584 condition branches, 256 permanently undefined
+UDF encodings and 256 supervisor-call SVC encodings.
+Only the B T1 class is granted, under operation 43, and
+it is NOT permitted inside an IT block.
+
+The complete fourteen-condition by sixteen-flag-state
+truth table (224 rows) is:
+../../../fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv
+This evaluates conditions over abstract N/Z/C/V flag
+values; it is not an executed machine-state trace.
+
+"A conditional branch chooses which exceptional instruction is next.english"
+in ../../../examples/ uses inspected T32 bytes and two
+declared machine states to show one trace that skips
+UDF and halts at ungranted SVC, and another that
+halts at ungranted UDF. ARM UDF and SVC are distinct
+exception mechanisms, not short condition branches.
+
+Combined with the earlier 256-halfword 0xBA00..BAFF
+subtree, these cover 4352 DISJOINT HALFWORD VALUES
+completely at the decoder-classification level.
+They do NOT cover the full 16-bit or 32-bit Thumb ISA,
+all operation semantics, or a real device's features.
+
 "Eight Thumb bit operations translated until the first ungranted
 instruction.english" in ../../../examples/ contains
 an actual foreign-assembler 16/32-bit byte listing, an
