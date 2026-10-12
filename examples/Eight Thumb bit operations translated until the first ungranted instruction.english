@@ -1,0 +1,400 @@
+EIGHT THUMB BIT OPERATIONS TRANSLATED UNTIL THE FIRST UNGRANTED INSTRUCTION.
+
+A bottom-up machine-code-to-English Major C specimen.
+This is NOT an English Major C executable; it starts from actual
+assembler-produced ARMv7-A Thumb instruction halfwords
+and conservatively stops when the declared permission set ends.
+
+SOURCE AND PROVENANCE OF THE INSTRUCTION BYTES.
+
+Diagnostic source assembly used:
+  .syntax unified
+  .arch armv7-a
+  .thumb
+  .text
+  .thumb_func
+  rev r2, r1
+  rev16 r3, r4
+  revsh r5, r6
+  rbit r7, r8
+  bfc r3, #8, #8
+  bfi r3, r2, #8, #8
+  ubfx r4, r5, #4, #7
+  sbfx r6, r7, #2, #6
+  teq r1, r2
+  orn r3, r4, r5
+  rrx r6, r7
+
+The production diagnostic employed
+  clang 17.0.0, --target=armv7a-none-eabi, -mthumb;
+  llvm-objdump 17.0.0, --triple=thumbv7-none-eabi.
+The diagnostic assembled source in a disposable
+working directory and inspected the resulting
+ELF32 little-endian ARM object file.
+These are FOREIGN DIAGNOSTIC TOOLS ONLY,
+not the established maintained ICK/NDK
+build route for English Major C.
+
+The independently decoded instruction list was:
+
+  offset 0x0000  halfword BA0A        REV R2,R1
+  offset 0x0002  halfword BA63        REV16 R3,R4
+  offset 0x0004  halfword BAF5        REVSH R5,R6
+  offset 0x0006  halfwords FA98 F7A8 RBIT R7,R8
+  offset 0x000A  halfwords F36F 230F BFC R3,#8,#8
+  offset 0x000E  halfwords F362 230F BFI R3,R2,#8,#8
+  offset 0x0012  halfwords F3C5 1406 UBFX R4,R5,#4,#7
+  offset 0x0016  halfwords F347 0685 SBFX R6,R7,#2,#6
+  offset 0x001A  halfwords EA91 0F02 TEQ R1,R2
+  offset 0x001E  halfwords EA64 0305 ORN R3,R4,R5
+  offset 0x0022  halfwords EA4F 0637 RRX R6,R7
+
+The last three instructions are retained as binary
+provenance but are NOT translated as successful
+English Major C operations in THIS closed profile:
+TEQ, ORN, and RRX remain outside the initial
+72-operation grant. A future version may
+admit them with separate exact long names.
+
+The eight preceding operations are all permitted,
+provided their normal T32 execution context
+and executable memory mapping are valid.
+The first three are TWO bytes each. Each
+subsequent permitted operation occupies FOUR bytes.
+The halfword at offset 0x0008 belongs to the
+RBIT starting at 0x0006 and is NOT its own
+sequential successor.
+
+PART ONE. DECLARED INITIAL MACHINE STATE.
+
+The abstract current instruction stream begins
+at offset zero within the diagnostic code.
+It is not an observed Android virtual address.
+
+All register values used as source inputs
+are explicitly declared before execution:
+
+    R1 = 0x12345678.
+    R4 = 0x12345678.
+    R6 = 0x000080FF.
+    R8 = 0x0000000D.
+    R0, R2, R3, R5, R7, R9-R12 are initially unknown.
+    SP and LR are initially unknown.
+    N=1, Z=1, C=1, V=0.
+
+The registers are 32-bit. The flags are the four
+architecturally observable comparison flags.
+The demonstration assumes that the entire
+stated instruction-byte region can be fetched
+and decoded in T32 state, that the selected
+instructions are legal, and that no exception
+or interrupt intervenes during the eight steps.
+
+No data-memory content is required by
+these eight register-only instructions,
+and none of them performs a data access.
+
+PART TWO. THE EIGHT SUCCESSIVE MACHINE OPERATIONS.
+
+EXECUTION STEP ONE.
+
+At relative execution index 0x0000,
+fetch BA0A, a TWO-byte instruction.
+Its permitted long name, operation 65,
+starts "Reverse the positions of the four
+successive eight-bit portions of a
+selected thirty-two-bit general-register value".
+The encoded source is R1, destination R2.
+Copy byte 0x78 to the most significant
+destination byte, then 0x56, 0x34, 0x12
+to successively lower byte positions.
+After the instruction:
+    R2 = 0x78563412;
+    R1 remains 0x12345678;
+    N/Z/C/V remain 1/1/1/0;
+    execution index = 0x0002.
+
+EXECUTION STEP TWO.
+
+At index 0x0002, fetch BA63,
+a TWO-byte REV16 selecting R4 as source
+and R3 as destination, operation 66.
+The original R4=0x12345678.
+Swap 0x12 with 0x34 within its high halfword;
+swap 0x56 with 0x78 within its low halfword.
+After the instruction:
+    R3 = 0x34127856;
+    R4 remains 0x12345678;
+    all condition flags remain unchanged;
+    execution index = 0x0004.
+
+EXECUTION STEP THREE.
+
+At index 0x0004, fetch BAF5,
+a TWO-byte REVSH selecting R6 as source
+and R5 as destination, operation 67.
+The least significant sixteen source bits
+are hexadecimal 0x80FF.
+The two component bytes exchange places,
+giving hexadecimal 0xFF80.
+Because its new bit 15 is one,
+fill bits 16 through 31 with ones.
+After the instruction:
+    R5 = 0xFFFFFF80;
+    R6 remains 0x000080FF;
+    all condition flags remain unchanged;
+    execution index = 0x0006.
+
+EXECUTION STEP FOUR.
+
+At index 0x0006, the first halfword FA98
+announces a 32-bit Thumb instruction. Fetch
+the next halfword F7A8 as part of that
+SAME instruction, operation 68, RBIT.
+The source R8 is 0x0000000D.
+Reversing the positions of all 32 bits
+produces 0xB0000000.
+After the instruction:
+    R7 = 0xB0000000;
+    R8 remains 0x0000000D;
+    flags unchanged;
+    execution index = 0x000A.
+Do not invent an instruction at 0x0008.
+
+EXECUTION STEP FIVE.
+
+At index 0x000A, halfwords F36F 230F
+specify operation 69, BFC with destination
+R3 and a cleared interval from bit 8 to
+bit 15 inclusive, total width eight.
+The old destination R3 is 0x34127856.
+Clearing the selected byte 0x78 yields:
+    R3 = 0x34120056.
+No other destination bit may change.
+No memory changes, flags remain unchanged,
+execution index = 0x000E.
+
+EXECUTION STEP SIX.
+
+At index 0x000E, halfwords F362 230F
+specify operation 70, BFI. The current
+old destination R3 is 0x34120056.
+The current old source R2 is 0x78563412.
+The eight least significant source bits
+are hexadecimal 0x12. Put those into
+destination bit positions 8 through 15.
+The resulting register is:
+    R3 = 0x34121256.
+R2 remains 0x78563412.
+The original R3 bits outside 8..15
+are preserved. Flags unchanged.
+Execution index = 0x0012.
+
+EXECUTION STEP SEVEN.
+
+At index 0x0012, halfwords F3C5 1406
+specify operation 71, unsigned bit-field
+extraction from R5 to R4 with first bit
+4 and width 7. R5 is now 0xFFFFFF80.
+The seven source bits in positions 4..10
+produce the unsigned integer 0x78.
+All destination bits 7..31 are set to zero.
+After the instruction:
+    R4 = 0x00000078;
+    R5 remains 0xFFFFFF80;
+    flags unchanged;
+    execution index = 0x0016.
+
+EXECUTION STEP EIGHT.
+
+At index 0x0016, halfwords F347 0685
+specify operation 72, signed bit-field
+extraction from R7 to R6 with first bit
+2 and width 6. R7 is 0xB0000000.
+Bits 2..7 of R7 are all zero, so the
+selected field has sign zero.
+All higher destination bits are filled
+with zero rather than one.
+After the instruction:
+    R6 = 0x00000000;
+    R7 remains 0xB0000000;
+    flags unchanged;
+    execution index = 0x001A.
+
+PART THREE. WHERE THIS TRANSLATION MUST STOP.
+
+The bytes at offset 0x001A are EA91 0F02,
+the 32-bit Thumb TEQ register instruction
+according to the independent diagnostic decoder.
+
+TEQ is listed in the separate coverage ledger
+as UNGRANTED. It is NOT operation 16, TST:
+testing an exclusive-or and testing an AND
+are different bitwise predicates with
+different condition-flag results.
+
+The instruction stream does not disappear
+because the language lacks an operation
+name for it. Rather, the proposed language
+MUST report:
+
+    An encountered native instruction is not in
+    the currently permitted operation set.
+    The attempted translation is incomplete.
+    The exact unsupported instruction begins at
+    offset 0x001A and occupies FOUR bytes.
+    No effects at 0x001A or later can be claimed
+    under the current source operation grant.
+
+Therefore the trace ends at 0x001A,
+not at an invented function return.
+The following ORN and RRX bytes remain
+visible in the source-machine provenance
+but are not silently interpreted.
+
+This is a useful boundary test for the
+concept "all and only the following operations."
+It must not be weakened to "execute the instruction
+anyway because the physical processor supports it."
+
+PART FOUR. OBSERVABLE RESULT OF THE EIGHT PERMITTED STEPS.
+
+The exact ordered execution-index sequence,
+including the first unsupported boundary, is:
+
+    0x0000
+    0x0002
+    0x0004
+    0x0006
+    0x000A
+    0x000E
+    0x0012
+    0x0016
+    0x001A (stop: ungranted TEQ)
+
+After the eight permitted operations:
+    R1 = 0x12345678.
+    R2 = 0x78563412.
+    R3 = 0x34121256.
+    R4 = 0x00000078.
+    R5 = 0xFFFFFF80.
+    R6 = 0x00000000.
+    R7 = 0xB0000000.
+    R8 = 0x0000000D.
+    N=1, Z=1, C=1, V=0.
+
+All other register values are unknown,
+not zero merely because they are absent
+from this trace. Memory is unchanged.
+No branch, call, store, or exception is
+claimed within the eight specified steps.
+
+PART FIVE. TWO NUMERICAL COUNTEREXAMPLES.
+
+SIGNED VERSUS UNSIGNED EXTRACTION.
+
+The program's actual sequential R7 value
+produces zero for operation 72. That
+coincidence is not sufficient to test its
+sign extension. Supply a separate input
+where R7=0x000000E0, with first bit 2
+and width 6. The six selected bits
+represent negative eight. SBFX must
+produce 0xFFFFFFF8; UBFX would produce
+0x00000038. The two are NOT interchangeable.
+This is a separate model input and not
+the preceding eight-instruction trace.
+
+REVSH VERSUS ZERO EXTENSION.
+
+With source low halfword 0x80FF, REVSH
+produces 0xFFFFFF80. A zero-extending
+interpretation would produce 0x0000FF80.
+Such a result is wrong even though
+the lowest sixteen bits agree.
+
+PART SIX. REQUIRED INDEPENDENT CHECKS.
+
+Positive: confirm all first and second
+instruction halfwords match the diagnostic
+object file, that the first three are
+two bytes each, and that the next five
+are four bytes each.
+
+Positive: confirm eight allowed long
+English operations map to numbers 65-72
+without an unnamed intermediary opcode.
+
+Positive: with the declared input state,
+the eight result registers and four flags
+match the exact output state above.
+
+Negative: reject an incorrect translation
+that treats second halfword F7A8 as the
+instruction at index 0x0008.
+
+Negative: reject a translation that changes
+the flags when REV, BFC or SBFX executes.
+
+Negative: reject an incorrect BFI that
+uses the high byte of R2 rather than its
+eight least significant bits.
+
+Negative: reject an erroneous UBFX that
+sign-extends source bit 10 instead of
+zero-filling destination bits above bit 6.
+
+Negative: reject an incorrect SBFX sign-bit
+choice, especially when selected sign differs
+from the original source bit 31.
+
+Negative: reject continuing execution of
+TEQ at 0x001A while claiming the profile's
+closed set of 72 operations is respected.
+
+Negative: reject counting the LLVM
+assembler/disassembler diagnostic as
+a complete language parser, certified
+semantic execution or an Android build.
+
+(NOTE:
+    The diagnostic source's assembler mnemonics
+    are provenance. The English Major C
+    executable vocabulary uses long
+    numbered names with separate definitions.
+    One can retain hundreds of words of inert
+    NOTES and WHY blocks without requiring the
+    language's execution processor to interpret
+    them as instructions.
+)
+
+(WHY? BECAUSE:
+    The user's proposed method is bottom-up:
+    start with the actual final machine instruction
+    and describe its complete observable effect.
+    A machine-level translation is not valid
+    merely because it resembles a computation
+    that could have been written in a high-level
+    language. The fixed permission boundary
+    must remain visible when an unfamiliar
+    instruction is encountered.
+)
+
+PART SEVEN. EVIDENCE LEVEL.
+
+The instruction byte and disassembly examples
+were produced by a foreign assembler/decoder
+for an explicitly selected T32 target,
+and the expected arithmetic was independently
+checked with ordinary bit calculations.
+No ARM CPU executed those instructions
+in this assignment.
+
+No machine-code equivalence checker,
+English Major C preprocessor, parser,
+interpreter, compiler, or physical
+device acceptance has been executed.
+
+The constraints and alternatives remain
+subject to ARM DDI 0406C.d and the
+project's future independent acceptance.
