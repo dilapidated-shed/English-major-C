@@ -1,0 +1,9 @@
+module FalseConditionalMove
+
+import Data.Bits
+
+whole_register_bits : Type
+whole_register_bits = Bits64
+
+false_conditional_move_result : whole_register_bits → whole_register_bits
+false_conditional_move_result original_register = original_register .&. 0xffffffff
