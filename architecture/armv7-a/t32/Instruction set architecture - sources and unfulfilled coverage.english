@@ -177,12 +177,60 @@ clang/LLVM diagnostic, the difference between
 LLVM's apparently legal printed IT and the ARM
 UNPREDICTABLE condition, SHA256 hashes and blockers.
 
-Combined with the previous 256-halfword BA00..BAFF
-subtree and the 4096-halfword D000..DFFF subtree,
-these THREE disjoint regions cover 4608 individual
-16-bit halfword values at decoder-classification level.
-They DO NOT cover the full 16-bit or 32-bit Thumb ISA,
-all ITSTATE/exceptions, or a real device's features.
+"Every short unconditional branch halfword.english"
+specifies the full E000..E7FF T32 B T2 encoding
+family, 2048 distinct two-byte halfwords, each
+with signed eleven-bit PC-relative displacement
+and precise last-slot IT restrictions. The
+row-by-row table is:
+../../../fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv
+All allocated forms map to EXISTING operation 42,
+under their legal source and target context.
+The word "unconditional" names an encoding without
+a condition field; ITSTATE may legally predicate
+its BRANCH EFFECT in the final IT slot.
+
+"Every breakpoint halfword and its
+conditional-execution exception.english"
+specifies the complete BE00..BEFF region:
+256 T32 BKPT T1 halfwords with unsigned
+immediates, all decoded but UNGRANTED.
+Their data-only inventory is:
+../../../fixtures/armv7-a-t32-breakpoint-halfwords.tsv
+Unlike an ordinary instruction governed by IT,
+BKPT remains always unconditional, EVEN when
+the surrounding IT predicate is false.
+A real debug-event outcome depends on target
+debug settings and OS exception behavior,
+and cannot be inferred from disassembly alone.
+
+"The same branch bytes acquire a condition from
+If Then state.english" in ../../../examples/
+retains a diagnostic E000 which LLVM displays
+as B outside IT but BEQ after IT EQ.
+It shows two distinct source-level register
+and execution-index traces that end at an
+ungranted SVC boundary.
+
+"2026-10-11-E000-and-BE00-Thumb-decode-audit.english"
+under ../../../evidence/ preserves the temporary
+clang/LLVM tool versions, source/object/disassembly
+digests, all 2048 branch/displacement checks,
+256 BKPT decode checks, and exact evidence limits.
+
+Together the five disjoint decoder subtrees cover
+  BA00..BAFF: 256 values
+  BE00..BEFF: 256 values
+  BF00..BFFF: 256 values
+  D000..DFFF: 4096 values
+  E000..E7FF: 2048 values
+or 6912 individual 16-bit halfword values at
+decoder-classification level. The separate
+initial executable vocabulary still has 72
+long English operation names. These checks
+do NOT cover the full 16-bit or 32-bit Thumb
+ISA, complete ITSTATE and debug exceptions,
+or actual processor/OS acceptance.
 
 "Eight Thumb bit operations translated until the first ungranted
 instruction.english" in ../../../examples/ contains
