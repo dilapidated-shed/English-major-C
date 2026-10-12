@@ -35,13 +35,13 @@ jobs:
           sudo apt-get install -y qemu-user
           qemu-arm --version
           qemu-x86_64 --version
-      - name: Make pinned NDK available
-        uses: android-actions/setup-android@v3
       - name: Pin and inspect the actual cross-toolchain
         run: |
           set -euo pipefail
-          sdkmanager --install "ndk;${NDK_VERSION}"
-          ndk="${ANDROID_HOME}/ndk/${NDK_VERSION}"
+          ndk="${ANDROID_HOME:-/usr/local/lib/android/sdk}/ndk/${NDK_VERSION}"
+          if [ ! -x "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" ]; then
+            sdkmanager --install "ndk;${NDK_VERSION}"
+          fi
           test -x "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
           echo "NDK_ROOT=$ndk" >> "$GITHUB_ENV"
           "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
