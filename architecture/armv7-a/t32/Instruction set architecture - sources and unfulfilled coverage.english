@@ -113,6 +113,27 @@ Their subset has at least two selected general
 registers and explicitly excludes SP/PC and
 base-register overlap.
 
+"Exactly how register bits are rearranged.english" defines
+new operation entries 65 through 72, covering limited
+REV, REV16, REVSH, RBIT, BFC, BFI, UBFX, SBFX forms,
+including their register and width restrictions.
+
+"Every halfword in one complete Thumb decode region.english"
+closes a finite 256-halfword subtree, BA00..BAFF,
+with 192 allocated byte-reversal encodings and 64
+reserved/UNDEFINED encodings that MUST NOT be executed
+as a permitted operation. Its 256 data rows are under
+../../../fixtures/armv7-a-t32-byte-reversal-halfwords.tsv.
+That exhaustive subtree proof does not count as exhaustive
+coverage of all 16-bit T32 or all 32-bit T32 encodings.
+
+"Eight Thumb bit operations translated until the first ungranted
+instruction.english" in ../../../examples/ contains
+an actual foreign-assembler 16/32-bit byte listing, an
+English execution-index and register trace, and an explicit
+stop at the first ungranted TEQ instruction. It is
+diagnostic source evidence, NOT a qualified ICK build.
+
 "Actual Thumb word transfers translated into English.english"
 in ../../../examples/ records independently sourced
 AOSP halfwords C409, CC09, B014, and B094 and
@@ -134,7 +155,7 @@ ENGLISH MAJOR C PROFILE BOUNDARY.
 The sole initial operation grant is:
     All and only these initial operations are permitted.english
 
-It lists 64 named families. No machine instruction outside a verified
+It lists 72 named families. No machine instruction outside a verified
 lowering of one of those named families is thereby permitted by the
 language. That is a complete statement of the INITIAL SOFTWARE GRANT,
 but it is NOT a complete statement of all the instructions executable
@@ -149,7 +170,7 @@ WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
 The open coverage inventory includes, without implying exhaustiveness:
 
   * every T32 encoding variant, width, restriction and alias even for
-    the 64 named operation families;
+    the 72 named operation families;
   * full multiply, multiply-accumulate, dual-multiply, long-multiply
     and signed/unsigned divide families;
   * saturating, parallel arithmetic, packing, byte reversal,
@@ -198,7 +219,7 @@ instruction set", an independent review SHALL:
    toolchain, and validate results independently. Report source,
    encode/decode, semantic execution and hardware evidence separately.
 
-Until then, do not describe the 64-entry grant as the entire physical ISA.
+Until then, do not describe the 72-entry grant as the entire physical ISA.
 
 TARGET-MACHINE DECLARATION REQUIREMENT.
 
