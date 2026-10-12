@@ -41,6 +41,16 @@ The closed initial scalar operation grant now contains **72** entries, not the f
 
 [Eight Thumb bit operations translated until the first ungranted instruction.english](examples/Eight%20Thumb%20bit%20operations%20translated%20until%20the%20first%20ungranted%20instruction.english) starts from inspected ARMv7-A T32 bytes assembled by a separate diagnostic tool, applies the eight permitted long-English operations in actual byte order, and stops at TEQ because it remains outside the present operation grant. It does not invent a successful translation for TEQ, ORN, or RRX.
 
+## Exhaustive conditional-branch, undefined, and supervisor-call encodings
+
+[Every conditional-branch and supervisor-call halfword.english](architecture/armv7-a/t32/Every%20conditional-branch%20and%20supervisor-call%20halfword.english) accounts for every one of the **4,096** two-byte Thumb encodings from `D000` to `DFFF`, including all 14 architectural flag conditions, correctly signed and scaled branch displacements, the distinction between sequential `A+2` and branch-relative `A+4`, and the T1 conditional-branch prohibition inside an IT block.
+
+The complete [4,096-row instruction-class table](fixtures/armv7-a-t32-conditional-branch-and-exception-halfwords.tsv) distinguishes 3,584 permitted-form conditional branches, 256 decoded-but-ungranted `UDF` (permanently undefined) encodings, and 256 decoded-but-ungranted `SVC` (supervisor-call) encodings. The [224-row condition-flag truth table](fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv) covers all fourteen branch predicates against all sixteen possible N/Z/C/V bit combinations.
+
+[A conditional branch chooses which exceptional instruction is next.english](examples/A%20conditional%20branch%20chooses%20which%20exceptional%20instruction%20is%20next.english) translates a small byte-verified native instruction sequence, showing how branches select between paths that would encounter `UDF` and `SVC`. In the current permission profile, the English translation **stops** at either exception rather than inventing an operating-system effect.
+
+The `BA00–BAFF` and `D000–DFFF` exhaustive subtrees are disjoint and account for **4,352 individual 16-bit halfword values** in total. Most of ARMv7-A T32 still remains unenumerated, including other 16-bit and 32-bit instruction groups. These two decoder subtrees do not expand the separately declared set of **72 permitted long-named operations**.
+
 ## Assembly-to-English decompilation target
 
 [What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 72-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
