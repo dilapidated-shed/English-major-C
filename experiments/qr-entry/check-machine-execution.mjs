@@ -68,14 +68,14 @@ async function machineTrace(arch,elf,initialState,steps,name) {
   for(const r of registers) commands.push('set $'+r+' = '+hex(initialState.registers[r]));
   commands.push('set $'+status+' = '+hex(initialState.flags));
   const capture=index=>{
-    const labels=[...registers,'flags'];
-    const format='QRSTATE '+index+' '+labels.map(r=>r+'=%llx').join(' ')+'\\n';
-    // GDB can expose an ARM integer register as signed int. Widening that
-    // directly sign-extends its display to 64 bits. First select the actual
-    // unsigned 32-bit register bits; x86-64 must retain its full 64 bits.
+    const format='QRSTATE '+index+' '+registers.map(r=>r+'=%llx').join(' ')+' flags=';
+    // Preserve ARM's unsigned 32-bit register bits before widening for display.
+    // Do not narrow x86-64 general registers. GDB's x64_eflags is a structured
+    // flags type: output/x reads its observed bits without an invalid C cast.
     const cast=arch==='arm'?'(unsigned long long)(unsigned int)':'(unsigned long long)';
-    const values=[...registers.map(r=>'$'+r),'$'+status].map(v=>cast+v).join(', ');
+    const values=registers.map(r=>cast+'$'+r).join(', ');
     commands.push('printf "'+format+'", '+values);
+    commands.push('output/x $'+status,'echo \\n');
     commands.push('dump binary memory '+quote(join(directory,'memory-'+index+'.bin'))+' '+hex(MEMORY_START)+' '+hex(MEMORY_START+MEMORY_SIZE));
   };
   capture(0); for(let i=1;i<=steps;i++){commands.push('stepi');capture(i);}
@@ -94,7 +94,9 @@ async function machineTrace(arch,elf,initialState,steps,name) {
   for(const line of gdb.stdout.split('\n')) {
     const m=/^QRSTATE (\d+) (.+)$/.exec(line); if(!m) continue;
     assert.equal(Number(m[1]),states.length,'Missing/repeated debugger state');
-    const values=Object.fromEntries(m[2].trim().split(' ').map(t=>{const [key,value]=t.split('=');assert(/^[0-9a-f]+$/.test(value));const n=BigInt('0x'+value);assert(n<(1n<<BigInt(arch==='arm'?32:64)),'Debugger register value exceeds architecture width');return [key,n];}));
+    const fields=m[2].trim().split(' ').map(t=>{const [key,value]=t.split('=');assert(/^(?:0x)?[0-9a-f]+$/.test(value));const n=BigInt('0x'+value.replace(/^0x/,''));assert(n<(1n<<BigInt(arch==='arm'?32:64)),'Debugger register value exceeds architecture width');return [key,n];});
+    assert.equal(fields.length,registers.length+1,'Repeated or missing register field');
+    const values=Object.fromEntries(fields);
     assert.deepEqual(Object.keys(values),[...registers,'flags'],'Missing, duplicate or unexpected register field');
     const flags=values.flags;delete values.flags;
     states.push({registers:values,flags,memory:readFileSync(join(directory,'memory-'+m[1]+'.bin'))});
