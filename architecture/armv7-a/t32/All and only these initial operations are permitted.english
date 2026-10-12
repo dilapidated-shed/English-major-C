@@ -636,7 +636,7 @@ Architectural encoding legality remains governed by DDI 0406C.d.
 
 Operation 65. "Reverse the positions of the four successive eight-bit
 portions of a selected thirty-two-bit general-register value, so that
-the original lowest-addressed portion of the word's bit representation
+the original least-significant eight-bit portion of the register
 becomes the highest-significance portion of the result, and store the
 rearranged thirty-two bits without changing the condition flags."
 Mapping: REV, 16-bit T32 T1 form only, with source Rm and destination Rd
