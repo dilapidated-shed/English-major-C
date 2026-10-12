@@ -405,7 +405,7 @@ way. Source semantics must check raw encoded bits.
 The source-derived byte-level example is:
 examples/One If Then block governs a short and a long instruction.english
 
-PART EIGHT-B. AN INSTRUCTION INSIDE IT THAT IGNOREs THE PREDICATE.
+PART EIGHT-B. AN INSTRUCTION INSIDE IT THAT IGNORES THE PREDICATE.
 
 The machine also has BKPT T1 encodings BE00..BEFF,
 which produce architecture-defined breakpoint
