@@ -29,7 +29,7 @@ An initial byte-level bottom-up witness is [One actual Thumb branch listing tran
 
 [Actual Thumb word transfers translated into English.english](examples/Actual%20Thumb%20word%20transfers%20translated%20into%20English.english) reads four pinned Android ART assembler expectation halfwords, `C409`, `CC09`, `B014` and `B094`, as independent instruction specimens. It does not pretend their original fixture arrays constitute one executed program.
 
-The closed initial scalar operation grant now contains **72** entries, not the full ARMv7-A T32 ISA. Presence of an instruction in hardware is not equivalent to its authorization in this initial English Major C profile.
+The closed initial scalar operation grant now contains **73** entries, not the full ARMv7-A T32 ISA. Presence of an instruction in hardware is not equivalent to its authorization in this initial English Major C profile.
 
 [Actual wide Thumb multiple-word operations in long English.english](examples/Actual%20wide%20Thumb%20multiple-word%20operations%20in%20long%20English.english) adds four precise, separately named 32-bit T32 STMIA and LDMDB operations, with and without base-register writeback. Each is anchored to a separate pinned AOSP expected-disassembly entry. The specification does not silently equate a four-byte Thumb encoding with two consecutive two-byte instructions.
 
@@ -49,7 +49,7 @@ The complete [4,096-row instruction-class table](fixtures/armv7-a-t32-conditiona
 
 [A conditional branch chooses which exceptional instruction is next.english](examples/A%20conditional%20branch%20chooses%20which%20exceptional%20instruction%20is%20next.english) translates a small byte-verified native instruction sequence, showing how branches select between paths that would encounter `UDF` and `SVC`. In the current permission profile, the English translation **stops** at either exception rather than inventing an operating-system effect.
 
-The `BA00–BAFF` and `D000–DFFF` exhaustive subtrees are disjoint and account for **4,352 individual 16-bit halfword values** in total. Most of ARMv7-A T32 still remains unenumerated, including other 16-bit and 32-bit instruction groups. These two decoder subtrees do not expand the separately declared set of **72 permitted long-named operations**.
+The `BA00–BAFF` and `D000–DFFF` exhaustive subtrees are disjoint and account for **4,352 individual 16-bit halfword values** in total. Most of ARMv7-A T32 still remains unenumerated, including other 16-bit and 32-bit instruction groups. These two decoder subtrees do not expand the separately declared set of **73 permitted long-named operations**.
 
 [The exact diagnostic audit receipt](evidence/2026-10-11-Dxxx-Thumb-decode-audit.english) records tool versions, SHA256 digests for transient assembler/decoder artifacts, all **4,096** independently checked halfword classifications, **3,584** independently checked branch displacements, the two unexpected LLVM aliases for `UDF`, and **2,366** arithmetic condition comparisons. These are limited diagnostic/source checks, **not** first-party compiler, executable-English, or physical-device acceptance.
 
@@ -61,7 +61,7 @@ The `BA00–BAFF` and `D000–DFFF` exhaustive subtrees are disjoint and account
 
 [The BFxx diagnostic receipt](evidence/2026-10-11-BFxx-Thumb-IT-and-hint-audit.english) preserves LLVM disassembly observations, including a case where LLVM prints `it al` for a form the ARM reference declares **UNPREDICTABLE**. The decoder display alone cannot grant executable source semantics.
 
-The three earlier decoder subtrees `BA00–BAFF`, `BF00–BFFF`, and `D000–DFFF` account for **4,608 distinct numerical 16-bit halfword values**. The additional complete `E000–E7FF` and `BE00–BEFF` subtrees described below bring the cumulative count to **6,912**, without enlarging the separately declared set of **72 long-named permitted operations** or proving a complete Thumb ISA.
+The three earlier decoder subtrees `BA00–BAFF`, `BF00–BFFF`, and `D000–DFFF` account for **4,608 distinct numerical 16-bit halfword values**. The additional complete `E000–E7FF` and `BE00–BEFF` subtrees described below bring the cumulative count to **6,912**, without enlarging the separately declared set of **73 long-named permitted operations** or proving a complete Thumb ISA.
 
 ## Exhaustive short branches and breakpoint encodings
 
@@ -73,11 +73,23 @@ The three earlier decoder subtrees `BA00–BAFF`, `BF00–BFFF`, and `D000–DFF
 
 The [E000/BE00 audit receipt](evidence/2026-10-11-E000-and-BE00-Thumb-decode-audit.english) records actual temporary diagnostic tool versions and SHA256s, 2,048 checked short-branch encodings and target calculations, 256 checked BKPT encodings, and explicit limitations.
 
-The five now completely classified disjoint subtrees `BA00–BAFF`, `BE00–BEFF`, `BF00–BFFF`, `D000–DFFF`, and `E000–E7FF` total **6,912 numerical 16-bit halfword values**. That is a decoder-classification statement, not complete ARMv7-A T32 semantics, execution authority, exception handling, a working frontend, or evidence of a processor run.
+The five previously classified disjoint subtrees `BA00–BAFF`, `BE00–BEFF`, `BF00–BFFF`, `D000–DFFF`, and `E000–E7FF` total **6,912 numerical 16-bit halfword values**. That is a decoder-classification statement, not complete ARMv7-A T32 semantics, execution authority, exception handling, a working frontend, or evidence of a processor run.
+
+## Address formation, literal data, and control transfer
+
+[Every halfword that forms an address from the execution position or stack pointer.english](architecture/armv7-a/t32/Every%20halfword%20that%20forms%20an%20address%20from%20the%20execution%20position%20or%20stack%20pointer.english) classifies **all 4,096 two-byte Thumb halfwords from A000 to AFFF**: 2,048 `ADR` T1 instructions which calculate `Align(instruction address + 4, 4) + 4 * unsigned imm8`, and 2,048 `ADD Rd, SP, #immediate` T1 instructions which compute `SP + 4 * unsigned imm8` into R0–R7 **without changing SP**. Their [complete 4,096-row table](fixtures/armv7-a-t32-address-generation-halfwords.tsv) records registers, immediates and computed addresses for two illustrative starting instruction locations.
+
+[Every PC-relative data-word load halfword.english](architecture/armv7-a/t32/Every%20PC-relative%20data-word%20load%20halfword.english) classifies **all 2,048 halfwords from 4800 to 4FFF**. This distinct `LDR (literal)` T1 instruction calculates an aligned PC-relative address, then actually **reads a 32-bit data word from memory**. That read has separate mapping, permissions and fault requirements. Its [complete 2,048-row encoding table](fixtures/armv7-a-t32-pc-relative-word-load-halfwords.tsv) is not a proof that the reads were ever executed.
+
+[An address a load and a branch disagree about the same bytes.english](examples/An%20address%20a%20load%20and%20a%20branch%20disagree%20about%20the%20same%20bytes.english) starts from **sixteen real assembled bytes**. It specifies a PC-derived address, a literal word load, and a branch around both `BKPT` and four literal-data bytes before stopping at ungranted `SVC`. The independent linear disassembler prints those literal bytes as plausible `LDRSB` and `ASRS` instructions; those are not instructions the selected execution-index path actually executes. This is direct evidence why the language must distinguish **decoded bytes**, **data reads**, and **executed instructions**.
+
+[The address/data diagnostic receipt](evidence/2026-10-11-PC-relative-address-and-data-load-audit.english) records the actual foreign clang/LLVM 17 assembler/decoder and object hashes, **4,096** address-generation and **2,048** literal-load classification checks, and a deliberately retained diagnostic formatting failure (decimal versus hexadecimal immediate text) that was corrected before the complete literal-load comparison passed. No claim is made about ICK/NDK execution or an independent compiler acceptance check.
+
+The previously completed five decoding regions accounted for 6,912 distinct two-byte halfword values. Adding the two disjoint A000–AFFF and 4800–4FFF regions yields **13,056 classified sixteen-bit halfword values** in seven closed decoder subtrees. The permitted long-named operation set now has **73 entries**: existing operations 40 and 41 were made encoding-precise, and new operation 73 names SP-relative address formation without changing SP. This remains a partial ARMv7-A T32 ISA specification, not a working frontend or verified physical-machine execution.
 
 ## Assembly-to-English decompilation target
 
-[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 72-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
+[What a final English translation of assembly must contain.english](decompilation/What%20a%20final%20English%20translation%20of%20assembly%20must%20contain.english) defines the bottom-up translation target: begin from actual decoded machine instructions, account for all their machine-visible effects, preserve the original assembly and machine-code evidence, and allow arbitrarily extensive non-executable `(NOTE: ...)` and `(WHY? BECAUSE: ...)` explanations. This does **not** attempt to reproduce the route from R or another high-level language to the executable. The same principles apply to later A32 or x86-64 specimens after their exact machine contracts are supplied. The current 73-operation T32 grant is not enough to claim every possible real disassembly can already be expressed.
 
 ## Contract status
 
