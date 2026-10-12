@@ -1,0 +1,122 @@
+name: Capture linked ARMv7 hardfp R QR harness and emulated numerical execution
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-armhf-linked:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Prepare Ubuntu ARM hard-float library packages and QEMU
+        run: |
+          set -euo pipefail
+          test "$(lsb_release -cs)" = noble
+          sudo dpkg --add-architecture armhf
+          for f in /etc/apt/sources.list.d/ubuntu.sources; do
+            if test -f "$f" && ! grep -q '^Architectures:' "$f"; then
+              sudo sed -i '/^URIs:/a Architectures: amd64' "$f"
+            fi
+          done
+          sudo tee /etc/apt/sources.list.d/armhf-ports.sources >/dev/null <<'SOURCES'
+          Types: deb
+          URIs: http://ports.ubuntu.com/ubuntu-ports
+          Suites: noble noble-updates noble-security
+          Components: main universe restricted multiverse
+          Architectures: armhf
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          SOURCES
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-14-arm-linux-gnueabihf gfortran-14-arm-linux-gnueabihf \
+            binutils-arm-linux-gnueabihf qemu-user libblas-dev:armhf libblas3:armhf
+
+      - name: Link authentic ARM ELF32 executable and execute under ARM emulation
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          mkdir -p /tmp/r-qr-arm-linked
+          cd examples/r-lm-native-x86-64
+          for routine in dqrls dqrdc2 dqrsl; do
+            arm-linux-gnueabihf-gfortran-14 \
+              -O2 -g -fno-inline -fPIC \
+              -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=hard \
+              -c "$routine.f" -o "/tmp/r-qr-arm-linked/$routine.armv7-hardfp.o"
+          done
+          arm-linux-gnueabihf-gcc-14 -O2 -g -Wall -Wextra \
+            -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=hard \
+            -c call_r_qr.c -o /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp.o
+          arm-linux-gnueabihf-gfortran-14 \
+            -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=hard \
+            /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp.o \
+            /tmp/r-qr-arm-linked/dqrls.armv7-hardfp.o \
+            /tmp/r-qr-arm-linked/dqrdc2.armv7-hardfp.o \
+            /tmp/r-qr-arm-linked/dqrsl.armv7-hardfp.o \
+            -L/usr/lib/arm-linux-gnueabihf/blas -L/usr/lib/arm-linux-gnueabihf \
+            -lblas -lm -o /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp
+          arm-linux-gnueabihf-readelf -h /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp \
+            | grep -q 'Machine:[[:space:]]*ARM'
+          arm-linux-gnueabihf-objdump -d \
+            /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp \
+            > /tmp/r-qr-arm-linked/linked-executable.armv7-hardfp.disasm.txt
+          qemu-arm -L /usr/arm-linux-gnueabihf \
+            -E LD_LIBRARY_PATH=/usr/lib/arm-linux-gnueabihf/blas:/usr/lib/arm-linux-gnueabihf:/usr/arm-linux-gnueabihf/lib \
+            /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp \
+            > /tmp/r-qr-arm-linked/test-output.txt
+          printf 'exit_status=0\n' >> /tmp/r-qr-arm-linked/test-output.txt
+          grep -q 'rank' /tmp/r-qr-arm-linked/test-output.txt
+          {
+            echo 'Linked ARMv7-A hardfp (not Android softfp) numerical smoke'
+            echo "Source commit $(git rev-parse HEAD)"
+            echo "Runner $(uname -a)"
+            arm-linux-gnueabihf-gfortran-14 --version | head -n 1
+            arm-linux-gnueabihf-gcc-14 --version | head -n 1
+            arm-linux-gnueabihf-objdump --version | head -n 1
+            qemu-arm --version | head -n 1
+            echo 'Compilation: -O2 -g -fno-inline -fPIC -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=hard'
+            echo 'Link library: Ubuntu armhf libblas'
+            arm-linux-gnueabihf-readelf -h /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp
+            arm-linux-gnueabihf-readelf -A /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp
+            arm-linux-gnueabihf-readelf -d /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp
+          } > /tmp/r-qr-arm-linked/capture-environment.txt
+          (cd /tmp/r-qr-arm-linked && sha256sum *.o call_r_qr.armv7-hardfp *.txt > SHA256SUMS)
+          echo '=== LINKED ARM NUMERICAL TEST ==='
+          cat /tmp/r-qr-arm-linked/test-output.txt
+          echo '=== LINKED ARM CHECKSUMS ==='
+          cat /tmp/r-qr-arm-linked/SHA256SUMS
+          for file in /tmp/r-qr-arm-linked/linked-executable.armv7-hardfp.disasm.txt \
+                      /tmp/r-qr-arm-linked/capture-environment.txt \
+                      /tmp/r-qr-arm-linked/test-output.txt \
+                      /tmp/r-qr-arm-linked/SHA256SUMS; do
+            name="$(basename "$file")"
+            echo "<<<BEGIN_TEXT_LINKED:$name>>>"
+            cat "$file"
+            echo "<<<END_TEXT_LINKED:$name>>>"
+          done
+          for file in /tmp/r-qr-arm-linked/*.o /tmp/r-qr-arm-linked/call_r_qr.armv7-hardfp; do
+            name="$(basename "$file")"
+            echo "<<<BEGIN_BASE64_LINKED:$name>>>"
+            base64 -w 0 "$file"
+            printf '\n'
+            echo "<<<END_BASE64_LINKED:$name>>>"
+          done
+
+      - name: Upload ARM32 linked executable, full object files and disassembly
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r-qr-armv7-linux-hardfp-linked-${{ github.sha }}
+          path: /tmp/r-qr-arm-linked/
+          if-no-files-found: error
+          retention-days: 30
