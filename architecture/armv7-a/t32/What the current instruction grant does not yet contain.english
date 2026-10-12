@@ -3,7 +3,7 @@ WHAT THE CURRENT INSTRUCTION GRANT DOES NOT YET CONTAIN.
 Status: architecture COVERAGE LEDGER, not an operation grant.
 It is part of the work required before anyone can honestly
 call this a full ARMv7-A T32 instruction set definition.
-Current allowed operations: numbered 01 through 72, all and
+Current allowed operations: numbered 01 through 73, all and
 only those in the closed initial grant in this directory.
 
 Primary standard: ARM DDI 0406C.d, A6 T32 encoding and A8
@@ -18,7 +18,7 @@ in that guide is NOT evidence that it belongs to ARMv7-A T32.
 READING THE STATUS OF A FAMILY.
 
 COVERED-SUBSET: at least one machine effect is named in the
-present 72-operation grant, but encoding-by-encoding validation
+present 73-operation grant, but encoding-by-encoding validation
 and exhaustive forms remain unfinished.
 UNGRANTED: the hardware may provide this instruction family,
 but the English Major C profile does not yet name permitted
@@ -82,6 +82,47 @@ memory fault. Precise permission, alignment,
 architecture-specific exception and concurrency
 details remain acceptance obligations.
 Sources: DDI 0406C.d, guide C2.45/C2.73/C2.74/C2.138.
+
+COVERED-SUBSET: the entire A000..AFFF two-byte
+Thumb address-generation interval is now
+individually decoded and documented in
+"Every halfword that forms an address from the
+execution position or stack pointer.english".
+A000..A7FF comprises 2048 ADR T1 encodings,
+with PC operand A+4 then Align(PC,4), unsigned
+imm8 multiplied by four, destination R0..R7.
+A800..AFFF comprises 2048 SP-plus-immediate
+ADD T1 encodings using the same low-register
+and scaled-immediate fields. This writes a
+register value but leaves SP itself unchanged.
+It is now separately granted as operation 73.
+None of these 4096 encodings performs a data
+memory access or a branch merely by computing
+an address. The row-by-row encoding source is
+fixtures/armv7-a-t32-address-generation-halfwords.tsv.
+
+COVERED-SUBSET: the entire 4800..4FFF interval
+of 2048 T32 LDR literal T1 encodings is
+individually documented in "Every PC-relative
+data-word load halfword.english" and the
+fixtures/armv7-a-t32-pc-relative-word-load-halfwords.tsv.
+A load uses Align(PC,4)+4*imm8, but then
+performs a REAL FOUR-BYTE DATA MEMORY READ
+from that address. It writes the CONTENTS
+into R0..R7 rather than writing the address
+itself. Exact target memory mapping, access
+permission, endianness, faults and IT
+effects remain runtime evidence obligations.
+This is distinct from ADR and from B.
+
+The model specimen "An address a load and a branch
+disagree about the same bytes.english" contains
+an assembler .word in an executable section;
+a linear disassembler renders that DATA as
+two plausible native instructions, whereas
+the actual control-flow path skips over it.
+That is deliberate evidence that decoded
+bits are not necessarily executed instructions.
 
 UNGRANTED: load/store a pair of words and account for
 alignment, ordering, register pairs and writeback.
@@ -179,12 +220,30 @@ permitted IT, 26 unpredictable IT, one NOP,
 four named hints and eleven unallocated hints.
 The 0xD000..0xDFFF region contains 3584
 conditional B T1, 256 UDF and 256 SVC.
-These FIVE COMPLETED DECODER SUBTREES
-account for exactly 256+256+4096+2048+256
-=6912 DISTINCT NUMERICAL 16-bit halfwords,
-NOT the complete Thumb ISA or every encoding
-of any of the long named permitted operations.
-Remaining sixteen-bit regions and all
+Those FIVE earlier decoder subtrees accounted for
+256+256+4096+2048+256 = 6912 distinct numerical
+sixteen-bit halfword values.
+
+A SIXTH completed decoder subtree now accounts
+for every A000..AFFF halfword: 4096 encodings,
+half ADR T1 and half ADD (SP plus immediate) T1.
+The existing operation 40 is narrowed to the
+aligned PC-relative ADR T1 form; newly permitted
+operation 73 names SP-relative ADD T1 in which
+SP is read but NOT changed.
+
+A SEVENTH completed decoder subtree accounts
+for every 4800..4FFF halfword: 2048 narrow
+LDR literal T1 encodings. Existing operation
+41 is narrowed to its precisely encoded
+PC-aligned data-memory read.
+
+Thus the SEVEN completed DISJOINT decoding
+regions account for 6912+4096+2048 =
+13056 DISTINCT NUMERICAL 16-bit halfword values,
+NOT the complete ARM Thumb ISA or every encoding
+of any long-named operation.
+Other sixteen-bit regions and all
 uninspected 32-bit combinations remain open.
 
 DECODED-BUT-UNGRANTED: all 256 SVC T1 instruction encodings
