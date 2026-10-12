@@ -1,0 +1,59 @@
+name: Execute English QR entry semantics against original machine bytes
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-byte-state-comparison:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the exact proposed source revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Record and verify exact source and execution host
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          printf 'exact_source_head=%s\n' "$EXPECTED_HEAD"
+          uname -srm
+          node --version
+          node -e 'if (Number(process.versions.node.split(".")[0]) < 18) process.exit(1)'
+      - name: Provision instruction emulation and register inspection
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y qemu-user gdb-multiarch
+          qemu-arm --version
+          qemu-x86_64 --version
+          gdb-multiarch --version
+      - name: Execute original QR bytes and compare each English state transition
+        run: |
+          set -euo pipefail
+          node --check experiments/qr-entry/english-state.mjs
+          node --check experiments/qr-entry/elf-evidence.mjs
+          node --check experiments/qr-entry/check-machine-execution.mjs
+          node experiments/qr-entry/check-machine-execution.mjs "$RUNNER_TEMP/qr-entry-evidence"
+          cat "$RUNNER_TEMP/qr-entry-evidence/receipt.json"
+      - name: Preserve exact states, input bytes, debugger logs and linked mode map
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qr-entry-original-machine-state-evidence
+          path: ${{ runner.temp }}/qr-entry-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+# No compiler or assembler runs: a bounded ELF loader envelope contains
+# bytes extracted unchanged from the pinned original objects. This validates
+# selected normal-completion QR entry semantics, not a replacement build,
+# full QR-from-English execution, exception behavior or independent ai-ci.
