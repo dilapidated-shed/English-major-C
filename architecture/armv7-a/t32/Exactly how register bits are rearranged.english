@@ -1,0 +1,359 @@
+EXACTLY HOW REGISTER BITS ARE REARRANGED.
+
+Experimental English Major C architectural source specification.
+Target: ARMv7-A in T32 state, unprivileged execution.
+Status: eight independently named operations, not an exhaustive encoding
+inventory, nor an executed language implementation.
+
+The long operation names that actually grant permission are operations
+65 through 72 in the sibling document:
+"All and only these initial operations are permitted.english".
+This document spells out what those names mean, which information they
+consume, what state they change, and what they deliberately do not do.
+
+NORMATIVE ARCHITECTURAL DEPENDENCY.
+
+ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition,
+ARM DDI 0406C.d (ID040418), especially the A6 Thumb decode
+tables and the relevant A8 instruction entries.
+
+SECONDARY CROSS-CHECK USED FOR THIS SLICE.
+
+ARM Compiler armasm Reference Guide, ARM DUI 0802B, ID121814,
+2014, Chapter 3:
+  Section 3.25, "BFC and BFI", printed pages 3-47 and 3-48;
+  Section 3.70, "REV, REV16, REVSH, and RBIT", pages 3-125 and 3-126;
+  Section 3.72, "SBFX and UBFX", page 3-129.
+The secondary manual covers architectures beyond the pinned ARMv7-A
+profile; it does not automatically authorize such extensions.
+Public copy:
+https://documentation-service.arm.com/static/5f3fa899428f7a6b3328fd44
+
+An independent diagnostic assembly was also decoded by clang/LLVM
+version 17, targeting armv7a-none-eabi with T32 selected, solely to
+obtain concrete instruction halfwords. That diagnostic reference is
+recorded in the associated example file. It is NOT an ICK compiler
+result or a qualified project build.
+
+PART ONE. WHAT THE MACHINE CAN AND CANNOT INFER FROM THIRTY-TWO BITS.
+
+A 32-bit register contains bits numbered 0 through 31.
+Bit zero is the least significant bit. Bit 31 is the most significant.
+An eight-bit portion with low bit number 8 contains bits 8..15.
+A sixteen-bit portion with low bit number 16 contains bits 16..31.
+
+Do not confuse:
+  the numerical significance order of bits in a register;
+  the byte order of multibyte objects when stored in memory;
+  the ordering of instruction halfwords in a T32 instruction stream;
+  the way a virtual address is mapped to physical DRAM;
+  the length of a native instruction encoding.
+
+The operations in this file work on register bit patterns.
+They perform NO memory loads and NO memory stores. The memory
+endianness of an external object is not changed by any one of them.
+They do not modify the CPSR endian-state bit. They do not rewrite
+an instruction sequence, grant the right to execute memory, or
+modify the execution index except through normal sequencing.
+
+A result may be mathematically interpreted as unsigned or signed.
+Only operations 67 and 72 explicitly make a sign-extension choice.
+The others produce their specified 32-bit pattern without
+asserting the programmer's eventual interpretation of those bits.
+
+PART TWO. DIFFERENT KINDS OF REVERSAL.
+
+OPERATION 65, reverse the FOUR BYTE POSITIONS of a register value.
+
+Given a 32-bit value with component bytes, from most significant
+to least significant, A:B:C:D, return D:C:B:A. In bit-position terms:
+  result bits 31..24 receive original bits 7..0;
+  result bits 23..16 receive original bits 15..8;
+  result bits 15..8 receive original bits 23..16;
+  result bits 7..0 receive original bits 31..24.
+No other bits may influence the result.
+A source of 0x12345678 yields 0x78563412.
+
+The selected native form is the TWO-byte Thumb T1 REV, not
+the separate four-byte encoding nor a sequence of shifts.
+Its encoding uses a low-register source and low-register destination,
+each chosen from R0-R7. Preserve all condition flags.
+
+OPERATION 66, reverse bytes independently WITHIN EACH HALFWORD.
+
+Given a value A:B:C:D, return B:A:D:C.
+Never cross the sixteen-bit dividing line between source bits
+15 and 16. The first output halfword comes exclusively from
+the original first halfword. The second output halfword comes
+exclusively from the original second halfword.
+A source of 0x12345678 yields 0x34127856.
+
+The selected native form is TWO-byte T1 REV16 with low
+registers R0-R7. It does not set flags or load memory.
+
+OPERATION 67, reverse only the LOW HALFWORD and sign-extend.
+
+Let source bits 15..8 be A and source bits 7..0 be B.
+Form the sixteen-bit value B:A, discarding the original
+source bits 16..31 entirely. If bit 15 of B:A is zero,
+produce 0x0000 followed by B:A; if it is one,
+produce 0xFFFF followed by B:A. This conditional filling
+does not make an ARM conditional branch and does not
+modify the comparison flags.
+
+For source low halfword 0x80FF, B:A becomes 0xFF80.
+Its sign bit is one, so the resulting 32-bit bit pattern
+is 0xFFFFFF80, representing -128 if later read as a
+signed 32-bit two's-complement integer.
+
+The selected native form is two-byte T1 REVSH.
+The word "signed" in the English name is part of
+the actual operation and cannot be silently dropped.
+
+OPERATION 68, reverse EVERY INDIVIDUAL BIT.
+
+For every source bit position k, 0<=k<=31,
+result bit position 31-k receives original bit k.
+This is not REV, which preserves the ordering of
+bits WITHIN each individual byte.
+
+The 32-bit pattern 0x0000000D has its least significant
+four bits 1101 in conventional most-significant-first
+binary notation. Bit reversal gives 0xB0000000.
+Another example: 0x00000001 becomes 0x80000000.
+Applying bit reversal twice to the same 32-bit value
+recovers the original value.
+
+The selected native form is FOUR-byte T32 RBIT and
+requires general registers R0-R12 (not SP or PC).
+There is no two-byte RBIT form in this selected T32 ISA.
+
+PART THREE. ZEROING A CONTIGUOUS INTERVAL.
+
+OPERATION 69, clear a chosen bitfield.
+
+The input consists of:
+  an old destination value D, held in a general register;
+  a first selected bit position called first_bit;
+  a strictly positive number of selected bits called width.
+
+The last selected position is first_bit+width-1.
+The operation is defined only for:
+  0 <= first_bit <= 31;
+  1 <= width <= 32-first_bit.
+For all positions k inside the selected interval, set the
+destination bit to ZERO. For all other positions, keep
+the exact bit from the original destination D.
+
+Example:
+  original D     = 0xA5A5FFFF;
+  first_bit      = 8;
+  width          = 8;
+  allowed mask   = 0x0000FF00;
+  resulting D    = 0xA5A500FF.
+The source is a single old register; there is no other
+register whose bits must be incorporated in the result.
+
+The selected machine instruction is BFC, FOUR bytes in
+the Thumb T1 encoding. Its bits describe the highest
+cleared position and the starting position. An
+out-of-range width or highest bit must be rejected.
+The instruction does NOT preserve the cleared bits
+in some invisible temporary register.
+
+PART FOUR. REPLACING ONE BIT INTERVAL WITH ANOTHER REGISTER'S BITS.
+
+OPERATION 70, insert a chosen bitfield.
+
+There are TWO register inputs: the old destination D
+and the source S. Their bit patterns are read as
+the old architectural state before any destination write.
+
+The selected destination interval is
+[first_bit, first_bit+width-1] inclusive.
+Bits outside the interval are copied from old D.
+Within the interval, result bit at first_bit+j
+receives source bit j for j from zero to width-1.
+
+For old D=0x12345678, old S=0x000000AB, first_bit=8,
+width=8, the resulting register contains 0x1234AB78.
+
+No source bits above bit width-1 are incorporated.
+The operation does not copy the full source register,
+and does not move any destination bits left or right.
+
+If the source register name equals the destination
+register name, the old bit pattern is used for both
+operand roles. An implementation must not overwrite
+D before it has computed the specified result.
+A single permitted machine instruction can realize
+such an aliasing case where the exact encoding allows
+it, but legality still belongs to the pinned ISA entry.
+
+The selected encoding is FOUR-byte BFI, T1 Thumb.
+The allocated interval is an actual encoded field,
+not an unbounded shift count, and no flags change.
+
+PART FIVE. TWO DIFFERENT MEANINGS OF FIELD EXTRACTION.
+
+OPERATION 71, extract an UNSIGNED field.
+
+Starting from source bit first_bit, copy width successive
+source bits into the lowest width bits of the destination,
+maintaining their original relative bit order.
+Every destination bit from width up through bit 31
+must be zero.
+
+For source S=0x000005A0 and first_bit=4,
+width=7, the selected bits yield 0x5A.
+The destination must become 0x0000005A,
+irrespective of its previous value.
+
+This is UBFX, FOUR-byte T32 encoding T1. The source
+register is read, and the destination register is
+overwritten. The architecture's width-minus-one
+encoding must not be mistaken for a width of one less
+than the requested semantic width.
+
+OPERATION 72, extract a SIGNED field.
+
+Perform the same interval selection and position
+translation as operation 71, but interpret the
+highest selected bit as the sign of a width-bit
+two's-complement integer. Copy that highest
+selected bit to ALL higher destination positions.
+
+For source S=0x000000E0 and first_bit=2,
+width=6, the six-bit extracted pattern is 111000.
+Its top selected bit is one. As a signed six-bit
+two's-complement quantity, it represents -8.
+The 32-bit destination bit pattern is 0xFFFFFFF8.
+It is not 0x00000038, which would be the unsigned
+interpretation of the same selected interval.
+
+When the highest selected bit is zero, sign extension
+fills higher bits with zero and can coincide with
+unsigned extraction. That coincidence does not
+make the operation names interchangeable.
+
+This is SBFX, FOUR-byte T32 T1. Source and destination
+registers are restricted to R0-R12.
+
+PART SIX. CONDITIONAL EXECUTION IS A SEPARATE EFFECT.
+
+The eight bit-rearrangement operations do not set
+N, Z, C or V. If a subsequent instruction uses
+a conditional branch depending on Z or V, the
+flags observed by that branch are preserved through
+one of these operations.
+
+When a particular permitted machine encoding legally
+appears inside a T32 IT block, the existing ITSTATE
+determines whether its data-register effects occur.
+The bit operation does not independently create,
+enter or exit an IT block. The interpreter still
+advances across the whole two-byte or four-byte
+encoded instruction when its condition is false,
+and advances ITSTATE according to architectural rules.
+
+A proposed lowering may not change a flag-preserving
+operation into a flag-setting arithmetic construction
+and call the two sequences equivalent merely because
+the destination values agree. The later branch might
+observe different flags.
+
+PART SEVEN. REASONS TO KEEP THE ALTERNATIVES.
+
+Choice A: use the dedicated REV, REV16, REVSH and RBIT
+encodings. Benefit: each operation's data permutation
+is explicit and can be matched to one native instruction.
+Cost: a different target ISA may not have equivalent
+single instructions, and the source cannot assume
+that architectural compactness proves execution speed.
+
+Choice B: implement reversal with ordinary shifts,
+logical operations and masks. Benefit: more portable
+to machines lacking a particular dedicated operation.
+Cost: multiple intermediate steps and possible effects
+on flags and registers. Each instruction in an actual
+resulting disassembly must be translated independently;
+the result alone does not justify inventing a single RBIT.
+
+Choice C: perform byte swapping during memory load
+or store using an explicitly chosen representation.
+Benefit: may avoid a separate register permutation.
+Cost: changes the memory-access and representation
+contract; unaligned accesses, permissions, hardware
+endianness and other observers become important.
+A REV instruction does not, by itself, do that.
+
+Choice D: implement a bitfield insertion or clear by
+AND, OR and shifts. Benefit: same mathematical value
+may be obtained using familiar bitwise operations.
+Cost: may change comparison flags depending on exact
+encoding, and incorrect masks can change unrelated bits.
+
+Choice E: use BFC/BFI/SBFX/UBFX when those instructions
+are available and all bit indices are encodable.
+Benefit: one exactly named bitfield operation.
+Cost: width/position limits and register restrictions
+must remain visible in source; these operations
+do not handle arbitrary-length bit strings.
+
+Choice F: perform signed versus unsigned extraction
+by explicit shifts. Benefit: makes sign propagation
+observable and can be expressed on many machines.
+Cost: arithmetic-right versus logical-right shift,
+intermediate width, and top selected sign bit require
+an exact proof. Replacing SBFX with UBFX based on a
+few nonnegative fixtures would be a correctness defect.
+
+Choice G: classify these patterns as instruction
+decoding work rather than ordinary numerical work.
+Benefit: building an interpreter may want to extract
+bitfields from raw instruction halfwords as DATA.
+Restriction: successfully extracting a field from
+bytes does not turn a malformed encoding into a
+permitted executable operation. Decode legality,
+ITSTATE, privileges and executable permissions
+remain separate.
+
+The language currently grants the dedicated operations.
+No universal performance, compilation strategy, or
+target-independent preference follows from that choice.
+
+PART EIGHT. REJECTED SHORTCUTS.
+
+A valid transformation MUST NOT:
+  * describe bytes as memory-ordered when they are
+    only numbered bitfields inside a register;
+  * call REV and RBIT the same operation;
+  * call REVSH a zero-extending operation;
+  * alter N/Z/C/V while claiming to use the
+    flag-preserving variants named here;
+  * use SP or PC as a data register for any of these forms;
+  * represent an invalid zero-width or over-running
+    bitfield as a successfully executed native instruction;
+  * omit the old destination as an input to BFI;
+  * substitute bitfield extraction for signed extension
+    without proving the selected sign bit;
+  * turn 32-bit T32 instructions into two consecutive
+    16-bit instructions in an English control-flow trace;
+  * manufacture a code-execution permission by writing
+    or rearranging bits that resemble an instruction;
+  * claim that all possible aliases and encodings
+    of these assembler mnemonics were admitted.
+
+PART NINE. WHAT HAS ACTUALLY BEEN VERIFIED.
+
+Source files and independently inspected diagnostic
+assembler halfwords establish a concrete correlation
+between representative encodings and English bit
+effects. The source rules and numerical examples
+have NOT been accepted by an English Major C runtime,
+AICI, ARM hardware, or a full formal verification.
+
+The complete ARM DDI 0406C.d table still contains
+numerous ungranted instruction classes and encoding
+variants. This document leaves that uncompleted
+work explicit.
