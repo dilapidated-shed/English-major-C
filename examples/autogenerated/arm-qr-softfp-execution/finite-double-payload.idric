@@ -1,0 +1,12 @@
+module FiniteDoublePayload
+
+import Data.Bits
+
+binary64_payload : Type
+binary64_payload = Bits64
+
+finite_double_payload : binary64_payload → Bool
+finite_double_payload payload =
+  if (payload .&. 0x7ff0000000000000) ≟ 0x7ff0000000000000
+     then False
+     else True
