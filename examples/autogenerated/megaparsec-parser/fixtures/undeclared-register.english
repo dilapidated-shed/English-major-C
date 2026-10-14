@@ -1,0 +1,2 @@
+This program uses ARMv7-A Thumb instructions.
+Put zero into "undeclared register" without changing the condition flags.

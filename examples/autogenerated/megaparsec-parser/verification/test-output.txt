@@ -1,0 +1,45 @@
+PASS: actual source has the independently stated 14-operation sequence
+PASS: actual source validates, including its forward branch
+PASS: declarations and labels do not become operations
+PASS: each source range reconstructs the exact original item
+PASS: source-file identity is retained
+PASS: first source item starts on line one
+PASS: annotation text cannot introduce undeclared executable operands
+PASS: notes and explanations have distinct types
+PASS: nested note parentheses are retained
+PASS: annotation source includes both delimiters
+PASS: Unicode descriptive names validate
+PASS: Unicode character offsets reconstruct original items
+PASS: CRLF input keeps the same operation values
+PASS: word spacing and sentence line wrapping preserve operations
+PASS: sentences need not occupy separate lines
+PASS: distinct names that would collide under slugification stay distinct
+PASS: instruction names remain case-sensitive
+PASS: unknown instruction cannot be swallowed
+PASS: multiply is not silently invented
+PASS: unsupported physical-register spelling
+PASS: missing terminal period
+PASS: unterminated quoted name
+PASS: empty quoted name
+PASS: whitespace-only quoted name
+PASS: quoted names cannot span lines
+PASS: unterminated annotation
+PASS: unterminated nested annotation
+PASS: unrecognized annotation tag
+PASS: trailing punctuation is not ignored
+PASS: keyword prefix is not a complete keyword
+PASS: wrong flag-effect wording is not a comment
+PASS: undeclared register
+PASS: missing branch destination
+PASS: duplicate machine declaration
+PASS: missing machine declaration
+PASS: duplicate register name
+PASS: duplicate physical register
+PASS: duplicate instruction name
+PASS: late register declaration
+PASS: dangling instruction name
+PASS: empty source is not a program
+PASS: comments alone are not a program
+PASS: machine without operations is not a program
+All parser and validation assertions passed.
+Test suite parser-tests: PASS
