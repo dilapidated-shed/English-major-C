@@ -43,7 +43,14 @@ function check(corpus){
    observed[op]=(observed[op]||0)+1;
    let required=[];
    if(['shl','shr','sar'].includes(op)){
-     required=['effective count','CF becomes','SF is','ZF indicates','PF is','AF is undefined','OF is undefined'];
+     // Shift-by-one overflow is defined; counts greater than one leave it undefined.
+     const parts=r[4].match(/^(shl|shr|sar)\s+([^,]+),(\S+)/);
+     requireTrue(Boolean(parts),'unparsed captured shift '+key);
+     const w=/^(?:e(?:ax|bx|cx|dx|si|di|bp|sp)|r(?:8|9|1[0-5])d)$/.test(parts[2])?32:64;
+     const effectiveCount=Number(parts[3]) & (w===64?63:31);
+     requireTrue(effectiveCount>0 && effectiveCount<w,'unsupported shift count '+key);
+     const of=effectiveCount===1?(op==='sar'?'OF=0':op==='shr'?'OF equals the original most-significant bit':'OF equals the result most-significant bit XOR CF'):'OF is undefined';
+     required=['effective count','CF becomes','SF is','ZF indicates','PF is','AF is undefined',of];
    }else if(op==='imul'){
      required=['full signed product','low ','Set CF and OF','SF, ZF, AF, and PF are undefined'];
    }else if(op==='comisd'||op==='ucomisd'){
@@ -75,6 +82,7 @@ if(process.argv.includes('--self-test')){
  mustReject({...sources,dqrsl:sources.dqrsl.replace('SF, ZF, AF, and PF are undefined','SF, ZF, AF, and PF are defined')},'IMUL undefined flags');
  mustReject({...sources,'linked-executable':sources['linked-executable'].replace('ordered less: ZF=0, PF=0, CF=1','ordered less: ZF=0, PF=0, CF=0')},'floating comparison CF');
  mustReject({...sources,dqrls:sources.dqrls.replace('AF is undefined','AF is defined')},'shift auxiliary carry');
+ mustReject({...sources,'linked-executable':sources['linked-executable'].replace('OF=0. An effective count','OF=1. An effective count')},'defined shift-by-one overflow');
 }
 console.log('PASS source regression: '+result.total+' records, '+result.corrected+' corrected false CMOV, '+result.expanded+' expanded incomplete descriptions');
 console.log('SEMANTIC_ACCEPTANCE=UNVERIFIED: source guard is not independent whole-state machine evidence.');
