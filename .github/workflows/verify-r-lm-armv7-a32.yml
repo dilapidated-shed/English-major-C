@@ -1,0 +1,86 @@
+name: Verify archived R QR ARMv7-A A32 object bytes and assembly
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-archived-a32:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout the exact candidate revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Confirm exact head and install ARM disassembler
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends binutils-arm-linux-gnueabihf
+
+      - name: Prove archived ELF objects decode to each recorded instruction and relocation
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(pwd)/examples/r-lm-native-armv7-a32"
+          cd "$source_dir"
+          sha256sum -c SHA256SUMS
+          mkdir -p /tmp/r-qr-arm-capture
+          for routine in dqrls dqrdc2 dqrsl; do
+            object="$routine.armv7-a32.o"
+            listing="$routine.armv7-a32.disasm.txt"
+            cp "$object" "/tmp/r-qr-arm-capture/$object"
+            arm-linux-gnueabihf-readelf -h "$object" | grep -q 'Machine:[[:space:]]*ARM'
+            arm-linux-gnueabihf-readelf -A "$object" | grep -q 'Tag_CPU_arch: v7'
+            arm-linux-gnueabihf-readelf -A "$object" | grep -q 'Tag_ARM_ISA_use: Yes'
+            # Cross compiler was invoked with softfp, not the hard-float ABI.
+            if arm-linux-gnueabihf-readelf -A "$object" | grep -q 'Tag_ABI_VFP_args: VFP registers'; then
+              echo 'FAIL: archived softfp object advertises hard-float calling convention' >&2
+              exit 1
+            fi
+            arm-linux-gnueabihf-objdump -dr --disassemble="${routine}_" \
+              "/tmp/r-qr-arm-capture/$object" > "/tmp/r-qr-arm-capture/$listing"
+            cmp "$listing" "/tmp/r-qr-arm-capture/$listing"
+            grep -q "00000000 <${routine}_>:" "$listing"
+            echo "PASS preserved original machine instructions, relocations and A32 decode: $routine"
+          done
+
+      - name: Prove an altered disassembly, ELF object, checksum and missing file all fail
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(pwd)/examples/r-lm-native-armv7-a32"
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          cp -a "$source_dir/." "$work/"
+          cd "$work"
+          sha256sum -c SHA256SUMS
+          printf 'altered\n' >> dqrls.armv7-a32.disasm.txt
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: mutated assembly falsely passed identity verification' >&2; exit 1
+          fi
+          cp "$source_dir/dqrls.armv7-a32.disasm.txt" .
+          printf 'altered' >> dqrsl.armv7-a32.o
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: mutated ELF object falsely passed identity verification' >&2; exit 1
+          fi
+          cp "$source_dir/dqrsl.armv7-a32.o" .
+          sed -i '1s/^./0/' SHA256SUMS
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: modified checksum ledger falsely passed' >&2; exit 1
+          fi
+          cp "$source_dir/SHA256SUMS" .
+          rm dqrdc2.armv7-a32.o
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: missing ELF object falsely passed' >&2; exit 1
+          fi
+          echo 'PASS: mutated listing, object, ledger, and missing-object fixtures rejected'
