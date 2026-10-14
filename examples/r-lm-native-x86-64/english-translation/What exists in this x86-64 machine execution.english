@@ -166,10 +166,13 @@ Conditional transfer:
 - JLE = "branch if signed less or equal (zero=1 or sign != overflow)".
 - JP = "branch if parity flag is set"; immediately after a
   scalar floating comparison it detects an *unordered* comparison.
-- CMOVS, CMOVNS, CMOVE, CMOVLE, CMOVG = "copy conditionally depending
-  on the relevant sign/zero/overflow flags"; if the condition is
-  false the destination stays unchanged, although a memory source
-  can still be read and fault. Conditional move is not a branch.
+- CMOVS, CMOVNS, CMOVE, CMOVLE, CMOVG = "select a register value
+  conditionally without branching." When the condition is false, only
+  the destination low-width value is selected again. A 32-bit CMOV
+  destination ALWAYS zero-extends into its encompassing 64-bit register,
+  including on a false condition; a 64-bit CMOV destination preserves
+  all 64 bits on a false condition. A memory source can still be read
+  and fault regardless of the condition. RFLAGS are unchanged.
 - SETA = "write one byte representing whether unsigned above is true".
 
 Scalar floating values and status:

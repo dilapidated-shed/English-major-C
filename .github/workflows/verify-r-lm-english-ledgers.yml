@@ -37,7 +37,10 @@ jobs:
       - name: Verify every recorded instruction and corrupted-ledger rejection
         run: |
           node examples/r-lm-native-x86-64/english-translation/verify-english-ledgers.mjs --self-test
+      - name: Reject prior incorrect x86 instruction effects and mutations
+        run: |
+          node examples/r-lm-native-x86-64/english-translation/verify-repaired-qr-english.mjs --self-test
 
-# Source-alignment and negative mutants only. Does NOT confirm semantic correctness,
+# Source alignment and repaired-effect regression only. Does NOT confirm full semantic correctness,
 # numerical behavior, floating-point exceptions, x86 CPU execution, ARM lowering,
 # non-bypassable Flexible Pipes, or independent ai-ci acceptance.

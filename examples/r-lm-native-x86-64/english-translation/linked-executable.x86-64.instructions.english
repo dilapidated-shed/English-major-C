@@ -1005,8 +1005,8 @@ INSTRUCTION 0141 | 0x1344 | f2 0f 10 04 c3 | movsd  xmm0,QWORD PTR [rbx+rax*8]
 
 INSTRUCTION 0142 | 0x1349 | f2 0f 2a d0 | cvtsi2sd xmm2,eax
   Section or entry point: main.
-  Long operation: Convert a signed integer to a double-precision floating value.
-  Detailed first-pass effect: Convert signed integer value eax to an IEEE-754 double-precision value under rounding control, store it in the low lane of xmm2, and preserve the high lane for the legacy encoding.
+  Long operation: Convert the signed 32-bit source integer exactly into a binary64 scalar lane.
+  Detailed first-pass effect: Interpret eax as a signed 32-bit two's-complement integer and convert it exactly to binary64, since every signed 32-bit integer is exactly representable. Write this 64-bit value to the low lane of xmm2, preserving bits 127 through 64 of its old value. RFLAGS are unchanged; this form cannot cause a rounding/inexact exception. This rule does not apply to 64-bit integer inputs or different source encodings.
   Sequential successor if not otherwise redirected or faulting: 0x134d (4 bytes).
   Link-time relocation: none.
 
@@ -1019,36 +1019,36 @@ INSTRUCTION 0143 | 0x134d | 48 83 c0 01 | add    rax,0x1
 
 INSTRUCTION 0144 | 0x1351 | f2 0f 5c c4 | subsd  xmm0,xmm4
   Section or entry point: main.
-  Long operation: Subtract the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and xmm4 to subtract source from destination under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 sub using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, subtract source low binary64 from destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1355 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0145 | 0x1355 | f2 0f 59 d1 | mulsd  xmm2,xmm1
   Section or entry point: main.
-  Long operation: Multiply the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm2 and xmm1 to multiply under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm2; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 mul using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, multiply the destination low binary64 by the source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm2, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1359 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0146 | 0x1359 | f2 0f 5c c2 | subsd  xmm0,xmm2
   Section or entry point: main.
-  Long operation: Subtract the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and xmm2 to subtract source from destination under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 sub using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, subtract source low binary64 from destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x135d (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0147 | 0x135d | f2 0f 59 c0 | mulsd  xmm0,xmm0
   Section or entry point: main.
-  Long operation: Multiply the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and xmm0 to multiply under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 mul using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, multiply the destination low binary64 by the source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1361 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0148 | 0x1361 | f2 0f 58 d8 | addsd  xmm3,xmm0
   Section or entry point: main.
-  Long operation: Add the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm3 and xmm0 to add under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm3; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 add using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, add source low binary64 to destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm3, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1365 (4 bytes).
   Link-time relocation: none.
 
@@ -1138,8 +1138,8 @@ INSTRUCTION 0160 | 0x1396 | f2 0f 10 24 24 | movsd  xmm4,QWORD PTR [rsp]
 
 INSTRUCTION 0161 | 0x139b | f2 0f 5c 25 7d 1d 00 00 | subsd  xmm4,QWORD PTR [rip+0x1d7d]        # 3120 <_IO_stdin_used+0x120>
   Section or entry point: main.
-  Long operation: Subtract the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm4 and QWORD PTR [rip+0x1d7d]        # 3120 <_IO_stdin_used+0x120> to subtract source from destination under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm4; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 sub using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rip+0x1d7d]; a memory fault prevents normal completion. For normally completing finite inputs, subtract source low binary64 from destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm4, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x13a3 (8 bytes).
   Link-time relocation: none.
 
@@ -1159,8 +1159,8 @@ INSTRUCTION 0163 | 0x13ab | 66 0f 54 e0 | andpd  xmm4,xmm0
 
 INSTRUCTION 0164 | 0x13af | 66 0f 2f 25 71 1d 00 00 | comisd xmm4,QWORD PTR [rip+0x1d71]        # 3128 <_IO_stdin_used+0x128>
   Section or entry point: main.
-  Long operation: Compare low double-precision lanes and write status flags with signaling-NaN rules.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm4 and QWORD PTR [rip+0x1d71]        # 3128 <_IO_stdin_used+0x128>. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. COMISD signals invalid operation for quiet as well as signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm4 against the eight-byte value from QWORD PTR [rip+0x1d71]; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Quiet and signaling NaNs can raise invalid-operation floating exceptions; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x13b7 (8 bytes).
   Link-time relocation: none.
 
@@ -1180,8 +1180,8 @@ INSTRUCTION 0166 | 0x13b9 | f2 0f 10 4c 24 08 | movsd  xmm1,QWORD PTR [rsp+0x8]
 
 INSTRUCTION 0167 | 0x13bf | f2 0f 5c 0d 69 1d 00 00 | subsd  xmm1,QWORD PTR [rip+0x1d69]        # 3130 <_IO_stdin_used+0x130>
   Section or entry point: main.
-  Long operation: Subtract the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm1 and QWORD PTR [rip+0x1d69]        # 3130 <_IO_stdin_used+0x130> to subtract source from destination under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm1; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 sub using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rip+0x1d69]; a memory fault prevents normal completion. For normally completing finite inputs, subtract source low binary64 from destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm1, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x13c7 (8 bytes).
   Link-time relocation: none.
 
@@ -1201,8 +1201,8 @@ INSTRUCTION 0169 | 0x13c9 | 66 0f 54 c8 | andpd  xmm1,xmm0
 
 INSTRUCTION 0170 | 0x13cd | 66 0f 2f 0d 53 1d 00 00 | comisd xmm1,QWORD PTR [rip+0x1d53]        # 3128 <_IO_stdin_used+0x128>
   Section or entry point: main.
-  Long operation: Compare low double-precision lanes and write status flags with signaling-NaN rules.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm1 and QWORD PTR [rip+0x1d53]        # 3128 <_IO_stdin_used+0x128>. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. COMISD signals invalid operation for quiet as well as signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm1 against the eight-byte value from QWORD PTR [rip+0x1d53]; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Quiet and signaling NaNs can raise invalid-operation floating exceptions; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x13d5 (8 bytes).
   Link-time relocation: none.
 
@@ -1509,15 +1509,15 @@ INSTRUCTION 0213 | 0x1481 | 48 89 f0 | mov    rax,rsi
 
 INSTRUCTION 0214 | 0x1484 | 48 c1 ee 3f | shr    rsi,0x3f
   Section or entry point: register_tm_clones.
-  Long operation: Shift bits right while filling high bits with zero.
-  Detailed first-pass effect: Read rsi and shift count 0x3f; shift bits toward lower positions, filling high bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3f with 0x3f; effective count is 63. From the pre-instruction register bits, shift the original 64-bit value of rsi right 63, discarding low bits and inserting high zero bits. Write the low 64-bit result to rsi. CF becomes original bit 62 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x1488 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0215 | 0x1488 | 48 c1 f8 03 | sar    rax,0x3
   Section or entry point: register_tm_clones.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read rax and shift count 0x3; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, arithmetic-shift the original signed 64-bit value of rax right 3, replicating its original sign bit. Write the low 64-bit result to rax. CF becomes original bit 2 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x148c (4 bytes).
   Link-time relocation: none.
 
@@ -1530,8 +1530,8 @@ INSTRUCTION 0216 | 0x148c | 48 01 c6 | add    rsi,rax
 
 INSTRUCTION 0217 | 0x148f | 48 d1 fe | sar    rsi,1
   Section or entry point: register_tm_clones.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read rsi and shift count 1; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 1 with 0x3f; effective count is 1. From the pre-instruction register bits, arithmetic-shift the original signed 64-bit value of rsi right 1, replicating its original sign bit. Write the low 64-bit result to rsi. CF becomes original bit 0 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF=0. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x1492 (3 bytes).
   Link-time relocation: none.
 
@@ -2020,8 +2020,8 @@ INSTRUCTION 0286 | 0x15a4 | 89 54 24 1c | mov    DWORD PTR [rsp+0x1c],edx
 
 INSTRUCTION 0287 | 0x15a8 | 48 c1 e5 03 | shl    rbp,0x3
   Section or entry point: dqrls_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rbp and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rbp left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rbp. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x15ac (4 bytes).
   Link-time relocation: none.
 
@@ -2377,8 +2377,8 @@ INSTRUCTION 0337 | 0x1674 | 48 8b 84 24 90 00 00 00 | mov    rax,QWORD PTR [rsp+
 
 INSTRUCTION 0338 | 0x167c | 48 c1 e1 03 | shl    rcx,0x3
   Section or entry point: dqrls_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rcx and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rcx left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rcx. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x1680 (4 bytes).
   Link-time relocation: none.
 
@@ -2587,8 +2587,8 @@ INSTRUCTION 0367 | 0x16da | 44 8d 41 01 | lea    r8d,[rcx+0x1]
 
 INSTRUCTION 0368 | 0x16de | 48 c1 e5 03 | shl    rbp,0x3
   Section or entry point: dqrls_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rbp and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rbp left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rbp. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x16e2 (4 bytes).
   Link-time relocation: none.
 
@@ -3287,8 +3287,8 @@ INSTRUCTION 0467 | 0x188a | 48 8b 84 24 70 01 00 00 | mov    rax,QWORD PTR [rsp+
 
 INSTRUCTION 0468 | 0x1892 | 66 0f 2e c1 | ucomisd xmm0,xmm1
   Section or entry point: dqrdc2_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and xmm1. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the low 64 bits of xmm1; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x1896 (4 bytes).
   Link-time relocation: none.
 
@@ -3448,8 +3448,8 @@ INSTRUCTION 0490 | 0x18f3 | 89 b4 24 c0 00 00 00 | mov    DWORD PTR [rsp+0xc0],e
 
 INSTRUCTION 0491 | 0x18fa | 41 0f 4e f0 | cmovle esi,r8d
   Section or entry point: dqrdc2_.
-  Long operation: Copy data only if zero flag is set or sign and overflow differ (ZF=1 or SF≠OF).
-  Detailed first-pass effect: Evaluate whether the zero flag is set or sign and overflow differ (ZF=1 or SF≠OF). The operand value from r8d is made available; if the condition passes copy it to esi, otherwise leave that destination unchanged. A memory source can be read (and fault) even when the condition is false. Arithmetic flags are not changed.
+  Long operation: Select a 32-bit value conditionally and write the entire encompassing 64-bit register.
+  Detailed first-pass effect: Read the original low 32 bits of esi and the 32-bit register r8d. Check ZF=1 or SF differs from OF; select r8d if true, or the old low 32 bits of esi if false. In BOTH cases write the selected low 32 bits into esi, clearing bits 63 through 32 of rsi, including when the condition is false. No condition flag changes. The recorded source is a register; a memory-source conditional move can fault even when its condition is false.
   Sequential successor if not otherwise redirected or faulting: 0x18fe (4 bytes).
   Link-time relocation: none.
 
@@ -3756,8 +3756,8 @@ INSTRUCTION 0534 | 0x19dd | f2 0f 11 ac 24 80 00 00 00 | movsd  QWORD PTR [rsp+0
 
 INSTRUCTION 0535 | 0x19e6 | 48 0f af c6 | imul   rax,rsi
   Section or entry point: dqrdc2_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rax ; rsi], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit two-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the old signed 64-bit values of rax and rsi; the original destination supplies the first multiplicand. Store the low 64 bits in rax; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x19ea (4 bytes).
   Link-time relocation: none.
 
@@ -4015,15 +4015,15 @@ INSTRUCTION 0571 | 0x1acc | f2 0f 10 1c f8 | movsd  xmm3,QWORD PTR [rax+rdi*8]
 
 INSTRUCTION 0572 | 0x1ad1 | f2 0f 59 c3 | mulsd  xmm0,xmm3
   Section or entry point: dqrdc2_.
-  Long operation: Multiply the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and xmm3 to multiply under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 mul using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, multiply the destination low binary64 by the source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1ad5 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0573 | 0x1ad5 | 66 0f 2f d0 | comisd xmm2,xmm0
   Section or entry point: dqrdc2_.
-  Long operation: Compare low double-precision lanes and write status flags with signaling-NaN rules.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm2 and xmm0. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. COMISD signals invalid operation for quiet as well as signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm2 against the low 64 bits of xmm0; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Quiet and signaling NaNs can raise invalid-operation floating exceptions; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x1ad9 (4 bytes).
   Link-time relocation: none.
 
@@ -4113,8 +4113,8 @@ INSTRUCTION 0585 | 0x1b0f | 44 8b 9c 24 c4 00 00 00 | mov    r11d,DWORD PTR [rsp
 
 INSTRUCTION 0586 | 0x1b17 | 49 0f af c0 | imul   rax,r8
   Section or entry point: dqrdc2_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rax ; r8], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit two-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the old signed 64-bit values of rax and r8; the original destination supplies the first multiplicand. Store the low 64 bits in rax; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x1b1b (4 bytes).
   Link-time relocation: none.
 
@@ -4883,8 +4883,8 @@ INSTRUCTION 0695 | 0x1d46 | 66 0f ef c9 | pxor   xmm1,xmm1
 
 INSTRUCTION 0696 | 0x1d4a | 66 0f 2e c1 | ucomisd xmm0,xmm1
   Section or entry point: dqrdc2_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and xmm1. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the low 64 bits of xmm1; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x1d4e (4 bytes).
   Link-time relocation: none.
 
@@ -4925,8 +4925,8 @@ INSTRUCTION 0701 | 0x1d62 | f2 0f 10 08 | movsd  xmm1,QWORD PTR [rax]
 
 INSTRUCTION 0702 | 0x1d66 | 66 0f 2e cb | ucomisd xmm1,xmm3
   Section or entry point: dqrdc2_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm1 and xmm3. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm1 against the low 64 bits of xmm3; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x1d6a (4 bytes).
   Link-time relocation: none.
 
@@ -5058,8 +5058,8 @@ INSTRUCTION 0720 | 0x1dc2 | f2 0f 11 44 24 38 | movsd  QWORD PTR [rsp+0x38],xmm0
 
 INSTRUCTION 0721 | 0x1dc8 | f2 0f 5e c8 | divsd  xmm1,xmm0
   Section or entry point: dqrdc2_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm1 and xmm0 to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm1; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm1, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1dcc (4 bytes).
   Link-time relocation: none.
 
@@ -5135,8 +5135,8 @@ INSTRUCTION 0731 | 0x1df8 | f2 0f 10 0d 38 13 00 00 | movsd  xmm1,QWORD PTR [rip
 
 INSTRUCTION 0732 | 0x1e00 | f2 0f 58 0b | addsd  xmm1,QWORD PTR [rbx]
   Section or entry point: dqrdc2_.
-  Long operation: Add the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm1 and QWORD PTR [rbx] to add under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm1; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 add using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rbx]; a memory fault prevents normal completion. For normally completing finite inputs, add source low binary64 to destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm1, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1e04 (4 bytes).
   Link-time relocation: none.
 
@@ -5331,8 +5331,8 @@ INSTRUCTION 0759 | 0x1e98 | 41 39 c0 | cmp    r8d,eax
 
 INSTRUCTION 0760 | 0x1e9b | 41 0f 4e c0 | cmovle eax,r8d
   Section or entry point: dqrdc2_.
-  Long operation: Copy data only if zero flag is set or sign and overflow differ (ZF=1 or SF≠OF).
-  Detailed first-pass effect: Evaluate whether the zero flag is set or sign and overflow differ (ZF=1 or SF≠OF). The operand value from r8d is made available; if the condition passes copy it to eax, otherwise leave that destination unchanged. A memory source can be read (and fault) even when the condition is false. Arithmetic flags are not changed.
+  Long operation: Select a 32-bit value conditionally and write the entire encompassing 64-bit register.
+  Detailed first-pass effect: Read the original low 32 bits of eax and the 32-bit register r8d. Check ZF=1 or SF differs from OF; select r8d if true, or the old low 32 bits of eax if false. In BOTH cases write the selected low 32 bits into eax, clearing bits 63 through 32 of rax, including when the condition is false. No condition flag changes. The recorded source is a register; a memory-source conditional move can fault even when its condition is false.
   Sequential successor if not otherwise redirected or faulting: 0x1e9f (4 bytes).
   Link-time relocation: none.
 
@@ -5520,8 +5520,8 @@ INSTRUCTION 0786 | 0x1f07 | 49 89 dd | mov    r13,rbx
 
 INSTRUCTION 0787 | 0x1f0a | 48 0f af d3 | imul   rdx,rbx
   Section or entry point: dqrdc2_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rdx ; rbx], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit two-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the old signed 64-bit values of rdx and rbx; the original destination supplies the first multiplicand. Store the low 64 bits in rdx; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x1f0e (4 bytes).
   Link-time relocation: none.
 
@@ -5604,8 +5604,8 @@ INSTRUCTION 0798 | 0x1f3e | eb 27 | jmp    1f67 <dqrdc2_+0x7c7>
 
 INSTRUCTION 0799 | 0x1f40 | f2 0f 51 db | sqrtsd xmm3,xmm3
   Section or entry point: dqrdc2_.
-  Long operation: Compute the low double-precision square root with the declared rounding environment.
-  Detailed first-pass effect: Compute the correctly rounded square root, under current MXCSR, of the low double-precision lane of xmm3; write to the low lane of xmm3, preserving the remaining high lane of the legacy destination.
+  Long operation: Compute a rounded scalar binary64 square root from the source low lane.
+  Detailed first-pass effect: Read the low binary64 lane of xmm3 and calculate its square root rounded according to MXCSR.RC; write the completed result to the low lane of xmm3, preserving original bits 127 through 64. Negative finite nonzero inputs raise invalid-operation status; signed zeros retain their sign and positive infinity yields positive infinity on normal completion. RFLAGS are unchanged. MXCSR masks, exception state and NaN-payload effects remain material; an unmasked exception may prevent normal completion.
   Sequential successor if not otherwise redirected or faulting: 0x1f44 (4 bytes).
   Link-time relocation: none.
 
@@ -5618,8 +5618,8 @@ INSTRUCTION 0800 | 0x1f44 | 48 8b 84 24 70 01 00 00 | mov    rax,QWORD PTR [rsp+
 
 INSTRUCTION 0801 | 0x1f4c | f2 0f 59 dc | mulsd  xmm3,xmm4
   Section or entry point: dqrdc2_.
-  Long operation: Multiply the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm3 and xmm4 to multiply under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm3; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 mul using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, multiply the destination low binary64 by the source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm3, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1f50 (4 bytes).
   Link-time relocation: none.
 
@@ -5807,8 +5807,8 @@ INSTRUCTION 0827 | 0x1fbb | 83 c2 01 | add    edx,0x1
 
 INSTRUCTION 0828 | 0x1fbe | f2 0f 5e 00 | divsd  xmm0,QWORD PTR [rax]
   Section or entry point: dqrdc2_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and QWORD PTR [rax] to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rax]; a memory fault prevents normal completion. For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x1fc2 (4 bytes).
   Link-time relocation: none.
 
@@ -5870,8 +5870,8 @@ INSTRUCTION 0836 | 0x1fec | f2 42 0f 10 64 e8 f8 | movsd  xmm4,QWORD PTR [rax+r1
 
 INSTRUCTION 0837 | 0x1ff3 | 66 0f 2e e7 | ucomisd xmm4,xmm7
   Section or entry point: dqrdc2_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm4 and xmm7. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm4 against the low 64 bits of xmm7; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x1ff7 (4 bytes).
   Link-time relocation: none.
 
@@ -5919,29 +5919,29 @@ INSTRUCTION 0843 | 0x2011 | f2 0f 10 1d 1f 11 00 00 | movsd  xmm3,QWORD PTR [rip
 
 INSTRUCTION 0844 | 0x2019 | f2 0f 5e cc | divsd  xmm1,xmm4
   Section or entry point: dqrdc2_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm1 and xmm4 to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm1; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm1, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x201d (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0845 | 0x201d | f2 0f 59 c9 | mulsd  xmm1,xmm1
   Section or entry point: dqrdc2_.
-  Long operation: Multiply the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm1 and xmm1 to multiply under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm1; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 mul using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, multiply the destination low binary64 by the source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm1, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x2021 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0846 | 0x2021 | f2 0f 5c d9 | subsd  xmm3,xmm1
   Section or entry point: dqrdc2_.
-  Long operation: Subtract the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm3 and xmm1 to subtract source from destination under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm3; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 sub using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, subtract source low binary64 from destination low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm3, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x2025 (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0847 | 0x2025 | f2 0f 5f dd | maxsd  xmm3,xmm5
   Section or entry point: dqrdc2_.
-  Long operation: Select the low double-precision maximum with legacy NaN and tie behavior.
-  Detailed first-pass effect: Select a low-lane result between xmm3 and xmm5 under legacy MAXSD rules, including noncommutative NaN and signed-zero-tie behavior. Write only the destination's low lane, preserve its high lane. A mathematical max() alone is not an exact substitute.
+  Long operation: Select legacy scalar binary64 maximum using source priority for NaN and signed-zero ties.
+  Detailed first-pass effect: Compare the old low binary64 lanes of xmm3 and xmm5. If either input is a NaN, or both are zero (regardless of their signs), select the second operand xmm5; otherwise select the greater value, with the second operand chosen on equality. Write its selected 64-bit low payload into xmm3, preserving bits 127 through 64 of the old destination. RFLAGS are unchanged. MXCSR exception behavior and precise signaling-NaN payload forwarding remain to be separately validated; do not substitute an ordinary commutative mathematical maximum.
   Sequential successor if not otherwise redirected or faulting: 0x2029 (4 bytes).
   Link-time relocation: none.
 
@@ -5968,8 +5968,8 @@ INSTRUCTION 0850 | 0x2036 | 66 0f 54 05 b2 10 00 00 | andpd  xmm0,XMMWORD PTR [r
 
 INSTRUCTION 0851 | 0x203e | 66 0f 2f 05 fa 10 00 00 | comisd xmm0,QWORD PTR [rip+0x10fa]        # 3140 <_IO_stdin_used+0x140>
   Section or entry point: dqrdc2_.
-  Long operation: Compare low double-precision lanes and write status flags with signaling-NaN rules.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and QWORD PTR [rip+0x10fa]        # 3140 <_IO_stdin_used+0x140>. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. COMISD signals invalid operation for quiet as well as signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the eight-byte value from QWORD PTR [rip+0x10fa]; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Quiet and signaling NaNs can raise invalid-operation floating exceptions; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x2046 (8 bytes).
   Link-time relocation: none.
 
@@ -6143,8 +6143,8 @@ INSTRUCTION 0875 | 0x20be | 41 39 d3 | cmp    r11d,edx
 
 INSTRUCTION 0876 | 0x20c1 | 44 0f 4f da | cmovg  r11d,edx
   Section or entry point: dqrdc2_.
-  Long operation: Copy data only if zero flag is clear and sign and overflow agree (ZF=0 and SF=OF).
-  Detailed first-pass effect: Evaluate whether the zero flag is clear and sign and overflow agree (ZF=0 and SF=OF). The operand value from edx is made available; if the condition passes copy it to r11d, otherwise leave that destination unchanged. A memory source can be read (and fault) even when the condition is false. Arithmetic flags are not changed.
+  Long operation: Select a 32-bit value conditionally and write the entire encompassing 64-bit register.
+  Detailed first-pass effect: Read the original low 32 bits of r11d and the 32-bit register edx. Check ZF=0 and SF equals OF; select edx if true, or the old low 32 bits of r11d if false. In BOTH cases write the selected low 32 bits into r11d, clearing bits 63 through 32 of r11, including when the condition is false. No condition flag changes. The recorded source is a register; a memory-source conditional move can fault even when its condition is false.
   Sequential successor if not otherwise redirected or faulting: 0x20c5 (4 bytes).
   Link-time relocation: none.
 
@@ -6290,8 +6290,8 @@ INSTRUCTION 0896 | 0x2111 | 48 63 00 | movsxd rax,DWORD PTR [rax]
 
 INSTRUCTION 0897 | 0x2114 | 4c 69 e0 ad 8b db 68 | imul   r12,rax,0x68db8bad
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [r12 ; rax ; 0x68db8bad], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 64-bit value of rax and the immediate 0x68db8bad, sign-extended from its encoded width to 64 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 64 bits in r12; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x211b (7 bytes).
   Link-time relocation: none.
 
@@ -6318,8 +6318,8 @@ INSTRUCTION 0900 | 0x2120 | 48 89 c2 | mov    rdx,rax
 
 INSTRUCTION 0901 | 0x2123 | c1 ff 1f | sar    edi,0x1f
   Section or entry point: dqrsl_.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read edi and shift count 0x1f; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 32-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x1f with 0x1f; effective count is 31. From the pre-instruction register bits, arithmetic-shift the original signed 32-bit value of edi right 31, replicating its original sign bit. Write the low 32-bit result to edi, clearing bits 63 through 32 of rdi. CF becomes original bit 30 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x2126 (3 bytes).
   Link-time relocation: none.
 
@@ -6332,8 +6332,8 @@ INSTRUCTION 0902 | 0x2126 | 8d 88 0f 27 00 00 | lea    ecx,[rax+0x270f]
 
 INSTRUCTION 0903 | 0x212c | 49 c1 fc 2c | sar    r12,0x2c
   Section or entry point: dqrsl_.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read r12 and shift count 0x2c; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x2c with 0x3f; effective count is 44. From the pre-instruction register bits, arithmetic-shift the original signed 64-bit value of r12 right 44, replicating its original sign bit. Write the low 64-bit result to r12. CF becomes original bit 43 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x2130 (4 bytes).
   Link-time relocation: none.
 
@@ -6346,8 +6346,8 @@ INSTRUCTION 0904 | 0x2130 | 41 29 fc | sub    r12d,edi
 
 INSTRUCTION 0905 | 0x2133 | 45 69 c4 10 27 00 00 | imul   r8d,r12d,0x2710
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [r8d ; r12d ; 0x2710], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 32-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 32-bit value of r12d and the immediate 0x2710, sign-extended from its encoded width to 32 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 32 bits in r8d; clear bits 63 through 32 of r8 as required by this 32-bit register write. Set CF and OF both to one exactly when the full signed result does not fit in 32 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x213a (7 bytes).
   Link-time relocation: none.
 
@@ -6367,15 +6367,15 @@ INSTRUCTION 0907 | 0x213d | 45 29 c4 | sub    r12d,r8d
 
 INSTRUCTION 0908 | 0x2140 | 4c 69 c0 d3 4d 62 10 | imul   r8,rax,0x10624dd3
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [r8 ; rax ; 0x10624dd3], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 64-bit value of rax and the immediate 0x10624dd3, sign-extended from its encoded width to 64 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 64 bits in r8; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x2147 (7 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0909 | 0x2147 | 49 c1 f8 26 | sar    r8,0x26
   Section or entry point: dqrsl_.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read r8 and shift count 0x26; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x26 with 0x3f; effective count is 38. From the pre-instruction register bits, arithmetic-shift the original signed 64-bit value of r8 right 38, replicating its original sign bit. Write the low 64-bit result to r8. CF becomes original bit 37 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x214b (4 bytes).
   Link-time relocation: none.
 
@@ -6388,8 +6388,8 @@ INSTRUCTION 0910 | 0x214b | 41 29 f8 | sub    r8d,edi
 
 INSTRUCTION 0911 | 0x214e | 45 69 c0 e8 03 00 00 | imul   r8d,r8d,0x3e8
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [r8d ; r8d ; 0x3e8], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 32-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 32-bit value of r8d and the immediate 0x3e8, sign-extended from its encoded width to 32 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 32 bits in r8d; clear bits 63 through 32 of r8 as required by this 32-bit register write. Set CF and OF both to one exactly when the full signed result does not fit in 32 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x2155 (7 bytes).
   Link-time relocation: none.
 
@@ -6402,8 +6402,8 @@ INSTRUCTION 0912 | 0x2155 | 45 29 c1 | sub    r9d,r8d
 
 INSTRUCTION 0913 | 0x2158 | 4c 69 c0 1f 85 eb 51 | imul   r8,rax,0x51eb851f
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [r8 ; rax ; 0x51eb851f], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 64-bit value of rax and the immediate 0x51eb851f, sign-extended from its encoded width to 64 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 64 bits in r8; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x215f (7 bytes).
   Link-time relocation: none.
 
@@ -6423,8 +6423,8 @@ INSTRUCTION 0915 | 0x2163 | 41 89 c1 | mov    r9d,eax
 
 INSTRUCTION 0916 | 0x2166 | 48 69 c0 67 66 66 66 | imul   rax,rax,0x66666667
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rax ; rax ; 0x66666667], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 64-bit value of rax and the immediate 0x66666667, sign-extended from its encoded width to 64 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 64 bits in rax; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x216d (7 bytes).
   Link-time relocation: none.
 
@@ -6437,8 +6437,8 @@ INSTRUCTION 0917 | 0x216d | 89 5c 24 1c | mov    DWORD PTR [rsp+0x1c],ebx
 
 INSTRUCTION 0918 | 0x2171 | 49 c1 f8 25 | sar    r8,0x25
   Section or entry point: dqrsl_.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read r8 and shift count 0x25; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x25 with 0x3f; effective count is 37. From the pre-instruction register bits, arithmetic-shift the original signed 64-bit value of r8 right 37, replicating its original sign bit. Write the low 64-bit result to r8. CF becomes original bit 36 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x2175 (4 bytes).
   Link-time relocation: none.
 
@@ -6451,15 +6451,15 @@ INSTRUCTION 0919 | 0x2175 | 41 29 f8 | sub    r8d,edi
 
 INSTRUCTION 0920 | 0x2178 | 48 c1 f8 22 | sar    rax,0x22
   Section or entry point: dqrsl_.
-  Long operation: Shift bits right while preserving the original sign bit.
-  Detailed first-pass effect: Read rax and shift count 0x22; shift bits toward lower positions, replicating the original sign bit; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register right with sign fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x22 with 0x3f; effective count is 34. From the pre-instruction register bits, arithmetic-shift the original signed 64-bit value of rax right 34, replicating its original sign bit. Write the low 64-bit result to rax. CF becomes original bit 33 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x217c (4 bytes).
   Link-time relocation: none.
 
 INSTRUCTION 0921 | 0x217c | 45 6b c0 64 | imul   r8d,r8d,0x64
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [r8d ; r8d ; 0x64], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 32-bit integers using the explicit three-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the signed 32-bit value of r8d and the immediate 0x64, sign-extended from its encoded width to 32 bits; the immediate and second operand supply both multiplicands, not the old destination. Store the low 32 bits in r8d; clear bits 63 through 32 of r8 as required by this 32-bit register write. Set CF and OF both to one exactly when the full signed result does not fit in 32 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x2180 (4 bytes).
   Link-time relocation: none.
 
@@ -6549,8 +6549,8 @@ INSTRUCTION 0933 | 0x21a0 | 39 c3 | cmp    ebx,eax
 
 INSTRUCTION 0934 | 0x21a2 | 0f 4f d8 | cmovg  ebx,eax
   Section or entry point: dqrsl_.
-  Long operation: Copy data only if zero flag is clear and sign and overflow agree (ZF=0 and SF=OF).
-  Detailed first-pass effect: Evaluate whether the zero flag is clear and sign and overflow agree (ZF=0 and SF=OF). The operand value from eax is made available; if the condition passes copy it to ebx, otherwise leave that destination unchanged. A memory source can be read (and fault) even when the condition is false. Arithmetic flags are not changed.
+  Long operation: Select a 32-bit value conditionally and write the entire encompassing 64-bit register.
+  Detailed first-pass effect: Read the original low 32 bits of ebx and the 32-bit register eax. Check ZF=0 and SF equals OF; select eax if true, or the old low 32 bits of ebx if false. In BOTH cases write the selected low 32 bits into ebx, clearing bits 63 through 32 of rbx, including when the condition is false. No condition flag changes. The recorded source is a register; a memory-source conditional move can fault even when its condition is false.
   Sequential successor if not otherwise redirected or faulting: 0x21a5 (3 bytes).
   Link-time relocation: none.
 
@@ -6710,8 +6710,8 @@ INSTRUCTION 0956 | 0x2208 | f2 0f 10 00 | movsd  xmm0,QWORD PTR [rax]
 
 INSTRUCTION 0957 | 0x220c | 66 0f 2e c1 | ucomisd xmm0,xmm1
   Section or entry point: dqrsl_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and xmm1. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the low 64 bits of xmm1; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x2210 (4 bytes).
   Link-time relocation: none.
 
@@ -7025,8 +7025,8 @@ INSTRUCTION 1001 | 0x22bf | 4c 89 5c 24 30 | mov    QWORD PTR [rsp+0x30],r11
 
 INSTRUCTION 1002 | 0x22c4 | 48 c1 e2 03 | shl    rdx,0x3
   Section or entry point: dqrsl_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rdx and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rdx left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rdx. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x22c8 (4 bytes).
   Link-time relocation: none.
 
@@ -7214,8 +7214,8 @@ INSTRUCTION 1028 | 0x2333 | f2 41 0f 10 04 c8 | movsd  xmm0,QWORD PTR [r8+rcx*8]
 
 INSTRUCTION 1029 | 0x2339 | f2 0f 5e c1 | divsd  xmm0,xmm1
   Section or entry point: dqrsl_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and xmm1 to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x233d (4 bytes).
   Link-time relocation: none.
 
@@ -7382,8 +7382,8 @@ INSTRUCTION 1052 | 0x23a5 | 48 89 cf | mov    rdi,rcx
 
 INSTRUCTION 1053 | 0x23a8 | 48 0f af fb | imul   rdi,rbx
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rdi ; rbx], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit two-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the old signed 64-bit values of rdi and rbx; the original destination supplies the first multiplicand. Store the low 64 bits in rdi; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x23ac (4 bytes).
   Link-time relocation: none.
 
@@ -7410,8 +7410,8 @@ INSTRUCTION 1056 | 0x23b2 | f2 41 0f 10 0c cf | movsd  xmm1,QWORD PTR [r15+rcx*8
 
 INSTRUCTION 1057 | 0x23b8 | 66 0f 2e c8 | ucomisd xmm1,xmm0
   Section or entry point: dqrsl_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm1 and xmm0. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm1 against the low 64 bits of xmm0; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x23bc (4 bytes).
   Link-time relocation: none.
 
@@ -7543,8 +7543,8 @@ INSTRUCTION 1075 | 0x2405 | 44 89 4c 24 1c | mov    DWORD PTR [rsp+0x1c],r9d
 
 INSTRUCTION 1076 | 0x240a | 48 c1 e0 03 | shl    rax,0x3
   Section or entry point: dqrsl_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rax and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rax left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rax. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x240e (4 bytes).
   Link-time relocation: none.
 
@@ -7732,8 +7732,8 @@ INSTRUCTION 1102 | 0x2475 | f2 41 0f 10 47 f8 | movsd  xmm0,QWORD PTR [r15-0x8]
 
 INSTRUCTION 1103 | 0x247b | 66 0f 2e c1 | ucomisd xmm0,xmm1
   Section or entry point: dqrsl_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and xmm1. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the low 64 bits of xmm1; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x247f (4 bytes).
   Link-time relocation: none.
 
@@ -7795,8 +7795,8 @@ INSTRUCTION 1111 | 0x2497 | 48 63 c8 | movsxd rcx,eax
 
 INSTRUCTION 1112 | 0x249a | 48 0f af d1 | imul   rdx,rcx
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rdx ; rcx], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit two-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the old signed 64-bit values of rdx and rcx; the original destination supplies the first multiplicand. Store the low 64 bits in rdx; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x249e (4 bytes).
   Link-time relocation: none.
 
@@ -7949,8 +7949,8 @@ INSTRUCTION 1133 | 0x24eb | 8b 44 24 28 | mov    eax,DWORD PTR [rsp+0x28]
 
 INSTRUCTION 1134 | 0x24ef | f2 0f 5e 03 | divsd  xmm0,QWORD PTR [rbx]
   Section or entry point: dqrsl_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and QWORD PTR [rbx] to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rbx]; a memory fault prevents normal completion. For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x24f3 (4 bytes).
   Link-time relocation: none.
 
@@ -8201,8 +8201,8 @@ INSTRUCTION 1169 | 0x2583 | 8b 44 24 30 | mov    eax,DWORD PTR [rsp+0x30]
 
 INSTRUCTION 1170 | 0x2587 | f2 0f 5e 03 | divsd  xmm0,QWORD PTR [rbx]
   Section or entry point: dqrsl_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and QWORD PTR [rbx] to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rbx]; a memory fault prevents normal completion. For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x258b (4 bytes).
   Link-time relocation: none.
 
@@ -8488,8 +8488,8 @@ INSTRUCTION 1210 | 0x263c | 45 31 ed | xor    r13d,r13d
 
 INSTRUCTION 1211 | 0x263f | 48 c1 e0 03 | shl    rax,0x3
   Section or entry point: dqrsl_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rax and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rax left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rax. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x2643 (4 bytes).
   Link-time relocation: none.
 
@@ -8635,8 +8635,8 @@ INSTRUCTION 1231 | 0x2696 | 66 0f ef c9 | pxor   xmm1,xmm1
 
 INSTRUCTION 1232 | 0x269a | 66 0f 2e c1 | ucomisd xmm0,xmm1
   Section or entry point: dqrsl_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and xmm1. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the low 64 bits of xmm1; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x269e (4 bytes).
   Link-time relocation: none.
 
@@ -8726,8 +8726,8 @@ INSTRUCTION 1244 | 0x26c9 | 44 89 4c 24 30 | mov    DWORD PTR [rsp+0x30],r9d
 
 INSTRUCTION 1245 | 0x26ce | 48 0f af c2 | imul   rax,rdx
   Section or entry point: dqrsl_.
-  Long operation: Multiply signed fixed-width integers and record the architecturally selected result.
-  Detailed first-pass effect: Perform the signed integer product using operands [rax ; rdx], with the encoded two- or three-operand destination convention and width. Store the low-width result; carry/overflow indicate whether the full result fits in the chosen signed width. Do not treat other undefined flags as meaningful.
+  Long operation: Multiply signed 64-bit integers using the explicit two-operand instruction form.
+  Detailed first-pass effect: Take the full signed product of the old signed 64-bit values of rax and rdx; the original destination supplies the first multiplicand. Store the low 64 bits in rax; replace the full 64-bit destination. Set CF and OF both to one exactly when the full signed result does not fit in 64 signed bits; otherwise clear both. SF, ZF, AF, and PF are undefined and must not be used as computed flags.
   Sequential successor if not otherwise redirected or faulting: 0x26d2 (4 bytes).
   Link-time relocation: none.
 
@@ -8852,8 +8852,8 @@ INSTRUCTION 1262 | 0x2710 | 4d 89 e0 | mov    r8,r12
 
 INSTRUCTION 1263 | 0x2713 | f2 0f 5e 03 | divsd  xmm0,QWORD PTR [rbx]
   Section or entry point: dqrsl_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and QWORD PTR [rbx] to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [rbx]; a memory fault prevents normal completion. For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x2717 (4 bytes).
   Link-time relocation: none.
 
@@ -8985,8 +8985,8 @@ INSTRUCTION 1281 | 0x2766 | 83 7c 24 18 12 | cmp    DWORD PTR [rsp+0x18],0x12
 
 INSTRUCTION 1282 | 0x276b | f2 0f 5e c8 | divsd  xmm1,xmm0
   Section or entry point: dqrsl_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm1 and xmm0 to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm1; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm1, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x276f (4 bytes).
   Link-time relocation: none.
 
@@ -9230,8 +9230,8 @@ INSTRUCTION 1316 | 0x280b | 66 0f ef c9 | pxor   xmm1,xmm1
 
 INSTRUCTION 1317 | 0x280f | 66 0f 2e c1 | ucomisd xmm0,xmm1
   Section or entry point: dqrsl_.
-  Long operation: Compare low double-precision lanes and write status flags with unordered handling.
-  Detailed first-pass effect: Compare low double-precision lanes of xmm0 and xmm1. On unordered comparison (NaN), set ZF=PF=CF=1; on ordered outcomes set the documented relation flags and clear OF/SF/AF. UCOMISD only signals invalid operation for signaling NaNs (subject to exception masks). Do not write the operands.
+  Long operation: Compare two scalar binary64 values, specifying all ordered and unordered condition flags.
+  Detailed first-pass effect: Compare the low binary64 value of xmm0 against the low 64 bits of xmm1; do not write either operand. On completed ordered greater: ZF=0, PF=0, CF=0; ordered less: ZF=0, PF=0, CF=1; ordered equal: ZF=1, PF=0, CF=0; unordered: ZF=1, PF=1, CF=1. Clear OF, SF, and AF on EVERY completed outcome. Signaling NaNs can raise invalid-operation floating exceptions; quiet NaNs alone do not; denormal operands can raise the denormal-operand exception. MXCSR masks/status control exception completion. With an unmasked floating exception, do not assert that the flag writes completed; memory source faults are separate.
   Sequential successor if not otherwise redirected or faulting: 0x2813 (4 bytes).
   Link-time relocation: none.
 
@@ -9377,8 +9377,8 @@ INSTRUCTION 1337 | 0x2862 | 4d 89 f8 | mov    r8,r15
 
 INSTRUCTION 1338 | 0x2865 | f2 41 0f 5e 45 00 | divsd  xmm0,QWORD PTR [r13+0x0]
   Section or entry point: dqrsl_.
-  Long operation: Divide the low double-precision lanes using the floating-point environment.
-  Detailed first-pass effect: Use low 64-bit floating lanes of xmm0 and QWORD PTR [r13+0x0] to divide destination by source under the floating-point rounding/exception environment. Store the result in the low 64 bits of xmm0; preserve its high 64 bits for this legacy form. IEEE exceptional values and MXCSR must be considered.
+  Long operation: Calculate scalar binary64 div using the recorded operand order and MXCSR.
+  Detailed first-pass effect: First read exactly eight source bytes from QWORD PTR [r13+0x0]; a memory fault prevents normal completion. For normally completing finite inputs, divide destination low binary64 by source low binary64; round according to MXCSR.RC, then write the binary64 result in the low lane of xmm0, preserving original bits 127 through 64. RFLAGS are unchanged. Apply MXCSR exception masks, sticky exception flags, denormals-are-zero and flush-to-zero where relevant; an unmasked exception can prevent a completed destination write. NaN-payload propagation, signaling NaNs, exception priority and all exceptional values remain unverified, not silently modeled as real arithmetic.
   Sequential successor if not otherwise redirected or faulting: 0x286b (6 bytes).
   Link-time relocation: none.
 
@@ -10574,8 +10574,8 @@ INSTRUCTION 1508 | 0x2b76 | 4c 8d 05 d3 05 00 00 | lea    r8,[rip+0x5d3]        
 
 INSTRUCTION 1509 | 0x2b7d | 48 c1 e0 03 | shl    rax,0x3
   Section or entry point: dqrsl_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rax and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rax left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rax. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x2b81 (4 bytes).
   Link-time relocation: none.
 

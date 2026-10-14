@@ -312,8 +312,8 @@ INSTRUCTION 0042 | 0xa4 | 89 54 24 1c | mov    DWORD PTR [rsp+0x1c],edx
 
 INSTRUCTION 0043 | 0xa8 | 48 c1 e5 03 | shl    rbp,0x3
   Section or entry point: dqrls_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rbp and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rbp left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rbp. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0xac (4 bytes).
   Link-time relocation: none.
 
@@ -669,8 +669,8 @@ INSTRUCTION 0093 | 0x174 | 48 8b 84 24 90 00 00 00 | mov    rax,QWORD PTR [rsp+0
 
 INSTRUCTION 0094 | 0x17c | 48 c1 e1 03 | shl    rcx,0x3
   Section or entry point: dqrls_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rcx and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rcx left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rcx. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x180 (4 bytes).
   Link-time relocation: none.
 
@@ -879,8 +879,8 @@ INSTRUCTION 0123 | 0x1da | 44 8d 41 01 | lea    r8d,[rcx+0x1]
 
 INSTRUCTION 0124 | 0x1de | 48 c1 e5 03 | shl    rbp,0x3
   Section or entry point: dqrls_.
-  Long operation: Shift the destination's bits left while filling low bits with zero.
-  Detailed first-pass effect: Read rbp and shift count 0x3; shift bits toward higher positions, filling low bits with zero; write result at encoded width. Apply the architecture's effective count mask. Flag effects depend on count, width and lost bits; never infer a generic complete flag assignment.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rbp left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rbp. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
   Sequential successor if not otherwise redirected or faulting: 0x1e2 (4 bytes).
   Link-time relocation: none.
 

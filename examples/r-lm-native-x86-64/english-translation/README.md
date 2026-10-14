@@ -116,6 +116,14 @@ resolves some object-relative relocations. We retain both instead of
 silently substituting one for the other. Neither listing reports a dynamic
 execution sequence: disassembly contains unexecuted branches and cold paths.
 
+## Corrections to the audited descriptions (2026-10-14)
+
+[Independent audit EMC-3](https://github.com/dilapidated-shed/English-major-C/pull/11) identified four distinct false 32-bit conditional-move statements, repeated in the linked listing (8 records), and 117 incomplete shift, signed-multiplication and scalar-floating descriptions. The original Fortran, ELF objects, instruction bytes, disassemblies, relocation rows and native harness are unchanged. See [the 22 native test cases and their original-error witness](https://github.com/dilapidated-shed/English-major-C/actions/runs/38205660058).
+
+All eight conditional-move records now explain that the **upper 32 bits of the 64-bit register are cleared even on a false condition**. All 117 audited incomplete records have expanded operand-specific effects: effective shift counts and defined/undefined flags; explicit two- or three-operand signed multiplication and overflow flags; complete ordered/unordered comparison flag tables; legacy MAXSD NaN and signed-zero priority; and scalar binary64 register-lane, operand-order, and MXCSR considerations. The remaining unverified floating exceptional cases are described as **not yet verified**, not silently accepted.
+
+The new \`verify-repaired-qr-english.mjs\` checks the eight exact bad encodings and the 117 audited incomplete records for the required corrected rules, with known-bad mutation fixtures. This is a **source-level regression gate** and cannot certify every Intel machine-state transition. The original independent audit remains a historical failure witness for the old head; it is not a semantic PASS receipt for this new head. All 153 separately classified control/environment boundaries, dynamic BLAS and runtime bodies, and complete QR execution remain unresolved. Do not merge without the required independent acceptance.
+
 ## Open work to claim a complete translation
 
 A fully checked result needs: formal operand parser and instruction decoder
