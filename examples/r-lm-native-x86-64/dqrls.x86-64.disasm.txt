@@ -1,0 +1,190 @@
+
+dqrls.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <dqrls_>:
+   0:	41 57                	push   r15
+   2:	31 c0                	xor    eax,eax
+   4:	49 89 cf             	mov    r15,rcx
+   7:	48 89 d1             	mov    rcx,rdx
+   a:	41 56                	push   r14
+   c:	41 55                	push   r13
+   e:	4d 89 c5             	mov    r13,r8
+  11:	41 54                	push   r12
+  13:	49 89 f4             	mov    r12,rsi
+  16:	55                   	push   rbp
+  17:	53                   	push   rbx
+  18:	48 83 ec 60          	sub    rsp,0x60
+  1c:	48 63 2e             	movsxd rbp,DWORD PTR [rsi]
+  1f:	48 63 32             	movsxd rsi,DWORD PTR [rdx]
+  22:	48 89 54 24 38       	mov    QWORD PTR [rsp+0x38],rdx
+  27:	48 8b 9c 24 a0 00 00 	mov    rbx,QWORD PTR [rsp+0xa0]
+  2e:	00 
+  2f:	4c 89 e2             	mov    rdx,r12
+  32:	48 85 ed             	test   rbp,rbp
+  35:	4c 89 44 24 30       	mov    QWORD PTR [rsp+0x30],r8
+  3a:	4d 89 c8             	mov    r8,r9
+  3d:	48 0f 48 e8          	cmovs  rbp,rax
+  41:	48 85 f6             	test   rsi,rsi
+  44:	48 89 7c 24 08       	mov    QWORD PTR [rsp+0x8],rdi
+  49:	48 0f 49 c6          	cmovns rax,rsi
+  4d:	4c 89 e6             	mov    rsi,r12
+  50:	48 89 44 24 40       	mov    QWORD PTR [rsp+0x40],rax
+  55:	49 89 c6             	mov    r14,rax
+  58:	ff b4 24 c8 00 00 00 	push   QWORD PTR [rsp+0xc8]
+  5f:	ff b4 24 c0 00 00 00 	push   QWORD PTR [rsp+0xc0]
+  66:	ff b4 24 d0 00 00 00 	push   QWORD PTR [rsp+0xd0]
+  6d:	4c 8b 8c 24 c8 00 00 	mov    r9,QWORD PTR [rsp+0xc8]
+  74:	00 
+  75:	e8 00 00 00 00       	call   7a <dqrls_+0x7a>
+			76: R_X86_64_PLT32	dqrdc2_-0x4
+  7a:	48 8b 84 24 c8 00 00 	mov    rax,QWORD PTR [rsp+0xc8]
+  81:	00 
+  82:	48 83 c4 20          	add    rsp,0x20
+  86:	8b 00                	mov    eax,DWORD PTR [rax]
+  88:	85 c0                	test   eax,eax
+  8a:	0f 8e 3d 01 00 00    	jle    1cd <dqrls_+0x1cd>
+  90:	41 8b 55 00          	mov    edx,DWORD PTR [r13+0x0]
+  94:	85 d2                	test   edx,edx
+  96:	0f 8e b9 00 00 00    	jle    155 <dqrls_+0x155>
+  9c:	4a 8d 04 f5 00 00 00 	lea    rax,[r14*8+0x0]
+  a3:	00 
+  a4:	89 54 24 1c          	mov    DWORD PTR [rsp+0x1c],edx
+  a8:	48 c1 e5 03          	shl    rbp,0x3
+  ac:	4d 89 f9             	mov    r9,r15
+  af:	48 89 44 24 08       	mov    QWORD PTR [rsp+0x8],rax
+  b4:	48 8d 44 24 4c       	lea    rax,[rsp+0x4c]
+  b9:	4c 8b ac 24 a0 00 00 	mov    r13,QWORD PTR [rsp+0xa0]
+  c0:	00 
+  c1:	41 bf 01 00 00 00    	mov    r15d,0x1
+  c7:	4c 8b b4 24 90 00 00 	mov    r14,QWORD PTR [rsp+0x90]
+  ce:	00 
+  cf:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+  d4:	4c 89 64 24 20       	mov    QWORD PTR [rsp+0x20],r12
+  d9:	4d 89 f4             	mov    r12,r14
+  dc:	49 89 ee             	mov    r14,rbp
+  df:	4c 89 ed             	mov    rbp,r13
+  e2:	4d 89 cd             	mov    r13,r9
+  e5:	66 66 2e 0f 1f 84 00 	data16 cs nop WORD PTR [rax+rax*1+0x0]
+  ec:	00 00 00 00 
+  f0:	48 83 ec 08          	sub    rsp,0x8
+  f4:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # fb <dqrls_+0xfb>
+			f7: R_X86_64_PC32	.rodata-0x4
+  fb:	4d 89 e9             	mov    r9,r13
+  fe:	41 83 c7 01          	add    r15d,0x1
+ 102:	ff 74 24 18          	push   QWORD PTR [rsp+0x18]
+ 106:	4d 01 f5             	add    r13,r14
+ 109:	50                   	push   rax
+ 10a:	53                   	push   rbx
+ 10b:	53                   	push   rbx
+ 10c:	41 54                	push   r12
+ 10e:	55                   	push   rbp
+ 10f:	4c 01 f5             	add    rbp,r14
+ 112:	53                   	push   rbx
+ 113:	48 8b 74 24 60       	mov    rsi,QWORD PTR [rsp+0x60]
+ 118:	4c 01 f3             	add    rbx,r14
+ 11b:	4c 8b 84 24 f8 00 00 	mov    r8,QWORD PTR [rsp+0xf8]
+ 122:	00 
+ 123:	48 8b 8c 24 e8 00 00 	mov    rcx,QWORD PTR [rsp+0xe8]
+ 12a:	00 
+ 12b:	48 8b 7c 24 40       	mov    rdi,QWORD PTR [rsp+0x40]
+ 130:	48 89 f2             	mov    rdx,rsi
+ 133:	e8 00 00 00 00       	call   138 <dqrls_+0x138>
+			134: R_X86_64_PLT32	dqrsl_-0x4
+ 138:	48 8b 44 24 48       	mov    rax,QWORD PTR [rsp+0x48]
+ 13d:	48 83 c4 40          	add    rsp,0x40
+ 141:	49 01 c4             	add    r12,rax
+ 144:	44 39 7c 24 1c       	cmp    DWORD PTR [rsp+0x1c],r15d
+ 149:	7d a5                	jge    f0 <dqrls_+0xf0>
+ 14b:	48 8b 84 24 a8 00 00 	mov    rax,QWORD PTR [rsp+0xa8]
+ 152:	00 
+ 153:	8b 00                	mov    eax,DWORD PTR [rax]
+ 155:	48 8b 7c 24 30       	mov    rdi,QWORD PTR [rsp+0x30]
+ 15a:	83 c0 01             	add    eax,0x1
+ 15d:	44 8b 0f             	mov    r9d,DWORD PTR [rdi]
+ 160:	44 39 c8             	cmp    eax,r9d
+ 163:	7f 59                	jg     1be <dqrls_+0x1be>
+ 165:	48 8b 7c 24 28       	mov    rdi,QWORD PTR [rsp+0x28]
+ 16a:	48 8b 4c 24 38       	mov    rcx,QWORD PTR [rsp+0x38]
+ 16f:	8b 17                	mov    edx,DWORD PTR [rdi]
+ 171:	48 63 f8             	movsxd rdi,eax
+ 174:	48 8b 84 24 90 00 00 	mov    rax,QWORD PTR [rsp+0x90]
+ 17b:	00 
+ 17c:	48 c1 e1 03          	shl    rcx,0x3
+ 180:	4c 8d 44 f8 f8       	lea    r8,[rax+rdi*8-0x8]
+ 185:	8d 72 01             	lea    esi,[rdx+0x1]
+ 188:	85 d2                	test   edx,edx
+ 18a:	0f 8e b9 00 00 00    	jle    249 <dqrls_+0x249>
+ 190:	4c 89 c2             	mov    rdx,r8
+ 193:	b8 01 00 00 00       	mov    eax,0x1
+ 198:	0f 1f 84 00 00 00 00 	nop    DWORD PTR [rax+rax*1+0x0]
+ 19f:	00 
+ 1a0:	83 c0 01             	add    eax,0x1
+ 1a3:	48 c7 02 00 00 00 00 	mov    QWORD PTR [rdx],0x0
+ 1aa:	48 01 ca             	add    rdx,rcx
+ 1ad:	39 f0                	cmp    eax,esi
+ 1af:	75 ef                	jne    1a0 <dqrls_+0x1a0>
+ 1b1:	48 83 c7 01          	add    rdi,0x1
+ 1b5:	49 83 c0 08          	add    r8,0x8
+ 1b9:	41 39 f9             	cmp    r9d,edi
+ 1bc:	7d d2                	jge    190 <dqrls_+0x190>
+ 1be:	48 83 c4 58          	add    rsp,0x58
+ 1c2:	5b                   	pop    rbx
+ 1c3:	5d                   	pop    rbp
+ 1c4:	41 5c                	pop    r12
+ 1c6:	41 5d                	pop    r13
+ 1c8:	41 5e                	pop    r14
+ 1ca:	41 5f                	pop    r15
+ 1cc:	c3                   	ret
+ 1cd:	41 8b 0c 24          	mov    ecx,DWORD PTR [r12]
+ 1d1:	85 c9                	test   ecx,ecx
+ 1d3:	7e 80                	jle    155 <dqrls_+0x155>
+ 1d5:	48 8b 7c 24 28       	mov    rdi,QWORD PTR [rsp+0x28]
+ 1da:	44 8d 41 01          	lea    r8d,[rcx+0x1]
+ 1de:	48 c1 e5 03          	shl    rbp,0x3
+ 1e2:	31 f6                	xor    esi,esi
+ 1e4:	8b 17                	mov    edx,DWORD PTR [rdi]
+ 1e6:	bf 01 00 00 00       	mov    edi,0x1
+ 1eb:	8d 4a 01             	lea    ecx,[rdx+0x1]
+ 1ee:	85 d2                	test   edx,edx
+ 1f0:	0f 8e 5f ff ff ff    	jle    155 <dqrls_+0x155>
+ 1f6:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
+ 1fd:	00 00 00 
+ 200:	48 89 f2             	mov    rdx,rsi
+ 203:	41 b9 01 00 00 00    	mov    r9d,0x1
+ 209:	66 66 2e 0f 1f 84 00 	data16 cs nop WORD PTR [rax+rax*1+0x0]
+ 210:	00 00 00 00 
+ 214:	66 66 2e 0f 1f 84 00 	data16 cs nop WORD PTR [rax+rax*1+0x0]
+ 21b:	00 00 00 00 
+ 21f:	90                   	nop
+ 220:	f2 41 0f 10 04 17    	movsd  xmm0,QWORD PTR [r15+rdx*1]
+ 226:	41 83 c1 01          	add    r9d,0x1
+ 22a:	f2 0f 11 04 13       	movsd  QWORD PTR [rbx+rdx*1],xmm0
+ 22f:	48 01 ea             	add    rdx,rbp
+ 232:	41 39 c9             	cmp    r9d,ecx
+ 235:	75 e9                	jne    220 <dqrls_+0x220>
+ 237:	48 83 c7 01          	add    rdi,0x1
+ 23b:	48 83 c6 08          	add    rsi,0x8
+ 23f:	4c 39 c7             	cmp    rdi,r8
+ 242:	75 bc                	jne    200 <dqrls_+0x200>
+ 244:	e9 0c ff ff ff       	jmp    155 <dqrls_+0x155>
+ 249:	44 89 c8             	mov    eax,r9d
+ 24c:	29 f8                	sub    eax,edi
+ 24e:	48 83 c7 01          	add    rdi,0x1
+ 252:	83 e0 01             	and    eax,0x1
+ 255:	41 39 f9             	cmp    r9d,edi
+ 258:	0f 8c 60 ff ff ff    	jl     1be <dqrls_+0x1be>
+ 25e:	85 c0                	test   eax,eax
+ 260:	74 0d                	je     26f <dqrls_+0x26f>
+ 262:	48 83 c7 01          	add    rdi,0x1
+ 266:	41 39 f9             	cmp    r9d,edi
+ 269:	0f 8c 4f ff ff ff    	jl     1be <dqrls_+0x1be>
+ 26f:	48 83 c7 02          	add    rdi,0x2
+ 273:	41 39 f9             	cmp    r9d,edi
+ 276:	0f 8c 42 ff ff ff    	jl     1be <dqrls_+0x1be>
+ 27c:	48 83 c7 02          	add    rdi,0x2
+ 280:	41 39 f9             	cmp    r9d,edi
+ 283:	7d ea                	jge    26f <dqrls_+0x26f>
+ 285:	e9 34 ff ff ff       	jmp    1be <dqrls_+0x1be>
