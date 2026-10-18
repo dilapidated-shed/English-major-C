@@ -1,0 +1,9 @@
+choice ledger_meaning one_of
+  preliminary_description
+  missing_description
+  independently_verified
+
+choice ledger_alignment one_of
+  exact_alignment
+  missing_evidence
+  contradicted_bytes

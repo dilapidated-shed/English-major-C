@@ -5,6 +5,14 @@ interpreter extension or merge is authorized by these prompts.
 
 ## P1: SUN EMC-ARM-LEDGERS-01
 
+Successor status: representation and bounded ledger authoring are implemented
+in [arm-linked/](arm-linked/README.md). The two ledgers account for 3,442
+instructions, 98 printed data rows and six suppressed ranges. Independent
+structural acceptance is wired to exact-head receipts. All explanations remain
+ANNOTATED_ONLY and complete effects UNVERIFIED. The original scope below is
+retained for provenance; further ledger authoring is no longer the next job.
+The semantic-slice and dependency-closure jobs remain open and take priority.
+
 Refresh dilapidated-shed/English-major-C audit/emc-fortran-cover-01 and its source
 pins. Use generated/missing-english.tsv to design full ledgers for exactly the
 2,005 softfp-linked and 1,437 hardfp-linked instruction rows. Keep A32/T32, ABI,
