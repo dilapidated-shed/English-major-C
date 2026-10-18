@@ -1,0 +1,30 @@
+
+Relocation section '.rel.dyn' at offset 0x4b0 contains 9 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00002e90  00000017 R_ARM_RELATIVE        
+00002e94  00000017 R_ARM_RELATIVE        
+00002ffc  00000017 R_ARM_RELATIVE        
+00003004  00000017 R_ARM_RELATIVE        
+00002fe8  00000415 R_ARM_GLOB_DAT         00000000   __gmon_start__
+00002fec  00000815 R_ARM_GLOB_DAT         00000000   _ITM_deregisterTMCloneTable
+00002ff0  00000a15 R_ARM_GLOB_DAT         00000000   _ITM_registerTMCloneTable
+00002ff4  00000f15 R_ARM_GLOB_DAT         00000000   __stack_chk_guard@GLIBC_2.4
+00002ff8  00001415 R_ARM_GLOB_DAT         00000000   __cxa_finalize@GLIBC_2.4
+
+Relocation section '.rel.plt' at offset 0x4f8 contains 15 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00002fac  00000316 R_ARM_JUMP_SLOT        00000000   abort@GLIBC_2.4
+00002fb0  00000416 R_ARM_JUMP_SLOT        00000000   __gmon_start__
+00002fb4  00000516 R_ARM_JUMP_SLOT        00000000   __printf_chk@GLIBC_2.4
+00002fb8  00000616 R_ARM_JUMP_SLOT        00000000   daxpy_
+00002fbc  00000716 R_ARM_JUMP_SLOT        00000000   memset@GLIBC_2.4
+00002fc0  00000916 R_ARM_JUMP_SLOT        00000000   dnrm2_
+00002fc4  00000b16 R_ARM_JUMP_SLOT        00000000   dcopy_
+00002fc8  00000c16 R_ARM_JUMP_SLOT        00000000   memcpy@GLIBC_2.4
+00002fcc  00000d16 R_ARM_JUMP_SLOT        00000000   dscal_
+00002fd0  00000e16 R_ARM_JUMP_SLOT        00000000   ddot_
+00002fd4  00001016 R_ARM_JUMP_SLOT        00000000   __stack_chk_fail@GLIBC_2.4
+00002fd8  00001116 R_ARM_JUMP_SLOT        00000000   memmove@GLIBC_2.4
+00002fdc  00001216 R_ARM_JUMP_SLOT        00000000   puts@GLIBC_2.4
+00002fe0  00001316 R_ARM_JUMP_SLOT        00000000   __libc_start_main@GLIBC_2.34
+00002fe4  00001416 R_ARM_JUMP_SLOT        00000000   __cxa_finalize@GLIBC_2.4

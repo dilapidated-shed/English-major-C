@@ -1,0 +1,11 @@
+component	interface_or_source_evidence	implementation_bytes	closure
+QR three routines	Stripped sources ELF symbols DWARF	Objects and linked copies captured	Full meanings and all-input behavior unverified
+Reference BLAS five routines	Source and symbol evidence	Five softfp objects and linked bodies captured	Not full BLAS or equivalent dynamic x86/hardfp libblas
+Dynamic BLAS	libblas.so.3 DT_NEEDED and undefined symbols	PLT stubs only in dynamic specimens	Library implementation absent
+libc	libc.so.6 DT_NEEDED and undefined/weak symbols	Caller stubs only	Shared bodies and process effects absent
+libgfortran	Historical link recipe; no direct DT_NEEDED entry in captured linked ELFs	Runtime shared library absent	Transitive/runtime behavior unknown
+libm	Recipe and numerical operations; no direct DT_NEEDED entry in captured linked ELFs	Shared library absent	Inline numeric instructions do not close library or FP effects
+Loader dynamic linking	PT_INTERP DT_NEEDED relocations GOT PLT	ELF stubs and metadata only	Loader implementation resolution interposition ASLR faults and signals unclosed
+R interpreter Cdqrls model machinery	R example standalone C harness and provenance descriptions	Whole R implementation absent	NA errors allocation attributes and actual R integration not demonstrated
+Fortran language	Fixed-form QR/BLAS plus free-form dnrm2.f90 and GNU Fortran 14.2.0 build records	Compiled specimens only	No complete ISO frontend or language support claim
+ABI and process	Headers ARM attribute leads and historical Linux manifests	Historical static specimens only	Initial memory state calling obligations and all system effects unverified

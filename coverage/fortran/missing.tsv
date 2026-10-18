@@ -1,0 +1,17 @@
+priority	item	status	evidence	recovery
+P2	Archived support and compressed-trace interpretation	HASHED_ONLY_NOT_SEMANTICALLY_AUDITED	ARCHIVED_SUPPORT rows in generated/artifacts.tsv	Inspect exact support artifacts separately; do not promote trace identity to state verification
+P1	Softfp linked English ledger	MISSING	2005 instruction rows in generated/missing-english.tsv	Author exact byte-aligned English without QR execution
+P1	Hardfp linked English ledger	MISSING	1437 instruction rows in generated/missing-english.tsv	Author separate A32/T32 ledger with separate ABI evidence
+P1	Complete instruction semantics	UNVERIFIED	1542 explicit form obligations in generated/semantic-forms.tsv	Bounded ISA/ABI claim audits and independent counterexamples
+P1	Object-only disassembly	MISSING_CAPTURED_LISTING	9 sections and 7340 bytes in generated/listing-gaps.tsv	Decode original objects read-only; preserve relocations and originals
+P1	Suppressed zero DATA meanings	UNKNOWN_MEANING_BYTES_CAPTURED	7 ranges and 60 bytes in generated/listing-gaps.tsv	Use mapping/section/source evidence; do not invent executed instructions
+P1	Libraries and loader closure	UNKNOWN	generated/dependencies.tsv	Recover exact verified artifacts or retain missing bodies
+P1	Indirect targets and process effects	UNRESOLVED	generated/calls.tsv	Identify required state and contracts without inventing target code
+P1	R interpreter and Cdqrls integration	NOT_CAPTURED	Standalone caller and R example only	Pin original R machinery separately; no whole-process inference
+P2	Full upstream Fortran source provenance	NOT_REVERIFIED	Stripped excerpts and recorded upstream Git blob leads	Recover exact upstream blobs; verify excerpt transformation without rebuilding
+P2	ISO Fortran conformance	NOT_ESTABLISHED	GNU Fortran archival profile; finite 35-family catalogue	Define deliberate frontend/profile goal before complete feature denominator
+P2	Source-to-machine meanings	DEBUG_CORRELATION_ONLY	generated/source-machine-crosswalk.tsv	Resolve missing/ambiguous mappings; line ranges are not meaning proofs
+P2	Implicit aliases SIMD FP faults and ordering	UNVERIFIED	generated/register-vocabulary.tsv and semantic-forms.tsv	Pin primary evidence for every claimed effect
+P2	Unassigned file-range meaning	UNKNOWN_MEANING_BYTES_CAPTURED	generated/file-ranges.tsv	Keep exact range/digest until provenance supports classification
+P2	Idriç audit implementation	BLOCKED_COMPILER_BOOTSTRAP	Real one-step command exited 2; attempt.md	Qualify direct-host compiler and byte/file/hash effects; Node is separate evidence
+HISTORICAL	FP Kitchen admission preflight	SUPERSEDED_BY_HUMAN_WAIVER	Earlier receipts retained in preflight/	No FP action required for this one-off

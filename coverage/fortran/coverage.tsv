@@ -1,0 +1,13 @@
+dimension	numerator	denominator	status	evidence
+source_snapshot_file_accounting	331	331	RAW_GIT_BLOB_IDENTITY_CHECKED	generated/occurrences.tsv
+unique_artifact_identity	136	136	SHA256_CHECKED	generated/artifacts.tsv
+source_to_machine_semantics	UNKNOWN	UNKNOWN	DEBUG_CORRELATION_ONLY	generated/source-machine-crosswalk.tsv
+elf_physical_byte_partition	215080	215080	STRUCTURAL_ACCOUNTING_CHECKED	generated/file-ranges.tsv
+all_elf_relocations	1345	1345	RAW_AND_READELF_CHECKED	generated/relocations.tsv
+native_instruction_listing_accounting	7426	7426	OVERLAPPING_SPECIMEN_RECORDS_ONLY	generated/records.tsv
+unique_runtime_instruction_coverage	UNKNOWN	UNKNOWN	NO_COMBINED_RUNTIME_DENOMINATOR	generated/routine-copies.tsv
+english_instruction_alignment	3984	7426	3442_EXPLICITLY_MISSING	generated/missing-english.tsv
+complete_verified_semantic_forms	0	1542	COMPLETE_EFFECTS_UNVERIFIED	generated/semantic-forms.tsv
+library_closure	UNKNOWN	UNKNOWN	NOT_CLOSED	generated/dependencies.tsv
+selected_fortran_feature_witnesses	21	35	FINITE_LEXICAL_CATALOGUE_ONLY	generated/fortran-features.tsv
+whole_fortran_support	UNKNOWN	UNKNOWN	NO_ISO_CONFORMANCE_CLAIM	README.md

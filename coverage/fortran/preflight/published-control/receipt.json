@@ -1,0 +1,174 @@
+{
+  "failed_stage": "kitchen-owned-recipe",
+  "finished_at": "2026-10-18T12:03:43.925533+00:00",
+  "github_sha_declared": null,
+  "parameters": {
+    "aici": "/workspace/scratch/9f46c4b17afd/ai-ci",
+    "kitchen": "/workspace/scratch/9f46c4b17afd/kitchen",
+    "source": "/workspace/scratch/9f46c4b17afd/English-major-C"
+  },
+  "pipeline": "emc-fortran-cover-01-preflight",
+  "pipeline_path": "pipelines/emc-fortran-cover-01-preflight.json",
+  "pipeline_sha256": "fc10a217994f651dbff4aaaa771f3945b75319a0ee6109f7bd902d2a50e4b81f",
+  "repository_commit": "646957bcdf0fbce3492553f84bc67b818dca643f",
+  "runner": {
+    "machine": "x86_64",
+    "python": "3.12.14",
+    "release": "6.18.55",
+    "system": "Linux"
+  },
+  "schema_version": 1,
+  "stages": [
+    {
+      "argv": [
+        "sha256sum",
+        "-c",
+        "tasks/emc-fortran-cover-01/materials.sha256"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.913462+00:00",
+      "index": 1,
+      "kind": "command",
+      "name": "job-envelope",
+      "started_at": "2026-10-18T12:03:43.911771+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "23a72f068fa8b035e14a0c06b76f8327674798c48c3b5e536ba5c069c1accd58"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/English-major-C",
+        "cat-file",
+        "-e",
+        "0655e12c0e19b3dde360ed097ee88ba7b2c6d060^{commit}"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.915277+00:00",
+      "index": 2,
+      "kind": "command",
+      "name": "source-pr-5",
+      "started_at": "2026-10-18T12:03:43.913513+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/English-major-C",
+        "cat-file",
+        "-e",
+        "fbd4f352ef9ae5561cf34e87675d0534585fb963^{commit}"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.917077+00:00",
+      "index": 3,
+      "kind": "command",
+      "name": "source-pr-7",
+      "started_at": "2026-10-18T12:03:43.915414+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/English-major-C",
+        "cat-file",
+        "-e",
+        "d567d6d9ec3a3b72c288886889bb235160e27ab6^{commit}"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.918926+00:00",
+      "index": 4,
+      "kind": "command",
+      "name": "source-pr-8",
+      "started_at": "2026-10-18T12:03:43.917206+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/English-major-C",
+        "cat-file",
+        "-e",
+        "39e5aef087029cf19bc34419af28998cfda41a4c^{commit}"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.920444+00:00",
+      "index": 5,
+      "kind": "command",
+      "name": "source-pr-10",
+      "started_at": "2026-10-18T12:03:43.918984+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/English-major-C",
+        "cat-file",
+        "-e",
+        "1418402cf01bd0cdcf58c8350f588b8ee098f4c3^{commit}"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.922259+00:00",
+      "index": 6,
+      "kind": "command",
+      "name": "source-pr-11",
+      "started_at": "2026-10-18T12:03:43.920495+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/English-major-C",
+        "cat-file",
+        "-e",
+        "763258c88b43a0b5f0358e345f01818e8e926cf0^{commit}"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "finished_at": "2026-10-18T12:03:43.923960+00:00",
+      "index": 7,
+      "kind": "command",
+      "name": "source-pr-12",
+      "started_at": "2026-10-18T12:03:43.922319+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/scratch/9f46c4b17afd/kitchen",
+        "cat-file",
+        "-e",
+        "a91df2ef2bf0d37fb32c10be0a2f8208648220e0:tasks/emc-fortran-coverage/1.grease"
+      ],
+      "cwd": ".",
+      "exit_code": 128,
+      "finished_at": "2026-10-18T12:03:43.925523+00:00",
+      "index": 8,
+      "kind": "command",
+      "name": "kitchen-owned-recipe",
+      "started_at": "2026-10-18T12:03:43.924017+00:00",
+      "stderr_sha256": "bb4d6da54c75355909d0c817fa13ce828d7ecec41a33921a70d95717054671fe",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "started_at": "2026-10-18T12:03:43.911613+00:00",
+  "status": "FAIL"
+}

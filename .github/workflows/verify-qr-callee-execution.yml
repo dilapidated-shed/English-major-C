@@ -43,8 +43,9 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/qr-callee-evidence/source"
-          git archive HEAD | tar -x -C "$RUNNER_TEMP/qr-callee-evidence/source"
+          mkdir -p "$RUNNER_TEMP/qr-callee-evidence"
+          # Archive all source bytes without extracting filenames forbidden by artifact upload.
+          git archive --format=tar HEAD > "$RUNNER_TEMP/qr-callee-evidence/source.tar"
       - name: Preserve per-step memory and FP bits with debugger logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
