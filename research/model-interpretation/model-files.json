@@ -1,0 +1,10 @@
+{
+  "schema": "emc-public-model-files/1",
+  "incremental_spend_limit_usd": 0,
+  "hosting": "Public publisher downloads only. No LFS, API inference, GPU rental, automatic mirroring or paid fallback.",
+  "models": [
+    {"id":"smollm3","family":"SmolLM","repository":"ggml-org/SmolLM3-3B-GGUF","revision":"4965cb60b150737b68a0408c36aeefb65078f894","file":"SmolLM3-Q4_K_M.gguf","bytes":1915305312,"sha256":"8334b850b7bd46238c16b0c550df2138f0889bf433809008cc17a8b05761863e","license":"Apache-2.0"},
+    {"id":"granite4","family":"Granite","repository":"ibm-granite/granite-4.0-h-micro-GGUF","revision":"51b8a3bd3da582356e63a17f09d325360f1d4e48","file":"granite-4.0-h-micro-Q4_K_M.gguf","bytes":1942564512,"sha256":"bcc78b9b25450101d1ad90d4b9a264e1bac892f534dfb76066f4eec792fdf023","license":"Apache-2.0"},
+    {"id":"qwen3","family":"Qwen","repository":"Qwen/Qwen3-1.7B-GGUF","revision":"61cf2fab285ddd4cad3dafa9c69dfef96426ee0b","file":"Qwen3-1.7B-Q8_0.gguf","bytes":1834426016,"sha256":"061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a","license":"Apache-2.0"}
+  ]
+}
