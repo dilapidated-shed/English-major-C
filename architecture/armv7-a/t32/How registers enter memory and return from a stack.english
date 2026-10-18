@@ -1,0 +1,454 @@
+HOW REGISTERS ENTER MEMORY AND RETURN FROM A STACK.
+
+English Major C ARMv7-A T32 architecture document.
+Status: experimental source specification, not a proven simulator.
+This file elaborates precisely the SEVEN distinct newly permitted
+operations numbered 54 through 60 in the closed initial grant:
+"All and only these initial operations are permitted.english".
+It does not admit any other ARM encoding by implication.
+Every ARM operation here is unprivileged and in T32 state.
+
+Normative architectural pin:
+  ARM DDI 0406C.d, T32 decoding and PUSH/POP, LDM/STM,
+  ADD SP and SUB SP descriptions.
+Accessible corroboration:
+  ARM Cortex-A Series (ARMv7-A) Programmer's Guide DEN0013,
+  "Multiple transfers" and "Procedure Call Standard".
+  ARM's Instruction Set Assembly Guide 100076_0200_00_en,
+  C2.45 (LDM), C2.73 (POP), C2.74 (PUSH), C2.138 (STM).
+  ARM's 16-bit Thumb instruction Quick Reference Card.
+No source here substitutes an ARMv7-M exception-return rule
+for the ARMv7-A application-program instruction semantics.
+
+PART ONE. THE OBJECTS TO WHICH THESE OPERATIONS APPLY.
+
+There is one 32-bit architectural stack pointer register R13.
+An application that follows an ordinary ARM full-descending
+stack convention treats its SP value as the address of the
+currently highest-occupied (lowest-addressed) stack word.
+
+SP is a register containing 32 bits, NOT a stack object in DRAM.
+A PUSH transfers values FROM registers TO memory and changes SP.
+A POP transfers values FROM memory TO registers and changes SP.
+Changing SP without performing a PUSH or POP does not move,
+erase, initialize, or allocate physical memory.
+
+The chosen memory model is byte-addressed, with an actual
+virtual-memory mapping and access-permission contract that
+must be supplied by the environment. An architectural
+word transfer addresses FOUR bytes, not four abstract
+elements of unknown size.
+
+For the narrow T32 encodings admitted here, every ordinary
+register in a register list is one of R0 through R7.
+The restricted PUSH can additionally include LR.
+The restricted POP can additionally include PC.
+A general LDMIA or STMIA has a base Rn chosen from R0
+through R7 and an explicitly nonempty register set from
+R0 through R7. This language draft additionally requires
+that the base not be in that set. That last condition is
+a deliberate restriction of the language profile, not a
+claim that every ARM encoding with base overlap is invalid.
+
+The order of English names in the human-written register
+list MUST NOT choose the order of the memory transfers.
+A register set is an unordered set of selected register
+numbers. The architectural convention associates the
+LOWEST numbered selected register with the LOWEST
+address in the accessed interval.
+
+For example, the sets {R3,R0} and {R0,R3}, if permitted,
+select exactly the same register numbers and exactly the
+same two memory addresses. They do not request reversal
+of memory order. Duplicating a member name does not
+create an additional register or make the CPU transfer
+the value twice.
+
+PART TWO. THE COMPLETE SUCCESSFUL EFFECT OF A PUSH.
+
+Define OLD_STACK_POINTER to be the original SP, read
+before the transfer.
+Define SELECTED_REGISTERS to be the nonempty set of
+R0..R7 and optionally LR selected by the T1 PUSH encoding.
+Define COUNT as its number of distinct selected registers.
+Define RESERVED_BYTES = 4*COUNT.
+Define FIRST_ADDRESS = OLD_STACK_POINTER - RESERVED_BYTES,
+with 32-bit address arithmetic where relevant.
+
+Before an attempted successful push, check the address
+alignment, data access validity and permission conditions
+required by the exact architecture and target environment.
+
+The word at FIRST_ADDRESS receives the old value of
+the lowest numbered selected register.
+The word at FIRST_ADDRESS+4 receives the old value of
+the next higher numbered selected register, if any.
+Continue until every selected register has a separate
+word, taking old LR as the highest numbered entry
+whenever LR is selected.
+After normal completion SP equals FIRST_ADDRESS.
+
+The selected source registers retain their values.
+N, Z, C, and V do not change. The execution index
+normally advances by two bytes. No return address is
+created by PUSH; a pushed LR value is merely the
+old value of LR copied into memory.
+
+Example: old SP=0x00001000, R0=0x11223344,
+R3=0xAABBCCDD, LR=0x00002001, with all affected
+stack words writable and word aligned.
+
+PUSH of {R0,R3,LR} has COUNT=3 and FIRST_ADDRESS=0x0FF4.
+The stored memory words are:
+  address 0x0FF4 receives 0x11223344;
+  address 0x0FF8 receives 0xAABBCCDD;
+  address 0x0FFC receives 0x00002001.
+SP becomes 0x0FF4. R0/R3/LR and flags are preserved.
+
+This example describes word values. An actual byte-by-byte
+image must additionally declare effective endianness.
+For ordinary little-endian memory, the four bytes at
+0x0FF4..0x0FF7 are 0x44, 0x33, 0x22, 0x11 in that order.
+Do NOT reverse the register-to-address association when
+changing endianness.
+
+PART THREE. THE COMPLETE SUCCESSFUL EFFECT OF A POP.
+
+Define OLD_STACK_POINTER to be the original SP.
+Define SELECTED_REGISTERS to be a nonempty set of R0..R7,
+optionally with the additional PC bit as allowed by the
+chosen narrow POP encoding. The bit for PC is distinct from
+bits selecting ordinary low registers.
+
+For normal execution, each selected low register receives
+one word at successive addresses, beginning at old SP,
+in ascending register-number order. If the PC bit is
+selected, the final, highest addressed word is loaded
+as a BRANCH TARGET and cannot be treated merely as
+another 32-bit general-register datum.
+
+After normal completion SP becomes
+OLD_STACK_POINTER + 4*COUNT, where COUNT includes PC
+if it was selected. POP does not otherwise change
+N/Z/C/V, and it does not directly write LR.
+
+For a POP without PC, ordinary sequential execution
+proceeds at the instruction following the POP.
+For POP with PC, execution transfers to the target
+encoded in the loaded word, subject to its state tag,
+alignment, permitted instruction boundary and executable
+access. Its successor is NOT necessarily the next
+instruction by address.
+
+Example: old SP=0x0FF4, the three memory words
+are 0x11223344, 0xAABBCCDD, 0x00002001 at
+0x0FF4, 0x0FF8, 0x0FFC respectively.
+
+POP {R0,R3,PC} yields R0=0x11223344,
+R3=0xAABBCCDD, SP=0x1000, with the final
+loaded word 0x2001 requesting T32 branch target
+0x2000. It is NOT equivalent to moving the
+integer 0x2001 into an ordinary R15 variable
+while continuing at the next instruction.
+This example is only successful if 0x2000 is a
+permitted executable T32 instruction boundary.
+
+The PUSH example stores LR but a later POP
+may restore PC. The register numbers are not
+the same: this is intentional and expresses
+a common calling/return convention. That
+convention is not a promise that every function
+has a matching stack frame.
+
+PART FOUR. WHAT A BASE REGISTER MEANS FOR STMIA.
+
+Operation 57 uses a low general-purpose base
+register Rn rather than implicitly using SP.
+The 16-bit T32 instruction encoding begins with
+binary 11000, followed by a three-bit register
+number Rn, followed by an eight-bit register-set
+mask. It occupies exactly TWO bytes.
+
+Let oldBase be the value of Rn at the start.
+Let count be the number of selected register bits.
+For successful execution, the first word at oldBase
+receives the starting value of the lowest-numbered
+selected register; the next selected register's
+starting value is written at oldBase+4; continue
+until all selected registers are stored.
+The base Rn is then assigned oldBase+4*count.
+
+Example: R4=0x3000, R0=0x11223344,
+R3=0x55667788, with valid writable mapped memory.
+The actual 16-bit T32 instruction encoding 0xC409
+is STMIA R4!, {R0,R3}. It writes 0x11223344
+to 0x3000, 0x55667788 to 0x3004, then
+changes R4 from 0x3000 to 0x3008.
+
+It leaves R0, R3, SP, LR, condition flags
+and the other general registers unchanged.
+The next execution index is two bytes beyond
+the instruction unless an exception intervenes.
+
+The original AOSP expected assembler output
+contains 0xC409 as an actual tested expected encoding.
+That source records the encoding; it does not
+record these hypothetical starting register values,
+which have been supplied for this explicit example.
+
+PART FIVE. WHAT THE BASE REGISTER MEANS FOR LDMIA.
+
+Operation 58 similarly uses one low general-purpose
+base register. Its 16-bit T32 encoding begins with
+binary 11001, followed by Rn and an eight-bit mask.
+
+Using the same initial base R4=0x3000, assume the
+memory word at 0x3000 equals 0x11223344 and
+the word at 0x3004 equals 0x55667788.
+The actual halfword 0xCC09 corresponds to
+LDMIA R4!, {R0,R3}. For normal execution,
+R0 becomes 0x11223344, R3 becomes 0x55667788,
+and R4 becomes 0x3008. No condition flags change.
+
+Again, the exact 0xCC09 instruction halfword
+appears in the pinned AOSP assembler expectation.
+The memory values and base register state in this
+document are explicit model inputs, not measurements
+of an ART process executing the instruction.
+
+PART SIX. WHY THE BASE REGISTER MAY NOT BE IN THE LIST HERE.
+
+The physical T32 ISA has special base-in-list cases.
+
+For the 16-bit LDMIA T1 encoding, including Rn in
+the destination register list changes writeback
+behavior: a form that loads Rn does not also write
+the ordinary incremented end-address to that same
+register as if the fields were independent.
+
+For the 16-bit STMIA T1 encoding, base overlap
+can make a stored base value unknown or impose
+additional architecture-specific restrictions
+depending on which register is selected first.
+
+The first English Major C grant does NOT paper
+over these subtleties. Operations 57 and 58
+explicitly reject every overlapping-base register
+list, leaving exact legal overlap forms for separate
+new long names or a separately versioned profile.
+
+The following cases are intentionally excluded:
+  STMIA R4!, {R0,R4} under operation 57;
+  LDMIA R4!, {R4} under operation 58.
+The first may have special or unpredictable base
+storage effects. The second has different
+native writeback semantics from operation 58.
+The English language does not replace such effects
+with the behavior that would have been convenient.
+
+PART SEVEN. CHANGE SP WITHOUT READING OR WRITING MEMORY.
+
+Operation 59 advances SP by four times a seven-bit
+unsigned immediate. The instruction halfword
+has base hexadecimal 0xB000. Its integer
+literal is an unscaled seven-bit value in the
+encoded bits, but its semantic BYTE displacement
+is that integer multiplied by four.
+
+Operation 60 subtracts the same byte displacement
+from SP. Its halfword base is 0xB080.
+Both forms are TWO bytes long and preserve flags.
+
+In pinned AOSP disassembly, 0xB014 means
+advance SP by 80 bytes. The low seven bits
+represent 20; multiplying by four gives 80.
+0xB094 means subtract 80 bytes from SP.
+These do not refer to 80 stack words.
+
+Assume initial SP=0x2000.
+ADD SP,#80 makes SP=0x2050 without writing
+any memory. SUB SP,#80 subsequently
+makes SP=0x2000, again without reading
+or writing any data memory. That arithmetic
+alone does not prove that either address
+is inside a valid mapped user stack.
+
+PART EIGHT. STACK ALIGNMENT AND CALLING CONVENTIONS.
+
+A successful word-oriented PUSH/POP/LDMIA/STMIA
+needs the applicable word-alignment requirements.
+A higher-level function-call ABI can impose
+additional constraints at public call boundaries,
+including eight-byte SP alignment in the ARM
+procedure-call standard (AAPCS).
+
+These are distinct:
+  instruction encoding legality;
+  address alignment for each memory operation;
+  memory accessibility of the whole transferred region;
+  operating system's process stack mapping;
+  ABI-mandated SP value at a function interface.
+
+A source-language compiler must preserve ALL
+declared obligations. It must not infer "safe
+stack" merely from the existence of the
+architectural SP register.
+
+For example, starting SP aligned to eight bytes,
+PUSH of three words subtracts twelve bytes,
+leaving SP only four-byte aligned. That can be
+a legal intermediate processor state even
+though a later external call may require
+realigning SP under the applicable ABI.
+
+PART NINE. FAULTS AND INTERLEAVING ARE NOT IGNORED.
+
+A load/store multiple can access more than one word.
+One of those addresses may fault even if earlier
+ones are accessible. The full architectural and
+OS exception model determines which accesses and
+register effects are observable after that fault.
+
+The successful-transformation equations above
+are NOT a rollback guarantee. They may not be used
+to claim that an exception automatically undoes
+earlier stores, or that all register results and
+writeback are well defined after a mid-transfer
+fault. Each exact encoding must have its
+exception and restart semantics verified.
+
+Nor may an application assume that two 32-bit
+words written by one STMIA are one atomic
+64-bit transaction, or that another observer
+can never see the first word before the second.
+A language with concurrency needs explicit
+memory ordering and atomicity contracts.
+
+Instruction fetch also remains distinct.
+A POP loading PC uses the last WORD OF DATA
+to select a code address; that word is not
+itself executed as a T32 instruction.
+PUSH storing LR writes return-address DATA,
+not executable code.
+
+PART TEN. EXPLICIT ALTERNATIVES RETAINED.
+
+Alternative A: always lower a multi-register source
+operation into several separate single-word LDR/STR
+instructions. This may make each access explicit and
+simplify some translation stages. It may increase
+instruction count, and fault/interrupt/writeback
+and observation effects must be compared before
+calling the translation equivalent.
+
+Alternative B: emit a native narrow PUSH/POP
+or LDMIA/STMIA where legal. This can be concise
+and is directly tied to the pinned machine encoding.
+It leaves instruction-specific exceptional behavior
+and register-list restrictions to be specified.
+
+Alternative C: permit the native T1 base-overlap
+special cases with separate precise English
+semantics. This covers more real disassemblies,
+but requires representing writeback-suppressed
+loads and constrained/unpredictable store cases.
+Those cases remain excluded by 57 and 58.
+
+Alternative D: use 32-bit Thumb wide multi-register
+instructions with higher registers, optional LR/PC
+and explicit writeback controls. This expands the
+source profile and is necessary for many real
+compiled functions. The long operation name must
+say which allowed variants and effects apply;
+a blanket "same as narrow" assumption is wrong.
+
+Alternative E: use dedicated SP +/- immediate
+instead of PUSH/POP to reserve space for locals.
+This changes SP but does not save/restores any
+register values. It therefore cannot replace
+a register-preserving prologue without additional
+explicit memory transfers.
+
+Alternative F: use a non-standard stack model
+(for example, ascending or empty-stack conventions).
+The ISA has other addressing modes, but a typical
+ARM Android procedure call ABI uses full descending
+stacks. This first grant is not an authorization to
+interchange conventions across a call boundary.
+
+All six possibilities remain recorded. The initial
+narrow operations are admitted so that actual
+machine bytes can be translated, not because
+they have been proved optimal.
+
+PART ELEVEN. SPECIFICATION-LEVEL ACCEPTANCE CASES.
+
+Case 1: Given old SP 0x1000 and the three
+registers R0/R3/LR from Part Two, expect
+the three original values at 0x0FF4,
+0x0FF8, 0x0FFC and new SP 0x0FF4.
+
+Case 2: Given old SP 0x0FF4 and memory from
+Part Three, POP {R0,R3,PC} restores the
+two low registers, sets SP 0x1000
+and selects T32 target 0x2000.
+
+Case 3: Given R4 0x3000, R0 0x11223344,
+R3 0x55667788, decode 0xC409 and expect
+two word stores and R4 0x3008.
+
+Case 4: Given R4 0x3000 and the two memory
+words, decode 0xCC09 and expect R0, R3
+loads and R4 0x3008.
+
+Case 5: Decode 0xB014 and 0xB094 separately.
+With SP 0x2000, the arithmetic results
+are 0x2050 and 0x1FB0 respectively.
+For a SEQUENCE in which 0xB094 follows
+0xB014 starting at 0x2000, the final
+SP is 0x2000. Flags remain unchanged.
+
+Case 6: Reject a narrow PUSH with no low
+register selected and M=0. Reject a
+narrow POP with no selected destination
+and P=0. A list containing LR only
+for PUSH and a list containing PC only
+for POP are nonempty lists, not
+the same as an empty selection.
+
+Case 7: Reject SP, LR or PC as the base
+for operation 57 or 58. Reject any
+list with a register above R7 for
+these restricted 16-bit encodings.
+
+Case 8: Reject Rn in the register list
+for operations 57 and 58 even when
+the physical ISA has a documented
+nonmatching special case.
+
+Case 9: Reject a claimed POP-to-PC
+return when the loaded state-tag bit
+requests A32 under this T32-only grant.
+
+Case 10: Reject a claimed memory write
+caused solely by ADD or SUB SP,#immediate.
+
+Case 11: Reject the claim that
+PUSH of three words preserves eight-byte
+SP alignment merely because the
+original SP was eight-byte aligned.
+
+Case 12: Reject a claim that two word
+stores caused by one STMIA form one
+atomic eight-byte store without a
+supported architecture/environment
+atomicity guarantee.
+
+Case 13: Record any mid-transfer fault
+according to the exact architecture.
+Do not silently mark it a successful
+complete load/store or claim a rollback
+that has not been specified.
+
+These are proposed semantic fixtures,
+not already executed acceptance results.

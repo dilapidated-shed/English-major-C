@@ -1,0 +1,164 @@
+AUDIT RECEIPT: ARMv7-A T32 IF-THEN AND HINT SPACE, BF00–BFFF.
+
+Date: 2026-10-11.
+Flexible Pipes owner: https://github.com/isomorphisms/flexible-pipes/issues/91
+English Major C source review:
+https://github.com/dilapidated-shed/English-major-C/pull/3
+
+Status: committed source and temporary foreign diagnostic observations.
+The work has NOT passed an English Major C parser, typechecker,
+native compiler, device run, or independent ai-ci acceptance.
+No claims of complete ARMv7-A T32 instruction set coverage follow
+from checking this one finite decode region.
+
+ARCHITECTURAL CONTRACT.
+
+The primary standard is ARM DDI 0406C.d, ID040418,
+A6.2.5 Table A6-7 and A8.8.55 IT T1.
+Important rules:
+  * opcode BF and mask zero select the hint space;
+  * BF00 is NOP; BF10/20/30/40 are named hints;
+  * eleven other BFx0 patterns are unallocated hints
+    which execute as NOP but MUST NOT be used by software;
+  * mask nonzero selects IT's encoding family;
+  * firstcond F is UNPREDICTABLE for any nonzero mask;
+  * firstcond E with mask population other than exactly
+    one set bit is UNPREDICTABLE;
+  * IT while already inside IT is UNPREDICTABLE;
+  * instructions inside IT must independently permit
+    conditional execution; T1 conditional B is not permitted.
+
+The committed 256-row data-only table is:
+fixtures/armv7-a-t32-if-then-and-hint-halfwords.tsv
+The legalistic English description is:
+architecture/armv7-a/t32/Every If Then and hint halfword.english
+
+AUDITED FINITE COUNTS.
+
+Exactly 256 candidate sixteen-bit halfwords:
+  214 IT encoding forms that are conditionally permitted
+      under further architecture and source context;
+   26 IT forms excluded as UNPREDICTABLE;
+    1 named NOP (BF00) permitted under operation 52;
+    4 named non-NOP hints (YIELD/WFE/WFI/SEV) decoded
+      but excluded from the present source grant;
+   11 unallocated hints that ARM reserves from software use.
+Total: 214+26+1+4+11 = 256.
+
+The 214 native IT forms are NOT a guarantee that every
+complete instruction sequence using them is legal or
+that its ITSTATE behavior is independently implemented.
+
+TEMPORARY INDEPENDENT DIAGNOSTIC.
+
+The diagnostic generated one machine-code section containing
+256 consecutive five-halfword groups. Each group consisted of
+one candidate BF00..BFFF halfword in ascending order, then
+FOUR copies of BF00 as padding. Four following NOP instructions
+were supplied so a valid IT block of maximal four slots
+would finish before the next candidate began.
+
+Foreign tools:
+    clang 17.0.0 --target=armv7a-none-eabi -mthumb
+    llvm-objdump 17.0.0 --triple=thumbv7-none-eabi -d
+
+The diagnostic source SHA256:
+    8c358fc975d3e003949d94a492d439b80d4fadfc341d6ba113517e90b27e04aa
+The ELF32 ARM object SHA256:
+    a0c05ae60a45423043cf1d4cdad74afdd0517b17772993bae9a7a354019491e8
+The disassembly text SHA256:
+    6390124a1a61959b6f4c77b24912a44998d417952202b869ea9f2517ab4b7d72
+
+Each candidate appeared at its expected ten-byte-spaced
+diagnostic offset, with its exact source halfword preserved.
+The foreign disassembler rendered one NOP, one each of
+YIELD/WFE/WFI/SEV, eleven generic HINT mnemonics,
+and 240 IT-looking mnemonics. Every IT-looking mnemonic
+indicated the expected ONE to FOUR following instruction
+slots based on the mask's trailing-zero count.
+
+WARNING: the 240 IT-looking decoder mnemonics include
+twenty-six forms that ARM DDI 0406C.d calls
+UNPREDICTABLE. An assembler/disassembler mnemonic is
+NOT independent evidence of architectural legality.
+In particular:
+    BFE8 => LLVM prints IT AL; architecture conditionally permits;
+    BFE3 => LLVM prints a multi-slot IT AL with an
+            "unpredictable IT predicate sequence" annotation;
+    BFF8 => LLVM also prints IT AL, but the architecture
+            calls firstcond F UNPREDICTABLE.
+This discrepancy between decoded display and permissibility
+is preserved as a regression case; the source grant rejects BFF8.
+
+The diagnostic is not a cross-vendor implementation:
+clang and llvm-objdump are both LLVM-family software.
+The bytes were assembled and decoded, not executed.
+
+REPOSITORY READBACK.
+
+The committed BF00..BFFF TSV was independently read back
+and every row was checked against its numeric halfword,
+four-bit firstcond, four-bit mask, explicit permission class,
+and number of following instruction slots. All 256 rows
+matched the ARM-derived predicate rules and there were
+zero data-table mismatches.
+
+One further temporary diagnostic assembled:
+    CMP R0,#0
+    ITE EQ
+    MOVEQ R1,R0
+    MOVWNE R2,#0x1234
+    NOP
+
+It produced:
+    2800
+    BF0C
+    4601
+    F241 2234 (one FOUR-byte instruction)
+    BF00
+
+That assembler source SHA256 was:
+    30034378db9ad959282ba2c29a0c10ccd70884d2ecb1058df15ee532143dffc4
+The corresponding object SHA256 was:
+    c2398cb4d78a63d12d0aff64ceb54351877b21f7a11e08887c3ded518043899c
+
+The source-derived English translation is:
+examples/One If Then block governs a short and a long instruction.english
+
+In its first described state R0=0, the EQ MOV executes
+and the NE MOVW does not; in its second state R0=7,
+the EQ MOV is skipped and the NE MOVW executes.
+Both states visit instruction addresses 0,2,4,6,A
+because IT changes which effects occur without
+requiring branch destinations. A skipped FOUR-byte
+MOVW still occupies four bytes in the instruction stream.
+No actual ARM execution was performed or claimed.
+
+KNOWN INCOMPLETE WORK.
+
+A correct English Major C interpreter must model
+every intermediate ITSTATE transition, nested-IT
+rejection, legal/illegal following operation, flag
+preservation and permitted exception return.
+The current documents state those obligations and
+a source-derived trace, but the interpreter and
+an independent AICI behavior fixture do NOT yet exist.
+
+Future acceptance should include:
+  * hostile BFF8 and BFE3 variants;
+  * all eleven unallocated software-reserved hints;
+  * a valid BFE8 form under a supported context;
+  * a nested IT that is rejected;
+  * a T1 B within IT that is rejected;
+  * one-/two-/three-/four-slot legal blocks;
+  * an early four-byte instruction in a block;
+  * a skipped four-byte instruction that advances four bytes;
+  * flag effects in the permitted types of IT slots;
+  * rejected branch-to-middle-of-IT;
+  * profile feature and real executable memory constraints;
+  * actual verified frontend, backend, and runtime as separate levels.
+
+The current evidence is deliberately insufficient for
+claiming an entire compiler or all ARMv7-A T32 instructions.
+
+END OF FINITE BFxx DIAGNOSTIC RECEIPT.

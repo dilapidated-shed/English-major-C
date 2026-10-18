@@ -1,0 +1,228 @@
+AUDIT RECEIPT: THUMB PC ADDRESS, STACK ADDRESS, LITERAL WORD LOAD.
+
+Source branch: fp-91-english-armv7-t32-execution-contract
+Work envelope: https://github.com/isomorphisms/flexible-pipes/issues/91
+Review: https://github.com/dilapidated-shed/English-major-C/pull/3
+
+Status: observed diagnostic assembly and disassembly, independently
+recalculated bitfields, GitHub source publication.
+NOT verified physical ARM execution.
+NOT an accepted English Major C compiler, parser or interpreter.
+NOT independent AICI acceptance or an authorized merge.
+
+I. NORMATIVE SOURCE.
+
+Arm Limited, ARM Architecture Reference Manual, ARMv7-A and ARMv7-R
+edition, ARM DDI 0406C.d / ID040418, especially the A6
+16-bit Thumb decode tables and the A8 instruction descriptions
+for ADR T1, ADD (SP plus immediate) T1 and LDR (literal) T1.
+The A4 unified-assembler address rules specify that a Thumb
+PC read is current instruction address +4, and Align(PC,4)
+clears the two lowest bits before computing some literal
+or PC-relative addresses.
+
+Source identification:
+https://developer.arm.com/documentation/ddi0406/cd
+Additional non-normative A-profile T32 instruction description:
+https://mikhailarkhipov.github.io/ARM-doc/A32/adr.html
+
+II. IDENTIFIED DIAGNOSTIC HOST AND TOOLS.
+
+Host: Linux x86-64 local disposable analysis environment.
+Compiler: clang 17.0.0, Swift/LLVM revision
+10999b6d034fe318f3d56c83bddb6572593a8bb0.
+Decoder: llvm-objdump 17.0.0.
+Target: armv7a-none-eabi, Thumb state, ELF32 little-endian ARM.
+
+The diagnostic tool binary file digests, dynamic library closure,
+compiler/linker runtime and target CPU were not fully captured.
+Thus these source/object/output SHA256 values describe a concrete
+temporary observation, not a complete reproducible ICK or NDK build.
+
+III. ALL 4096 A000..AFFF HALFWORDS.
+
+A transient assembler source placed all 4096 literal .hword
+values A000 through AFFF in increasing numerical order into
+a Thumb .text section. Each group of sixteen consecutive
+values was written on a .hword directive line.
+
+Temporary source SHA256:
+80280a8596c41854afcbcda639b2fc1397a68723096e8539976dc01b1fa5cdcc
+Temporary ELF32 ARM object SHA256:
+b8e7da5ce1a16e63f70215d2ca8835b9096b733376dbde3a17ee88093f57c543
+Temporary LLVM disassembly SHA256:
+9d6caf045875ba5ba79f8312ff7ceb94c6eaa74905fa83ac88bf9ec11f48f392
+
+Decoded instruction totals:
+  2048 T1 ADR instruction halfwords, A000–A7FF;
+  2048 T1 ADD Rd,SP,#immediate halfwords, A800–AFFF;
+  zero unexplained alternate or missing forms.
+
+A separate arithmetic comparison checked all 4096
+offset/halfword/low-register/immediate combinations:
+  current diagnostic section offset = 2*(halfword-A000);
+  destination = bits 10..8, R0 through R7;
+  byte increment = 4 * unsigned bits 7..0.
+The decoder name/operands/offsets agreed with every
+row and exactly matched the two 2048-entry classes.
+
+The associated 4096-row committed source is:
+fixtures/armv7-a-t32-address-generation-halfwords.tsv
+
+The arithmetic examples in its two result columns
+are NOT actual runtime addresses, but illustrative
+assumptions: instruction begins at 0x1000 or 0x1002,
+and SP is assumed equal to 0x2000.
+PC base for both instruction addresses is 0x1004,
+because Align(0x1004,4)=Align(0x1006,4)=0x1004.
+This is not a claim that a physical ARM program's
+instructions were loaded at those virtual addresses.
+
+IV. ALL 2048 LITERAL WORD LOAD HALFWORDS.
+
+A separate diagnostic generated .hword 0x4800 through
+.hword 0x4FFF, strictly in numerical order.
+
+Temporary source SHA256:
+fe022a60245b0bf237182c995626d44d592439b654b642fa869dc35574d56eda
+Temporary ELF32 ARM object SHA256:
+e9bcb95af24d097452bbe99cf07d257d56865088653e64f73af06615e5b399f2
+Temporary LLVM disassembly SHA256:
+3b2c641d3d6e8017281579c8465d4fe5a2b1ea242318e8c459f785dc8a3702e0
+
+All 2048 entries decoded as two-byte T1
+LDR literal instructions with destination R0..R7,
+unsigned imm8*4 byte offsets, and PC-relative
+word addresses.
+
+The first diagnostic comparison script FAILED
+every one of the 2048 text comparisons. The
+comparison expected decimal text after "#",
+while LLVM printed hexadecimal strings
+with prefix "#0x". This was a diagnostic
+representation error, not evidence that
+ARM immediate fields differ from the model.
+
+The independent comparison was repaired to
+parse the printed numeric literal using its
+actual indicated radix, rather than assuming
+a printed representation. The renewed
+comparison checked every raw halfword,
+destination, scaled immediate, and
+instruction byte offset; all 2048 matched,
+with zero remaining discrepancies.
+
+The complete committed data enumeration is:
+fixtures/armv7-a-t32-pc-relative-word-load-halfwords.tsv
+
+The diagnostic disassembler did NOT actually
+perform those 2048 data memory reads.
+Any successful LDR runtime state additionally
+depends on target memory mappings, permissions,
+endianness, conditions and faults.
+
+V. A REAL SIXTEEN-BYTE CODE/DATA AMBIGUITY.
+
+The diagnostic assembly source combined T32
+.hword instruction encodings and a literal
+.word 0x12345678 in the SAME .text section.
+It had exact raw bytes:
+00 A0 01 49 02 E0 00 BE 78 56 34 12 00 BF 01 DF
+
+SHA256 diagnostic source:
+7bcf3e392d1dc62a9aece9425abfc198509509e9acaca4d6cdb2b3a93b71b3ad
+SHA256 diagnostic ELF32 object:
+e5627dbcebaffeed79ccb3851d0e6b7533b1e2d8f6fb8eb5b6a79d063895d10b
+SHA256 diagnostic linear disassembly:
+c89da3af7a3c63df506f5958b89f4e169142de9b5422bcca2f6ad986415febd4
+SHA256 diagnostic raw section dump:
+1f619f98b570557f15d4b4b1924b9728bfaa08d30842c2347a8eeb510e73225a
+
+The four literal bytes are at .text section
+offset 8..11. A naive linear disassembler
+displayed those bytes as two perfectly
+plausible Thumb instructions:
+  halfword 0x5678 -> LDRSB R0,[R7,R1]
+  halfword 0x1234 -> ASRS R4,R6,#8.
+But the ORIGINAL assembler source specified
+those bytes as a SINGLE DATA WORD,
+and the actual B instruction at offset
+four branches directly to offset twelve.
+Thus a control-flow trace beginning at offset
+zero neither executes the breakpoint at offset
+six nor executes those literal bytes as code.
+
+A separate temporary arithmetic state model
+assumed the machine section was loaded at
+virtual address 0x1000, had T32 executable
+entries at the intended offsets, and
+could read the four literal data bytes
+with little-endian semantics.
+
+It produced the ordered index trace:
+  0x1000 ADR R0, Align(PC,4) + 0;
+  0x1002 LDR R1, [Align(PC,4)+4];
+  0x1004 B with positive four-byte displacement;
+  0x100C NOP;
+  0x100E STOP before ungranted SVC.
+Known results before SVC:
+  R0=0x1004;
+  R1=0x12345678;
+  other undeclared register values UNKNOWN;
+  N/Z/C/V unchanged from UNKNOWN starting flags;
+  ordinary data memory unchanged.
+
+The arithmetic check verified the five visited
+instruction-boundary addresses and two computed
+register values. No physical CPU performed this trace.
+The assumption that the .text mapping permits
+ordinary data reads must be tested independently
+on any future concrete target.
+
+VI. MEANING AND EXPLICIT LIMITS.
+
+ADR constructs an address numerical value.
+SP-relative ADD constructs another numerical
+value without changing SP.
+LDR literal constructs a PC-relative address
+AND then reads a word from it.
+B changes the execution index.
+The existence of a register value numerically
+equal to an executable address does not branch
+there. Decodable instruction-looking DATA bytes
+do not automatically become executed instructions.
+
+Existing long operation 40 is narrowed to exact
+ADR T1 encoding.
+Existing long operation 41 is narrowed to exact
+LDR literal T1 encoding.
+New long operation 73 separately names
+SP-relative ADD T1, where destination is R0-R7
+and SP itself remains unchanged.
+
+All three operation families preserve comparison
+flags and have two-byte instruction encodings.
+Their complete runtime semantics in IT blocks
+still require independent full ITSTATE acceptance.
+
+VII. EXPLICITLY OPEN VERIFICATION OBLIGATIONS.
+
+The source files do not demonstrate:
+  - all ARMv7-A A32 and T32 encodings;
+  - full ARMv7-A user-mode memory attributes;
+  - target-specific executable/readable permissions;
+  - ARMv7 cache, speculation, or real DRAM transfers;
+  - data aborts under varied memory mappings;
+  - independent hostile test acceptance in AICI;
+  - parser/typechecker/lowering or an executable
+    English Major C semantic runtime;
+  - ICK or Android NDK maintained build qualification;
+  - a successful hardware execution of the example;
+  - completion of the R lm()/QR disassembly translation.
+
+This is source-level architectural work,
+real foreign diagnostic decode evidence,
+and separately computed example arithmetic.
+It is NOT finished compiler or processor qualification.
+
+END OF AUDIT RECEIPT.

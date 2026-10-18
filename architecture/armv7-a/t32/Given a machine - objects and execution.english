@@ -1,0 +1,223 @@
+GIVEN A MACHINE: ITS OBJECTS, PROCESSES, AND EXECUTION.
+
+Document status: English Major C experimental normative-draft specification.
+Scope: symbolic ARMv7-A application-level execution in T32 (Thumb) state.
+Cross-reference: "All and only these initial operations are permitted.english"
+in this directory. Precise ARM source and gaps are recorded in
+"Instruction set architecture - sources and unfulfilled coverage.english".
+
+PART ONE. THE DECLARATION OF THE MACHINE.
+
+Given a machine satisfying the ARMv7-A architecture and capable of executing
+16-bit and 32-bit Thumb instructions (T32), operating for the present
+description in its unprivileged application mode, the following properties
+shall be assumed and no additional physical property shall be inferred.
+
+The machine has an execution index.
+
+Execution index: A value identifying the memory address from which the next
+instruction is to be fetched. Ordinary sequential execution advances this
+value according to the length of the instruction. Branching replaces it with
+the address of another instruction.
+
+The expression "execution index" is the preferred English Major C name for
+the abstract next-instruction address. Its value is a byte address, not an
+ordinal count of instructions and not the number of instructions completed.
+This agreed wording is also tracked, unmodified, in PR #2, "Define the
+execution index". The execution index is not a new hardware register.
+
+The machine has thirteen architecturally visible general-purpose registers
+called R0 through R12, each holding exactly 32 bits. R13 has the special role
+of stack pointer, abbreviated SP. R14 has the special role of link register,
+abbreviated LR. R15 has the special role of program counter, abbreviated PC.
+Their physical implementations, renaming, banked copies, and issue pipelines
+are not specified by this declaration. R0-R12 hold patterns of 32 bits; they
+do not carry an intrinsic "signed", "pointer", "text", or "instruction" tag.
+
+The machine has architectural condition state, including N (negative), Z
+(zero), C (carry or no-borrow according to the producing arithmetic operation),
+and V (signed overflow), as described in the application program status
+register, APSR. Other status fields, the Q bit, GE bits, and system status
+registers exist in the architecture but are NOT licensed for direct
+English Major C use by the initial operation set merely by naming APSR here.
+
+The machine has access to a byte-addressed virtual memory view. A byte has
+eight bits. Reading or writing multiple bytes depends on the mapping,
+permissions, alignment rules, size of access, endianness, and architectural
+memory behavior applicable to the exact operation. A load from a virtual
+address is NOT a promise of a physical DRAM transfer: it may be served by
+a cache, may generate a translation/access exception, or may interact with
+memory of a different type. The processor's memory controller, interconnect,
+cache hierarchy, page tables, and DRAM are distinct objects. An application
+does not by default know their physical addresses or part numbers.
+
+The machine has a mechanism for fetching instruction halfwords, decoding
+the instruction in the current T32 execution state, checking architectural
+conditions and relevant exceptions, executing its effects, and determining
+the architectural next instruction. This declaration does not assert any
+particular number of physical pipeline stages, prefetch distance, execution
+units, branch-prediction policy, or latency.
+
+The machine has an instruction set architecture: the full architectural
+reference is ARM DDI 0406C.d, whose identity is provided in the other
+referenced file. The separate closed English Major C operation grant names
+which instructions a program in this initial language profile MAY request.
+The actual processor may support many instructions that the language profile
+does not yet permit. These two sets MUST NOT be conflated.
+
+PART TWO. THE ABSTRACT PROGRAM STATE.
+
+For purposes of explaining a single architectural instruction, define the
+state as the tuple of:
+  (a) the execution index, in byte-address units;
+  (b) the 32-bit values of R0-R12, SP, and LR;
+  (c) the architecturally relevant N, Z, C, and V flags;
+  (d) current T32 conditional-execution state, including ITSTATE when active;
+  (e) the architecturally observable memory contents and attributes;
+  (f) instruction and data translation, permissions, and execution state;
+  (g) any exception state necessary to represent a fault or trap.
+
+This tuple is a specification model, not a claim that the full physical
+microarchitecture is expressible by that tuple. A later concurrency contract
+must add architecturally relevant sharing, atomicity, ordering, exclusive
+monitor state, and observer relations. In their absence, this file claims
+only a single-threaded trace under the stated memory-access assumptions.
+
+An ordinary successful instruction transition may modify only those
+components that its exact operation allows. An instruction that completes
+normally advances the execution index according to the T32 encoding length,
+unless the operation explicitly transfers control. An instruction that
+generates an exception follows its architectural exception semantics;
+it is not equivalent to an ordinary completed transition.
+
+PART THREE. INSTRUCTION LENGTH AND THE REGISTER CALLED PC.
+
+In the selected T32 state a single instruction occupies one or two 16-bit
+halfwords: two bytes or four bytes. The sequential execution index normally
+advances by TWO BYTES or FOUR BYTES, never by "one instruction" as though
+every instruction had the same byte length.
+
+The architectural value obtained when a T32 instruction reads PC as an
+operand is ordinarily the address of that instruction plus four bytes,
+subject to the specified operation's alignment and special rules. Certain
+PC-relative operations align that value to a four-byte boundary. This
+operand-reading behavior MUST NOT be mistaken for the value of the
+abstract execution index, or for the address of whatever halfword a
+physical prefetch unit may already have fetched. A program-counter write
+is a control transfer and is governed by its specific instruction rules.
+
+Instruction fetch alignment and branch-target restrictions are those of
+ARM DDI 0406C.d. In particular, a T32 instruction address denotes a
+halfword-aligned instruction boundary. A four-byte instruction may start at
+a halfword address that is not divisible by four. A branch must not be
+declared valid solely because its destination address contains bytes:
+the destination must be a permitted instruction boundary with appropriate
+execution state and access rights.
+
+PART FOUR. WHEN BYTES ARE DATA AND WHEN THEY ARE INSTRUCTIONS.
+
+The same memory bytes may be interpreted as integer data, encoded text,
+an address, or instruction encodings. None of those meanings is an
+intrinsic property of the byte sequence. Their meaning is established by
+the operation performing the read and by the applicable representation
+and execution contract.
+
+A data-load operation obtains data from memory and does not itself request
+that the loaded bytes be executed. A legal instruction-fetch operation
+obtains bytes from an executable mapping in the machine's instruction
+stream and decodes them according to the current execution state.
+A branch changes the next architectural instruction address; it does
+not magically make a non-executable mapping executable. The availability
+of writable or executable page permissions belongs to the operating
+environment. An Android user process cannot assume arbitrary changes
+to page permissions, code-cache coherency, or authority to execute data.
+
+Self-modifying or generated machine code, instructions stored in ordinary
+buffers, and transitions through newly generated code are therefore
+NOT implicitly permitted by this first profile. Any later provision must
+specify memory permissions, data-cache and instruction-cache maintenance,
+required synchronization, instruction boundary validation, and OS effects
+rather than treating a cast from "data" to "code" as sufficient.
+
+PART FIVE. SEQUENTIAL EXECUTION, BRANCHING, AND CONDITIONAL EXECUTION.
+
+For a successfully executed non-branch instruction of length L bytes,
+the default architectural successor is the address indexed before
+execution plus L, where L is either two or four. The program must not
+assume a single uniform instruction width.
+
+A branch operation instead selects an architectural target under a
+specified condition. A conditional branch whose condition is false
+continues sequentially. The evaluated condition is derived from the
+architectural condition flags, or from the source register for CBZ/CBNZ,
+according to the precise instruction. Equality after subtraction, for
+example, is determined from the Z flag.
+
+The IT instruction establishes a bounded conditional-execution block for
+following T32 instructions, using an initial condition and permitted inverse
+conditions. It is NOT an ordinary unrestricted if statement: its length,
+legal instruction placement, flag behavior, and branch placement are
+constrained by the ARM architecture. The initial operation grant cannot
+legalize an otherwise invalid or unpredictable IT sequence.
+
+The execution index describes architectural control flow. Physical
+instruction prefetch, cache fills, branch speculation, branch prediction,
+and any discarded speculative work do NOT change the language's declared
+result unless the architecture explicitly exposes an observable effect.
+A one-time source-level dispatch between two loops is a distinct
+program transformation; it must not be called "hardware branch prefetch".
+
+PART SIX. LOADS, STORES, FLAGS, AND EXCEPTIONS.
+
+A register-to-register arithmetic operation works with architectural
+register values rather than directly adding values stored in DRAM.
+A load obtains a memory value into registers, possibly using caches and
+translation hardware; a store requests the reverse effect. The operation
+specification determines address formation, size, sign extension or zero
+extension, effective endianness, writeback, alignment, and fault behavior.
+If any material property remains unspecified, no executable lowering
+may be pronounced verified.
+
+Arithmetic that writes N, Z, C, or V is different from arithmetic that
+preserves those flags. In particular, a compare is not an invisible
+mathematical predicate: it has prescribed flag effects on later
+conditional branches. Any substitution involving conditional execution
+must preserve all architecturally observable relevant effects.
+
+An exception, including an invalid instruction, instruction fetch fault,
+permission fault, data fault, or supervisor call, is NOT represented by
+silently skipping the instruction. The exact handling differs between
+an operating-system-controlled user process and privileged firmware.
+This file specifies no exception-handler installation or operating-system
+system-call interface.
+
+PART SEVEN. PHYSICAL BINDING REQUIRED BEFORE RUNNING ON A REAL DEVICE.
+
+A concrete machine declaration SHALL additionally identify:
+  * processor/SoC vendor, part, revision, architecture feature registers,
+    execution mode, supported instructions and optional extensions;
+  * target byte ordering, alignment policies, memory mappings and access rights;
+  * cache and memory hierarchy facts relevant to the proposed program;
+  * actual OS/ABI, loader, stack and calling convention, and executable permissions;
+  * source, compiler/assembler and machine-code identity;
+  * observed execution evidence if actual execution is claimed.
+
+No DRAM model number, processor part number, or bus/channel identity from
+a hypothetical introductory example is asserted here. The named target is
+symbolic until a target-specific manifest is attached and verified.
+
+PART EIGHT. EXPLICIT EXCLUSIONS AND UNRESOLVED CHOICES.
+
+This source does not define all instructions available to ARMv7-A hardware.
+This source does not authorize execution in A32 (ARM) state, privileged modes,
+coprocessor state, Advanced SIMD, VFP, direct device-memory control, or
+an arbitrary instruction encoded in user-supplied bytes. Those capabilities
+require their own enumerated grants and detailed rules.
+
+Open questions include: whether the language's execution index is directly
+manipulable as an ordinary first-class value; whether code-data conversion
+can be made safe and explicit; how exceptions are typed; how concurrency and
+memory ordering are represented; and how a language-level conditional
+operation corresponds to T32 predicates, branches, or software dispatch.
+
+These choices must be recorded, not silently resolved by the first compiler.

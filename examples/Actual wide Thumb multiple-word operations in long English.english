@@ -1,0 +1,321 @@
+ACTUAL WIDE THUMB MULTIPLE-WORD OPERATIONS IN LONG ENGLISH.
+
+This document begins with actual expected machine encodings rather than
+with a high-level algorithm. Source revision and fixture identity are
+recorded explicitly. The later numerical register and memory examples are
+HYPOTHETICAL INPUT STATES, not observed machine execution.
+
+Exact external source:
+  Android Open Source Project, ART,
+  08490b84048a0267694268185441b70cfa090185,
+  compiler/utils/assembler_thumb_test_expected.cc.inc.
+  https://android.googlesource.com/platform/art/+/08490b84048a0267694268185441b70cfa090185/compiler/utils/assembler_thumb_test_expected.cc.inc
+
+The source includes the separate arrays:
+    StoreMultipleResults, and
+    LoadMultipleResults.
+
+They contain the following checked-in expected instructions:
+
+  StoreMultipleResults, offset 0x0002:
+    first halfword 0xE8A4; second halfword 0x4800;
+    assembler displays: STMIA.W R4!, {R11, LR}.
+
+  StoreMultipleResults, offset 0x0006:
+    first halfword 0xE884; second halfword 0x4800;
+    assembler displays: STMIA.W R4, {R11, LR}.
+
+  LoadMultipleResults, offset 0x0002:
+    first halfword 0xE934; second halfword 0x4800;
+    assembler displays: LDMDB R4!, {R11, LR}.
+
+  LoadMultipleResults, offset 0x0006:
+    first halfword 0xE914; second halfword 0x4800;
+    assembler displays: LDMDB R4, {R11, LR}.
+
+The four source offsets are local to their corresponding
+assembler-test arrays. It is NOT claimed that all four
+instructions were consecutive in one executable program.
+The original test also has other machine instructions,
+and this document does not pretend to translate all
+instructions reachable from its true entry point.
+
+PART ONE. FIRST FETCH, THEN SECOND HALFWORD OF THE SAME INSTRUCTION.
+
+At each of these four offsets, the first five bits of
+the first halfword begin with binary 11101, identifying
+a 32-bit T32 encoding class. A second 16-bit halfword
+must be fetched and interpreted as part of the same
+architectural instruction.
+
+The second halfword 0x4800 has bits 14 and 11 equal
+to one. These select register number 14 (LR) and
+register number 11 (R11), respectively. Bit 15
+(selecting PC where such a field is defined) is
+zero. Bit 13 (SP) is zero. Both registers are
+included in each transfer.
+
+The exact first halfword distinguishes four
+architectural operations:
+  0xE884: increment-after multiword STORE, W=0;
+  0xE8A4: increment-after multiword STORE, W=1;
+  0xE914: decrement-before multiword LOAD, W=0;
+  0xE934: decrement-before multiword LOAD, W=1.
+
+The bit which differs between 0xE884 and 0xE8A4
+is the writeback bit. The analogous difference
+between 0xE914 and 0xE934 is also writeback.
+Changing that bit can change R4 even when
+the same data values are transferred.
+
+These are FOUR-BYTE instructions. An instruction
+at offset 0x0002 occupies halfwords beginning at
+0x0002 and 0x0004, and has ordinary successor
+index 0x0006. An instruction at offset 0x0006
+occupies halfwords 0x0006 and 0x0008 and has
+ordinary successor index 0x000A.
+The second halfword of a four-byte instruction
+is NOT the next independently executed instruction.
+
+PART TWO. STORE MULTIPLE WITH WRITEBACK.
+
+Assume the instruction at StoreMultipleResults
+offset 0x0002 is the current instruction. Define
+the starting state as:
+    R4 = 0x00003000;
+    R11 = 0x11223344;
+    LR = 0x00004001;
+    N, Z, C, V are unknown but fixed;
+    memory at 0x3000..0x3007 is mapped,
+    writable, and satisfies alignment rules;
+    no exception occurs during the transfer.
+
+The selected operation 62 has the long name:
+"Beginning at the memory address in a selected
+general-purpose base register, copy the original
+thirty-two-bit value of every member of a permitted
+register set into consecutive four-byte memory
+words ordered by ascending register number,
+and then increase the base register by four bytes
+per member."
+
+There are two selected registers, numbered 11 and 14.
+The lower-numbered one is R11, so the memory word
+at address 0x3000 receives the original R11 value
+0x11223344. The higher-numbered one is LR,
+so the word at address 0x3004 receives 0x00004001.
+
+Since two registers were selected, R4 changes from
+0x3000 to 0x3008. R11 remains 0x11223344;
+LR remains 0x00004001; flags remain fixed.
+No branch is caused by storing LR as data.
+The successor execution index becomes offset 0x0006
+in the same StoreMultipleResults fragment.
+
+PART THREE. STORE MULTIPLE WITHOUT WRITEBACK.
+
+For the different instruction at StoreMultipleResults
+offset 0x0006, reset the starting state to
+R4=0x3000, R11=0x11223344, LR=0x00004001
+and valid mapped/writable aligned memory.
+
+This instruction is operation 61, whose long name
+states that the base register shall remain unchanged.
+
+The word at 0x3000 becomes 0x11223344.
+The word at 0x3004 becomes 0x00004001.
+R4 REMAINS 0x3000.
+The flags, R11 and LR remain unchanged.
+The successor index is offset 0x000A.
+
+The memory effects match the writeback case
+under equal starting states, but the complete
+machine-state effects do not. The difference
+must survive translation to English.
+
+PART FOUR. LOAD MULTIPLE, DECREMENT BEFORE, WRITEBACK.
+
+Begin a SEPARATE model input at LoadMultipleResults
+offset 0x0002. Assume:
+    R4=0x00003008;
+    memory word at 0x3000 = 0x11223344;
+    memory word at 0x3004 = 0x00004001;
+    those words are readable and aligned.
+
+Instruction halfwords 0xE934,0x4800 invoke
+operation 64. Two registers are selected.
+The FIRST word address is:
+    0x3008 minus 4 times 2 = 0x3000.
+
+The lowest selected register R11 receives
+the word from 0x3000, so R11=0x11223344.
+
+The highest selected register LR receives
+the word from 0x3004, so LR=0x00004001.
+
+The writeback bit is set, so R4 becomes
+0x3008 minus eight bytes = 0x3000.
+The flags remain unchanged. NO BRANCH
+occurs from the mere act of loading LR.
+The next execution index is offset 0x0006
+within LoadMultipleResults.
+
+PART FIVE. LOAD MULTIPLE, DECREMENT BEFORE, NO WRITEBACK.
+
+Begin another separate model input at LoadMultipleResults
+offset 0x0006 with R4=0x00003008 and the
+same two readable aligned memory words.
+
+Instruction halfwords 0xE914,0x4800 invoke
+operation 63. The load addresses and
+register assignments are the SAME as above:
+R11 becomes 0x11223344 and LR becomes 0x00004001.
+
+But here R4 REMAINS 0x3008 rather than
+becoming 0x3000. The execution index
+advances by four bytes to offset 0x000A.
+Flags remain unchanged. No PC write occurs.
+
+PART SIX. WHY LOADING LR DOES NOT AUTOMATICALLY RETURN.
+
+The link register is capable of holding
+a Thumb-state-tagged return value, but
+a data-load instruction that makes LR
+equal to 0x00004001 is not a branch.
+The next ordinary instruction is still
+at the sequential successor address.
+
+A later authorized BX LR or equivalent
+control-transfer instruction could read
+LR and transfer to 0x00004000 in T32
+state, subject to that target being
+permitted and executable. Such a branch
+was NOT observed as part of these four
+machine instructions. It must not be
+inserted as an alleged translation
+of LDMDB R4!,{R11,LR}.
+
+Likewise, a store of the LR data word
+0x00004001 does not execute any of
+the bytes of that word.
+
+PART SEVEN. EFFECTS NOT CLAIMED HERE.
+
+The memory words at 0x3000 and 0x3004
+are not an atomic combined eight-byte
+transaction simply because one instruction
+addresses both words. A failing second
+access cannot be assumed to roll back
+the first. A multiword instruction may
+fault, and the exact partial effects
+need their own architectural rule.
+
+Registers R11 and LR remain legal members
+of these selected WIDE operations, unlike
+the narrow T1 STMIA/LDMIA set restricted
+to R0-R7. Conversely, SP and PC are not
+granted list members by these particular
+long operation names. The subset's base
+cannot overlap its register set.
+
+The hypothetical instruction stream
+starts at a relative offset, not at
+an established Android process VA.
+No claim about the actual physical
+DRAM component, cache line fills,
+branch prediction, process privilege,
+or executed binary is derived from
+the source assembler expectations.
+
+PART EIGHT. COMPETING REPRESENTATIONS TO RETAIN.
+
+Choice A: treat the hardware's W bit as
+one source operation with a Boolean
+writeback option. This is compact, but
+a reader must inspect that option to
+understand whether the base changes.
+
+Choice B: give base-preserving and
+base-updating operations different
+long English names, as entries 61-64
+currently do. This makes a crucial
+state change visibly explicit, at the
+cost of longer source and more names.
+
+Choice C: replace a multiword operation
+by multiple single-word loads or stores
+and a separately explicit base update.
+This makes individual memory addresses
+easy to spell out but must account for
+all exceptional effects and ordering
+before claiming equivalence.
+
+Choice D: represent the complete exact
+native instruction as a foreign opaque
+operation and attach an explanatory
+English comment. This avoids inventing
+semantics prematurely, but fails the
+goal of a genuinely exhaustive English
+translation unless the foreign operation
+is precisely defined elsewhere.
+
+Current draft choice: separate long
+operations according to writeback,
+preserve the original halfwords and
+provenance, and list any unverified
+processor-level effects without guessing.
+
+PART NINE. POSITIVE AND NEGATIVE CASES.
+
+Positive: the four halfword pairs
+must be decoded as FOUR-BYTE T32
+instructions with the listed base,
+two-register mask, and W value.
+
+Positive: when base=0x3000, either
+STMIA stores R11 at 0x3000 and
+LR at 0x3004. With writeback,
+R4 becomes 0x3008. Without, R4
+remains 0x3000.
+
+Positive: when base=0x3008, either
+LDMDB loads R11 from 0x3000 and
+LR from 0x3004. With writeback,
+R4 becomes 0x3000. Without, R4
+remains 0x3008.
+
+Negative: interpreting halfword
+0x4800 as its own instruction
+after 0xE8A4, 0xE884, 0xE934
+or 0xE914 must be rejected.
+
+Negative: loading LR must not
+be reported as a branch or as
+an update of the execution index
+to the value held in LR.
+
+Negative: decrement-before must
+not be confused with increment-after.
+The starting word for a two-register
+LDMDB with base 0x3008 is 0x3000,
+not 0x3008.
+
+Negative: a base-register writeback
+must not be invented in a W=0 form
+or omitted in a W=1 form.
+
+Negative: the register list order
+must not be reversed; R11 is the
+lower-numbered register despite
+LR's special linguistic name.
+
+Negative: even though the external
+AOSP source includes those encodings,
+the presence of assembly text alone
+does not show that an English Major C
+parser, translator or emulator executed
+these instructions.
+
+Every one of the cases above is a
+SPECIFIED FUTURE ACCEPTANCE CASE,
+not an already accepted program test.

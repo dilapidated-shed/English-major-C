@@ -1,0 +1,292 @@
+ONE ACTUAL THUMB BRANCH LISTING TRANSLATED FROM THE BOTTOM UPWARD.
+
+Status: initial source-derived trace specimen; not a compiler and not
+a claim that these machine instructions were executed in this job.
+
+Original external source:
+Android Open Source Project, ART, pinned revision
+08490b84048a0267694268185441b70cfa090185,
+compiler/utils/assembler_thumb_test_expected.cc.inc,
+array named SimpleBranchResults.
+https://android.googlesource.com/platform/art/+/08490b84048a0267694268185441b70cfa090185/compiler/utils/assembler_thumb_test_expected.cc.inc
+
+The external file provides an expected ARM Thumb assembler listing.
+The original source's offset labels and observed halfword encodings
+are evidence of a test expectation checked into ART. They are NOT
+evidence that we built, executed or reassembled that test here.
+This experiment does not reconstruct an R function or invent a
+high-level source. It starts with encoded machine instructions.
+
+Architecture assumed for the English interpretation:
+ARMv7-A in T32 instruction state, unprivileged, with the
+current closed 73-operation profile in the architecture directory.
+This is a valid target choice for the *interpretation*;
+no concrete mobile CPU was observed during this work.
+
+PART ONE. THE RELEVANT ORIGINAL ENCODINGS.
+
+The following pairs give an offset relative to the original
+fixture's instruction-stream start, followed by the 16-bit
+instruction halfword as a hexadecimal number.
+
+    Offset 0x0006: 0xE000
+    Offset 0x0008: 0x2102
+    Offset 0x000A: 0x2003
+    Offset 0x000C: 0x2002
+    Offset 0x000E: 0x2101
+    Offset 0x0010: 0xD0FD
+    Offset 0x0012: 0xD000
+    Offset 0x0014: 0x2102
+    Offset 0x0016: 0x2003
+    Offset 0x0018: 0xE002
+    Offset 0x001A: 0x2104
+    Offset 0x001C: 0xE000
+    Offset 0x001E: 0x2105
+    Offset 0x0020: 0x2006
+
+For this specimen, interpret these numbers as actual T32
+instruction halfwords, not as a single array of integer data
+that has somehow already been executed.
+
+The four relevant machine instruction families are:
+  MOVS (immediate): 16-bit T32 form setting N and Z;
+  B (unconditional): 16-bit direct PC-relative branch;
+  B with condition EQ: 16-bit branch only when Z=1;
+  (other instructions in the published fixture exist,
+   but this specimen does not expand them).
+
+The original disassembly renders one of the branches as
+"b.n", one as "beq.n", and one of the register writes as
+"movs". These short assembler names remain provenance, not
+the chosen English Major C operation names.
+
+PART TWO. A PRECISE DECLARATION OF THE STARTING STATE.
+
+Choose the execution index to be offset 0x0006.
+Assume every listed instruction address is executable in
+the selected T32 state, and all listed bytes are present
+and identically visible to the instruction fetch mechanism.
+The 16-bit encodings are well-formed at the assumed address.
+The value of each general register initially is unknown
+unless assigned by one of the listed operations.
+The initial values of N, Z, C, V are unknown.
+The values of SP and LR are unknown and are NOT assumed
+to contain a valid call frame or return location.
+No instruction in the traced path reads or writes data memory.
+For this trace, no exception, asynchronous interrupt,
+or external concurrent modification is introduced.
+
+Offsets in this file are relative, not independently observed
+operating-system virtual addresses. To execute at a concrete
+address, a loader must supply a base and a matching executable
+mapping. Do not treat a listing offset as the actual program
+counter value in a process that has never been launched.
+
+PART THREE. THE MACHINE-LEVEL TRACE EXPRESSED AS ENGLISH.
+
+STEP ONE.
+
+The execution index is 0x0006 relative to the known code base.
+The halfword has value 0xE000, a 16-bit unconditional
+T32 branch with an immediate displacement of zero.
+Apply the operation whose full long English name is
+"Replace the execution index with the named legal T32
+instruction address without modifying the link register."
+The architectural PC-relative base of this instruction
+is 0x000A. Adding the encoded displacement zero produces
+the selected successor offset 0x000A.
+
+No register, memory location, or condition flag changes.
+The 16-bit halfword at offset 0x0008 is therefore NOT
+executed in this trace. Its bytes have not disappeared:
+they remain ordinary contents of the same instruction
+stream and might be decoded on another execution path.
+
+STEP TWO.
+
+The execution index is 0x000A. The halfword 0x2003 is
+the 16-bit MOVS-immediate encoding that chooses register
+R0 and unsigned literal 3. Apply operation 53, whose
+name states that it writes the zero-extended eight-bit
+literal to a low general-purpose register and updates
+negative and zero flags without changing carry or
+overflow. After this step:
+    R0 is exactly 0x00000003;
+    N is zero;
+    Z is zero;
+    C and V retain their prior unknown values.
+The next sequential index is offset 0x000C.
+
+STEP THREE.
+
+At offset 0x000C, halfword 0x2002 selects the same
+operation 53 with R0 and literal 2. This overwrites
+the old value of R0. After this step:
+    R0 is exactly 0x00000002;
+    N is zero;
+    Z is zero;
+    C and V retain their prior values.
+The next index is offset 0x000E.
+
+STEP FOUR.
+
+At offset 0x000E, halfword 0x2101 selects operation
+53 with R1 and literal 1. After the step:
+    R1 is exactly 0x00000001;
+    R0 remains 0x00000002;
+    N is zero;
+    Z is zero;
+    C and V remain unchanged from their prior values.
+The next index is offset 0x0010.
+
+STEP FIVE.
+
+At offset 0x0010, halfword 0xD0FD is a conditional
+branch requesting a branch on EQUAL, meaning Z=1.
+Its 8-bit signed displacement field has bit pattern
+11111101 and signed integer value negative three;
+multiplying by two yields negative six bytes.
+The architectural PC operand base at offset
+0x0010 is offset 0x0014, and negative six
+added to 0x0014 gives target offset 0x000E.
+
+In the particular trace begun at offset 0x0006,
+Z is zero because of the MOVS at offset 0x000E.
+Therefore the condition fails. This instruction
+does NOT take its target at 0x000E.
+It changes neither the general registers nor
+the condition flags.
+It advances the execution index by its actual
+16-bit length, to offset 0x0012.
+
+STEP SIX.
+
+At offset 0x0012, halfword 0xD000 is another
+EQUAL conditional branch. Its immediate displacement
+is zero and its architectural PC-relative base is
+offset 0x0016, which is therefore its *taken* target.
+
+However, the current Z flag is still zero.
+Consequently the branch is NOT taken and ordinary
+sequential execution proceeds to offset 0x0014.
+The coincidence that its taken target would have
+been offset 0x0016 does not allow the description
+to claim that the branch executed.
+
+STEP SEVEN.
+
+At offset 0x0014, halfword 0x2102 writes unsigned
+literal 2 into R1 through operation 53.
+After the step, R1 is 0x00000002, Z=0 and N=0.
+The next index is offset 0x0016.
+
+STEP EIGHT.
+
+At offset 0x0016, halfword 0x2003 writes unsigned
+literal 3 into R0 through operation 53.
+After the step, R0 is 0x00000003, Z=0 and N=0.
+The next index is offset 0x0018.
+
+STEP NINE.
+
+At offset 0x0018, halfword 0xE002 performs a 16-bit
+unconditional branch with immediate field value 2.
+Its architectural PC-relative base is offset
+0x001C, and its displacement is two times 2
+bytes, giving target offset 0x0020.
+The execution index becomes offset 0x0020.
+The instructions located at offsets 0x001A,
+0x001C and 0x001E are skipped by THIS trace.
+Their bytes are still part of the source listing.
+
+STEP TEN.
+
+At offset 0x0020, halfword 0x2006 writes unsigned
+literal 6 into R0 through operation 53.
+After the step, R0 is 0x00000006, R1 remains
+0x00000002, N is zero and Z is zero;
+C and V retain their unknown original values.
+Its sequential successor is offset 0x0022.
+
+The provided listing excerpt ends at offset 0x0020.
+The English translation MUST STOP at the unresolved
+next-instruction boundary. It must NOT invent a
+return instruction, a function result, a process exit,
+or an additional R function call at 0x0022.
+
+PART FOUR. AN ALTERNATIVE ENTRY SHOWING A TAKEN CONDITION.
+
+Choose a separate initial state with execution index
+0x0010, Z=1, and an otherwise permissible processor
+state. This is NOT the same run as the first trace.
+
+At 0x0010, the EQUAL branch is taken to 0x000E,
+because the entering value of Z is one.
+
+At 0x000E, operation 53 writes literal 1 to R1
+and sets Z=0. Execution advances to 0x0010.
+
+At 0x0010, the SAME branch encoding is encountered
+again, but it is NOT taken because Z is now zero.
+Execution proceeds to 0x0012.
+
+This makes the dependence on the flag-producing
+instruction concrete. Replacing MOVS with a
+flag-preserving MOV would change this trace for
+some initial flag states, even though the same
+integer 1 reaches R1. Therefore the distinction
+between operations 02 and 53 is semantically
+necessary, not cosmetic.
+
+PART FIVE. INERT REASONING THAT MUST SURVIVE.
+
+(NOTE:
+    The source of byte encodings is a pinned AOSP
+    checked-in assembler expectation, not a live
+    executable from a user device. The chosen entry
+    at offset 0x0006 is the start of an isolated
+    segment, not the function's published entry
+    point. Starting at the fixture's offset zero
+    would encounter an earlier backward branch
+    that may not reach the segment in this trace.
+)
+
+(WHY? BECAUSE:
+    The purpose of this fixture is to check the
+    translation of machine control flow before
+    inferring any high-level program structure.
+    The source-level statements "if", "for",
+    "loop" or "return" would be a later
+    interpretation, not a substitute for the
+    machine's actual branches and register effects.
+)
+
+PART SIX. ACCEPTANCE AND REJECTION.
+
+An independent decoder of the actual halfwords
+should confirm all listed widths and targets.
+
+An English Major C semantic interpreter, when one
+exists, must reproduce:
+    trace A successor offsets, in order:
+      0x0006, 0x000A, 0x000C, 0x000E, 0x0010,
+      0x0012, 0x0014, 0x0016, 0x0018, 0x0020,
+      and then unresolved 0x0022;
+    trace A final known R0=6, R1=2, Z=0, N=0;
+    trace B's two visits to 0x0010 with different
+      Z values and correspondingly different outcomes.
+
+Deliberately defective versions must be rejected
+if they: execute the 0x0008 halfword in trace A;
+replace the 0xD0FD signed displacement by an
+unsigned +253 displacement; change MOVS to MOV;
+treat 0x0010 as having length four; treat a
+branch's PC-relative base as its next sequential
+address; claim C and V were overwritten by MOVS;
+or invent an instruction at 0x0022.
+
+These acceptance cases have been SPECIFIED here,
+not run against an English Major C implementation.
+The disassembler expectation is external evidence
+for these halfwords, not proof of independent
+English-language parser/executor functionality.

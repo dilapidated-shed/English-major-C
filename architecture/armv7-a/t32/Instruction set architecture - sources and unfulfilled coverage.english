@@ -1,0 +1,402 @@
+INSTRUCTION SET ARCHITECTURE: SOURCES AND UNFULFILLED COVERAGE.
+
+Status: reference/provenance contract and explicit gaps, NOT a completed
+self-contained transcription of the full ARMv7-A Thumb instruction set.
+
+The selected abstract target is ARMv7-A executing T32 instructions in
+unprivileged application mode. "Thumb-2" denotes the 16-bit and 32-bit
+Thumb encoding facilities supported in this architecture, NOT a separate
+processor, and NOT a claim that every optional extension is fitted.
+
+PRIMARY ARCHITECTURAL REFERENCE.
+
+The normative reference is:
+
+Arm Limited, ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition,
+document ARM DDI 0406, revision C.d, publication identifier ID040418.
+
+Official document landing:
+https://developer.arm.com/documentation/ddi0406/cd
+
+Arm document content (C.d):
+https://documentation-service.arm.com/static/5f8daeb7f86e16515cdb8c4e
+
+ADDITIONAL CROSS-CHECK SOURCE (NOT A SUBSTITUTE FOR DDI 0406C.d).
+
+Arm Limited, Instruction Set Assembly Guide for Armv7 and earlier Arm
+architectures, Reference Guide, version 2.0, document
+100076_0200_00_en (2019).
+https://documentation-service.arm.com/static/5e7b6a6216d2907d594035c4
+
+In that guide, A1.10 describes PC reads, C1 describes condition flags,
+C2.14/C2.19-C2.23 describe branches, C2.41 describes IT,
+and C2.154 describes TBB/TBH. This edition includes Armv8 and
+some other profile-specific forms. No instruction is admitted to this
+ARMv7-A T32 profile merely because this guide mentions it.
+The primary ARMv7-A-specific DDI 0406C.d must determine
+architecture and encoding validity.
+
+ADDITIONAL 16-BIT THUMB QUICK-CARD CROSS-CHECK.
+
+Arm Limited, "Thumb 16-bit Instruction Set", Quick Reference Card,
+which describes Thumb-2 16-bit instructions as well as earlier Thumb.
+https://documentation-service.arm.com/static/5ed67dc7ca06a95ce53f9334
+
+The page headed "Thumb 16-bit Instruction Set" that covers load,
+store, PUSH, POP, and branch operations distinguishes:
+  - LDM with its base excluded (base writeback required);
+  - LDM with its base included (base writeback omitted);
+  - STM with a base writeback in the narrow encoding;
+  - PUSH of low registers with optional LR;
+  - POP of low registers with optional PC;
+  - direct SP arithmetic scaled by four bytes.
+These distinctions are material to the English operation names.
+The quick card does not enumerate all wide T32 encodings or
+override ARM DDI 0406C.d.
+
+This reference is identified by its document number AND revision. A later
+version, a similar ARMv7-M manual, an ARMv8-A AArch32 description, a blog
+post, and assembler implementation notes are NOT substitutions without a
+recorded compatibility review. A vendor Cortex-A reference manual can
+supply implementation and feature facts but does not silently replace the
+architecture manual.
+
+SECTIONS THAT MUST INFORM AN EXACT ARCHITECTURE PORT.
+
+A2: application programmers' model, 32-bit architectural registers,
+    PC operand reads, condition flags, execution state and extension state.
+A3: memory model, endianness, memory attributes, ordering, alignment,
+    translation and permissible access.
+A4: instruction-set overview and groupings, conditional execution,
+    branch/exchange behavior and the distinction between ARM and Thumb.
+A6: 16-bit and 32-bit Thumb instruction-decode tables.
+A8: individual instruction descriptions: all T encodings, operand
+    constraints, architectural pseudocode, condition/flag effects,
+    deprecations, UNDEFINED, UNPREDICTABLE and optional features.
+The applicable system-architecture and extension portions must be
+consulted whenever a physical target grants those operations.
+
+The architecture reference MUST be consulted at the specific instruction
+encoding, rather than merely matching an assembler mnemonic. Mnemonics may
+denote several encodings, aliases, different flag semantics, different
+operand restrictions, or a change of instruction state.
+
+This revision DOES NOT reproduce Arm's copyrighted full instruction
+descriptions or claim that short English glosses can replace its formal
+pseudocode. English Major C must eventually supply its own independently
+verified executable operation semantics or explicit reference binding.
+
+FURTHER AUDIT RECORDS IN THIS REPOSITORY.
+
+"Which instruction is next and how it is found.english" specifies
+instruction length, execution index, PC operand and control-flow traces.
+
+"Exactly when execution branches.english" specifies condition flags
+and permitted branching mechanisms in long English.
+
+"When bytes mean data and when bytes mean instructions.english"
+separates data loads from instruction fetch and records the
+alternative execution models considered.
+
+"How registers enter memory and return from a stack.english"
+specifies the narrow T32 PUSH, POP, LDMIA, STMIA, and
+SP add/subtract operations, their word ordering and
+writeback, plus rejected base-overlap and exception
+assumptions. The closed initial grant includes
+seven additional operations, numbered 54 through 60.
+
+"Actual wide Thumb multiple-word operations in long English.english"
+in ../../../examples/ records the additional four-byte STMIA
+and LDMDB instructions with W=0 and W=1, admitted
+under separately named operations 61 through 64.
+Their subset has at least two selected general
+registers and explicitly excludes SP/PC and
+base-register overlap.
+
+"Exactly how register bits are rearranged.english" defines
+new operation entries 65 through 72, covering limited
+REV, REV16, REVSH, RBIT, BFC, BFI, UBFX, SBFX forms,
+including their register and width restrictions.
+
+"Every halfword in one complete Thumb decode region.english"
+closes a finite 256-halfword subtree, BA00..BAFF,
+with 192 allocated byte-reversal encodings and 64
+reserved/UNDEFINED encodings that MUST NOT be executed
+as a permitted operation. Its 256 data rows are under
+../../../fixtures/armv7-a-t32-byte-reversal-halfwords.tsv.
+That exhaustive subtree proof does not count as exhaustive
+coverage of all 16-bit T32 or all 32-bit T32 encodings.
+
+"Every conditional-branch and supervisor-call halfword.english"
+defines the ENTIRE 0xD000 through 0xDFFF sixteen-bit Thumb
+decoding subtree, using DDI 0406C.d A6.2.6 Table A6-8
+and A8.8.18 for conditional B T1. The 4096-row table:
+../../../fixtures/armv7-a-t32-conditional-branch-and-exception-halfwords.tsv
+has 3584 condition branches, 256 permanently undefined
+UDF encodings and 256 supervisor-call SVC encodings.
+Only the B T1 class is granted, under operation 43, and
+it is NOT permitted inside an IT block.
+
+The complete fourteen-condition by sixteen-flag-state
+truth table (224 rows) is:
+../../../fixtures/armv7-a-t32-conditional-branch-flag-truth-table.tsv
+This evaluates conditions over abstract N/Z/C/V flag
+values; it is not an executed machine-state trace.
+
+"A conditional branch chooses which exceptional instruction is next.english"
+in ../../../examples/ uses inspected T32 bytes and two
+declared machine states to show one trace that skips
+UDF and halts at ungranted SVC, and another that
+halts at ungranted UDF. ARM UDF and SVC are distinct
+exception mechanisms, not short condition branches.
+
+"Every If Then and hint halfword.english" describes the
+complete BF00..BFFF 256-halfword subtree under
+ARM DDI 0406C.d A6.2.5 Table A6-7 and A8.8.55.
+Its full data table is:
+../../../fixtures/armv7-a-t32-if-then-and-hint-halfwords.tsv
+The subtree includes 214 conditionally admissible
+IT forms; 26 IT encodings rejected as UNPREDICTABLE;
+one exact permitted NOP, four named but ungranted
+hints, and eleven software-reserved unallocated hints.
+It does NOT mean that the full ITSTATE execution
+interpreter or every following-instruction context
+has already been implemented.
+
+"One If Then block governs a short and a long instruction.english"
+in ../../../examples/ translates a foreign diagnostic
+of an actual 16-bit IT followed by a two-byte MOV
+and a four-byte MOVW, with different register effects
+depending on the initial comparison flags, but no
+different execution-index sequence. Its diagnostic
+source was assembled and decoded, not run on ARM hardware.
+
+"2026-10-11-BFxx-Thumb-IT-and-hint-audit.english"
+in ../../../evidence/ captures its temporary
+clang/LLVM diagnostic, the difference between
+LLVM's apparently legal printed IT and the ARM
+UNPREDICTABLE condition, SHA256 hashes and blockers.
+
+"Every short unconditional branch halfword.english"
+specifies the full E000..E7FF T32 B T2 encoding
+family, 2048 distinct two-byte halfwords, each
+with signed eleven-bit PC-relative displacement
+and precise last-slot IT restrictions. The
+row-by-row table is:
+../../../fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv
+All allocated forms map to EXISTING operation 42,
+under their legal source and target context.
+The word "unconditional" names an encoding without
+a condition field; ITSTATE may legally predicate
+its BRANCH EFFECT in the final IT slot.
+
+"Every breakpoint halfword and its
+conditional-execution exception.english"
+specifies the complete BE00..BEFF region:
+256 T32 BKPT T1 halfwords with unsigned
+immediates, all decoded but UNGRANTED.
+Their data-only inventory is:
+../../../fixtures/armv7-a-t32-breakpoint-halfwords.tsv
+Unlike an ordinary instruction governed by IT,
+BKPT remains always unconditional, EVEN when
+the surrounding IT predicate is false.
+A real debug-event outcome depends on target
+debug settings and OS exception behavior,
+and cannot be inferred from disassembly alone.
+
+"The same branch bytes acquire a condition from
+If Then state.english" in ../../../examples/
+retains a diagnostic E000 which LLVM displays
+as B outside IT but BEQ after IT EQ.
+It shows two distinct source-level register
+and execution-index traces that end at an
+ungranted SVC boundary.
+
+"2026-10-11-E000-and-BE00-Thumb-decode-audit.english"
+under ../../../evidence/ preserves the temporary
+clang/LLVM tool versions, source/object/disassembly
+digests, all 2048 branch/displacement checks,
+256 BKPT decode checks, and exact evidence limits.
+
+Together the five disjoint decoder subtrees cover
+  BA00..BAFF: 256 values
+  BE00..BEFF: 256 values
+  BF00..BFFF: 256 values
+  D000..DFFF: 4096 values
+  E000..E7FF: 2048 values
+or 6912 individual 16-bit halfword values at
+decoder-classification level. The separate
+initial executable vocabulary at that earlier stage had 72
+long English operation names. These checks
+do NOT cover the full 16-bit or 32-bit Thumb
+ISA, complete ITSTATE and debug exceptions,
+or actual processor/OS acceptance.
+
+"Eight Thumb bit operations translated until the first ungranted
+instruction.english" in ../../../examples/ contains
+an actual foreign-assembler 16/32-bit byte listing, an
+English execution-index and register trace, and an explicit
+stop at the first ungranted TEQ instruction. It is
+diagnostic source evidence, NOT a qualified ICK build.
+
+"Actual Thumb word transfers translated into English.english"
+in ../../../examples/ records independently sourced
+AOSP halfwords C409, CC09, B014, and B094 and
+their separately stated machine-state transitions.
+
+"What the current instruction grant does not yet contain.english"
+holds the outstanding instruction-family inventory, including
+ungranted wide PUSH/POP and LDM/STM forms, barriers,
+exclusives, floating-point, SIMD and optional processor
+extensions. Restricted 16-bit stack and multiple-word
+forms are separately permitted by operations 54-60.
+
+"One actual Thumb branch listing translated from the bottom upward.english"
+in ../../../examples/ gives a source-derived machine-byte specimen
+and exposes the distinct MOV versus MOVS flag behavior.
+
+"Every halfword that forms an address from the execution position
+or stack pointer.english" declares the COMPLETE finite 4096-halfword
+A000..AFFF subtree. It has 2048 T32 ADR T1 forms using
+Align(PC+4,4) plus the unsigned immediate times four, and 2048
+T32 ADD (SP plus immediate) T1 forms producing a new
+low-register value without modifying SP. Existing operation 40
+is explicitly limited to the ADR T1 encoding; the latter
+SP-relative register-producing form is separately named
+new long operation 73. The complete data table is:
+../../../fixtures/armv7-a-t32-address-generation-halfwords.tsv
+
+"Every PC-relative data-word load halfword.english" declares
+the COMPLETE 2048-halfword 4800..4FFF T32 LDR literal T1
+subtree. It calculates Align(PC+4,4)+4*imm8 and then performs
+an actual FOUR-BYTE DATA-MEMORY READ, subject to mapping
+and access permissions. Existing operation 41 is now
+limited to that exact narrow T1 form. Its data rows are:
+../../../fixtures/armv7-a-t32-pc-relative-word-load-halfwords.tsv
+
+"An address a load and a branch disagree about the same bytes.english"
+in ../../../examples/ preserves a REAL assembled 16-byte
+ELF32 ARM .text section and the precise code/data ambiguity:
+its literal bytes 78 56 34 12 are one declared DATA WORD,
+which a linear LLVM disassembler nonetheless prints as
+two potential instruction encodings. The actual branch
+skips their addresses; a preceding LDR reads their word
+value; an ADR merely calculates a numerical address.
+The language trace stops before an ungranted SVC.
+
+"2026-10-11-PC-relative-address-and-data-load-audit.english"
+in ../../../evidence/ records actual foreign compiler/decoder
+diagnostics of all 6144 newly classified halfwords,
+observed artifact SHA256 digests and the precise
+limits of arithmetic and memory-model verification.
+
+The earlier FIVE disjoint subtrees classified 6912
+numerical two-byte Thumb halfword values. The added
+4096 Axxx and 2048 48xx..4Fxx forms are disjoint from
+those five, giving exactly SEVEN fully enumerated
+decoder-classification subtrees containing
+13056 DISTINCT numerical sixteen-bit halfword values.
+This is NOT completeness of the ARMv7-A T32 ISA,
+even of every instruction form underlying the 73
+currently permitted long English operations.
+The verified target processor and runtime remain unspecified.
+
+ENGLISH MAJOR C PROFILE BOUNDARY.
+
+The sole initial operation grant is:
+    All and only these initial operations are permitted.english
+
+It lists 73 named families. No machine instruction outside a verified
+lowering of one of those named families is thereby permitted by the
+language. That is a complete statement of the INITIAL SOFTWARE GRANT,
+but it is NOT a complete statement of all the instructions executable
+by a physical ARMv7-A processor.
+
+"All and only" is therefore a quantifier over the selected named
+operation profile. It does not mean that every architecturally possible
+physical instruction is present in that initial profile.
+
+WHAT HAS NOT BEEN ENUMERATED OR VERIFIED.
+
+The open coverage inventory includes, without implying exhaustiveness:
+
+  * every T32 encoding variant, width, restriction and alias even for
+    the 73 named operation families;
+  * full multiply, multiply-accumulate, dual-multiply, long-multiply
+    and signed/unsigned divide families;
+  * saturating, parallel arithmetic, packing, byte reversal,
+    bit-field selection and miscellaneous integer operations;
+  * all memory-addressing variants, register-list transfers,
+    stack aliases, exclusives, synchronization and memory barriers;
+  * exception/supervisor, CPSR/SPSR and mode-control facilities,
+    system access, coprocessor and privileged instructions;
+  * all architectural hints, instructions that may be deprecated,
+    unavailable, unconditional-encoding special cases and traps;
+  * VFP / floating-point support, Advanced SIMD / NEON and optional
+    processor-specific architecture extensions;
+  * ThumbEE and Jazelle, where relevant, which are not granted here;
+  * proof that instruction selection is identical across actual
+    processors with different supported architecture features;
+  * target operating-system ABI, toolchain, virtual-memory permissions,
+    exception handling, calling convention, code generation and
+    actual execution.
+
+Some of these instruction classes are wholly absent from the initial
+allowed vocabulary by design. Others will be subject to a future
+coverage or exact-encoding audit. The reference manual is the
+canonical source against which any statement of hardware-wide
+instruction completeness MUST be reconciled.
+
+FULL-CATALOGUE COMPLETION CRITERION.
+
+Before anyone labels an English Major C file "the complete ARMv7-A T32
+instruction set", an independent review SHALL:
+
+1. Pin and identify the architectural revision and target feature profile.
+2. Enumerate every T32 decode-table leaf for that feature profile,
+   including valid encodings, conditional forms, aliases, reserved
+   encodings and legal instructions only when their conditions hold.
+3. Associate each reachable valid form with a unique or explicitly
+   shared long English operation name and the full input/output/effect
+   specification, including PC, flags, ITSTATE, memory, exceptions,
+   processor state, and any required privilege.
+4. Demonstrate how two-byte and four-byte fetch/decode boundaries,
+   state interworking, endian choices and unaligned accesses are handled.
+5. Reject every intentionally invalid, missing-feature, forbidden,
+   implementation-dependent-without-manifest, or unpredicted form.
+6. Audit instruction groups and count against the ARM reference;
+   record discrepancies rather than assuming a mnemonic index complete.
+7. Compile/encode/decode checked fixtures only using an authorized
+   toolchain, and validate results independently. Report source,
+   encode/decode, semantic execution and hardware evidence separately.
+
+Until then, do not describe the 73-entry grant as the entire physical ISA.
+
+TARGET-MACHINE DECLARATION REQUIREMENT.
+
+The first future concrete declaration must identify the actual SoC, CPU
+core/revision, supported feature bits, architectural execution state,
+user-mode environment, endianness, memory permissions, permitted
+instruction forms, relevant cache coherency protocol and ABI. No
+unverified RAM/DRAM part number, device register map, or physical channel
+address shall be invented. A CPU architectural instruction cannot
+be promoted from "supported in a family" to "observed executable on
+this device" merely from the instruction-set name.
+
+PUBLIC CROSS-REFERENCES.
+
+English Major C's goal and future Idris-front-end exercise:
+https://github.com/dilapidated-shed/English-major-C/issues/1
+
+This specific Flexible Pipes authored-document job:
+https://github.com/isomorphisms/flexible-pipes/issues/91
+
+The separately reviewed execution-index definition:
+https://github.com/dilapidated-shed/English-major-C/pull/2
+
+Alternative branching choices and missing-value example:
+../../../decisions/Choices for missing-value branching and execution.english
+
+Nothing in this document grants implicit access to an assembler,
+compiler backend, native executable, device privilege, or successful
+acceptance check.
