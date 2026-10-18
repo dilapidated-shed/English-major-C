@@ -1,0 +1,55 @@
+
+Relocation section '.rel.text' at offset 0x998 contains 1 entry:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00000050  0000111c R_ARM_CALL             00000000   __aeabi_uidiv
+
+Relocation section '.rel.debug_info' at offset 0x9a0 contains 34 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00000008  00000702 R_ARM_ABS32            00000000   .debug_abbrev
+0000000d  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000013  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000017  00000b02 R_ARM_ABS32            00000000   .debug_str
+0000001b  00000202 R_ARM_ABS32            00000000   .text
+00000023  00000a02 R_ARM_ABS32            00000000   .debug_line
+0000002a  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000031  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000038  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000042  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000049  00000b02 R_ARM_ABS32            00000000   .debug_str
+0000004d  00000202 R_ARM_ABS32            00000000   .text
+00000062  00000802 R_ARM_ABS32            00000000   .debug_loclists
+00000066  00000802 R_ARM_ABS32            00000000   .debug_loclists
+00000072  00000802 R_ARM_ABS32            00000000   .debug_loclists
+00000076  00000802 R_ARM_ABS32            00000000   .debug_loclists
+00000082  00000802 R_ARM_ABS32            00000000   .debug_loclists
+00000086  00000802 R_ARM_ABS32            00000000   .debug_loclists
+0000008b  00000b02 R_ARM_ABS32            00000000   .debug_str
+00000096  00000802 R_ARM_ABS32            00000000   .debug_loclists
+0000009a  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000a6  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000aa  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000b6  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000ba  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000c8  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000cc  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000d1  00000b02 R_ARM_ABS32            00000000   .debug_str
+000000dc  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000e0  00000802 R_ARM_ABS32            00000000   .debug_loclists
+000000fa  00000202 R_ARM_ABS32            00000000   .text
+00000106  00000b02 R_ARM_ABS32            00000000   .debug_str
+0000011a  00000b02 R_ARM_ABS32            00000000   .debug_str
+0000011e  00000b02 R_ARM_ABS32            00000000   .debug_str
+
+Relocation section '.rel.debug_aranges' at offset 0xab0 contains 2 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00000006  00000602 R_ARM_ABS32            00000000   .debug_info
+00000010  00000202 R_ARM_ABS32            00000000   .text
+
+Relocation section '.rel.debug_line' at offset 0xac0 contains 1 entry:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+0000005d  00000202 R_ARM_ABS32            00000000   .text
+
+Relocation section '.rel.debug_frame' at offset 0xac8 contains 2 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00000014  00000d02 R_ARM_ABS32            00000000   .debug_frame
+00000018  00000202 R_ARM_ABS32            00000000   .text

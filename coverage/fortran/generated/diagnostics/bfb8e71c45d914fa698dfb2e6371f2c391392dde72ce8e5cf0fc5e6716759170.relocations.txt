@@ -1,0 +1,18 @@
+
+Relocation section '.rel.dyn' at offset 0x3c8 contains 2 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00014034  00000115 R_ARM_GLOB_DAT         00000000   __gmon_start__
+00013f0c  00000214 R_ARM_COPY             00013f0c   __stack_chk_guard@GLIBC_2.4
+
+Relocation section '.rel.plt' at offset 0x3d8 contains 10 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+0001400c  00000516 R_ARM_JUMP_SLOT        00000000   raise@GLIBC_2.4
+00014010  00000916 R_ARM_JUMP_SLOT        00000000   __libc_start_main@GLIBC_2.34
+00014014  00000616 R_ARM_JUMP_SLOT        00000000   memmove@GLIBC_2.4
+00014018  00000a16 R_ARM_JUMP_SLOT        00000000   memcpy@GLIBC_2.4
+0001401c  00000b16 R_ARM_JUMP_SLOT        00000000   __stack_chk_fail@GLIBC_2.4
+00014020  00000316 R_ARM_JUMP_SLOT        00000000   puts@GLIBC_2.4
+00014024  00000116 R_ARM_JUMP_SLOT        00000000   __gmon_start__
+00014028  00000416 R_ARM_JUMP_SLOT        00000000   memset@GLIBC_2.4
+0001402c  00000716 R_ARM_JUMP_SLOT        00000000   __printf_chk@GLIBC_2.4
+00014030  00000816 R_ARM_JUMP_SLOT        00000000   abort@GLIBC_2.4

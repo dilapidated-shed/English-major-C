@@ -1,0 +1,2 @@
+# TSV trailing empty fields and exact binutils diagnostic spaces are evidence.
+coverage/fortran/generated/** -whitespace

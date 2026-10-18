@@ -1,13 +1,17 @@
-priority	item	state	evidence	recovery
-P0	Kitchen inventory recipe	MISSING_IMPLEMENTATION	No emc/fortran inventory task in Kitchen a91df2ef2bf0d37fb32c10be0a2f8208648220e0; proposed tasks/emc-fortran-coverage/1.grease absent	Implement and qualify owner recipe; publish reviewed immutable pin; new FP candidate/run
-P0	Grease runtime	UNAVAILABLE_ON_HOST	command -v grease exited 1 on Ubuntu 24.04.3 Linux x86_64	Resolve exact target through Cat Food or a verified published runtime; do not substitute Bash
-P0	Ike runtime	UNAVAILABLE_ON_HOST	command -v ike exited 1; scoped scratch executable search found none	Resolve verified executable/source/artifact identity and host qualification; do not substitute make
-P0	Independent acceptance checker	MISSING_IMPLEMENTATION	No emc/fortran coverage checker found in ai-ci 2843a804fea1bbc4e3e40b6c236064bb1d41f316	Implement independent raw-source/ELF oracle and adversarial fixtures in ai-ci; publish pin
-P1	Declared archived corpus and overlap relation	NOT_AUDITED	Six different source trees pinned; all complete tree metadata retained	Materialize all pins; define corpus by artifact digest, specimen, ISA mode, ABI and section; retain competing versions
-P1	Byte ranges instructions data relocations gaps	NOT_AUDITED	Machine inventory not run	Derive bytes from pinned originals; ledger every interval with missing/unknown entries; test damaged examples
-P1	Observed instruction-form effects	NOT_AUDITED	Existing prose and prior semantic audit remain separate evidence	Read normative ISA/ABI evidence; adjudicate every required effect and preserve contradictions
-P1	External call and library closure	NOT_AUDITED	Softfp reference-blas source/object entries exist in provenance/pr-10-tree.tsv	Identify captured bodies by digest and missing bodies explicitly; do not claim all BLAS absent or all covered
-P1	Fortran versions and feature denominator	UNDEFINED	Three QR routines do not define language-wide support	Choose and document exact standard/profile with primary references; distinguish exercised/documented/absent/outside-profile
-P1	Adversarial corruption suite	NOT_IMPLEMENTED	No checker or damaged-fixture execution recorded	Reject each required corruption class with positive twins through Kitchen/Ike and ai-ci
-P2	Source or upstream reference unavailable	CONDITIONAL	All six pinned commit objects were available in this run	Retain pin and missing row; recover exact Git object/archive and compare digest; new evidence never overwrites failure
-P2	Unverifiable dependency bytes or semantics	CONDITIONAL	Closure and semantic audit not yet performed	Keep UNKNOWN/NOT_CAPTURED/CONTRADICTED with exact cause; obtain original artifact or authoritative evidence without invented implementation
+priority	item	status	evidence	recovery
+P2	Archived support and compressed-trace interpretation	HASHED_ONLY_NOT_SEMANTICALLY_AUDITED	ARCHIVED_SUPPORT rows in generated/artifacts.tsv	Inspect exact support artifacts separately; do not promote trace identity to state verification
+P1	Softfp linked English ledger	MISSING	2005 instruction rows in generated/missing-english.tsv	Author exact byte-aligned English without QR execution
+P1	Hardfp linked English ledger	MISSING	1437 instruction rows in generated/missing-english.tsv	Author separate A32/T32 ledger with separate ABI evidence
+P1	Complete instruction semantics	UNVERIFIED	1542 explicit form obligations in generated/semantic-forms.tsv	Bounded ISA/ABI claim audits and independent counterexamples
+P1	Object-only disassembly	MISSING_CAPTURED_LISTING	9 sections and 7340 bytes in generated/listing-gaps.tsv	Decode original objects read-only; preserve relocations and originals
+P1	Suppressed zero DATA meanings	UNKNOWN_MEANING_BYTES_CAPTURED	7 ranges and 60 bytes in generated/listing-gaps.tsv	Use mapping/section/source evidence; do not invent executed instructions
+P1	Libraries and loader closure	UNKNOWN	generated/dependencies.tsv	Recover exact verified artifacts or retain missing bodies
+P1	Indirect targets and process effects	UNRESOLVED	generated/calls.tsv	Identify required state and contracts without inventing target code
+P1	R interpreter and Cdqrls integration	NOT_CAPTURED	Standalone caller and R example only	Pin original R machinery separately; no whole-process inference
+P2	Full upstream Fortran source provenance	NOT_REVERIFIED	Stripped excerpts and recorded upstream Git blob leads	Recover exact upstream blobs; verify excerpt transformation without rebuilding
+P2	ISO Fortran conformance	NOT_ESTABLISHED	GNU Fortran archival profile; finite 35-family catalogue	Define deliberate frontend/profile goal before complete feature denominator
+P2	Source-to-machine meanings	DEBUG_CORRELATION_ONLY	generated/source-machine-crosswalk.tsv	Resolve missing/ambiguous mappings; line ranges are not meaning proofs
+P2	Implicit aliases SIMD FP faults and ordering	UNVERIFIED	generated/register-vocabulary.tsv and semantic-forms.tsv	Pin primary evidence for every claimed effect
+P2	Unassigned file-range meaning	UNKNOWN_MEANING_BYTES_CAPTURED	generated/file-ranges.tsv	Keep exact range/digest until provenance supports classification
+P2	Idriç audit implementation	BLOCKED_COMPILER_BOOTSTRAP	Real one-step command exited 2; attempt.md	Qualify direct-host compiler and byte/file/hash effects; Node is separate evidence
+HISTORICAL	FP Kitchen admission preflight	SUPERSEDED_BY_HUMAN_WAIVER	Earlier receipts retained in preflight/	No FP action required for this one-off

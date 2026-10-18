@@ -1,0 +1,11 @@
+choice semantic_evidence one_of
+  captured_bytes
+  preliminary_annotation
+  independently_verified
+  contradicted
+  unknown
+
+choice byte_accounting one_of
+  accounted
+  missing
+  overlapping

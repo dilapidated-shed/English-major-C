@@ -1,90 +1,148 @@
-# English Major Fortran inventory — blocked preflight
+# English Major Fortran — archived-corpus inventory
 
-**EMC-FORTRAN-COVER-01 is incomplete.** Source identities and tree metadata are
-preserved; byte accounting, semantic qualification, language coverage and
-independent acceptance have not run.
+This one-off inventory proceeds directly under the human's 2026-10-18 waiver of
+Flexible Pipes. The failed preflight in preflight/ is historical and superseded.
+No QR interpreter extension, compilation, or new QR execution occurred.
 
-The [exact FP envelope](https://github.com/isomorphisms/flexible-pipes/blob/646957bcdf0fbce3492553f84bc67b818dca643f/tasks/emc-fortran-cover-01/assignment.txt)
-is authoritative for this attempt. [Tracking issue #224](https://github.com/isomorphisms/flexible-pipes/issues/224)
-does not establish dispatch or acceptance.
+The measured corpus is precisely the six pinned current trees, not every Git
+history object or upstream library. The original ZIP retained in earlier Git
+history is preserved there and is not counted as another current-tree specimen.
 
-## Present, missing, unknown
+ARCHIVED_SUPPORT artifacts, including the compressed historical trace, logs,
+licenses and parser/checker sources, are preserved by identity. Their full
+content semantics and behavior were not audited. This interpretation gap remains
+explicit; hashing a trace is not verification of its states.
 
-- Present: all six requested PR-head commit objects, with full immutable pins,
-  PR titles and observed stack/state in [source-heads.tsv](source-heads.tsv).
-  [provenance/](provenance/) contains their complete Git-tree metadata:
-  respectively 68, 41, 68, 92, 40 and 22 entries. These **331 snapshot entries
-  overlap**; the number is not an instruction count or a unique-corpus total.
-- Missing implementation: a Kitchen inventory recipe, a matching independent
-  ai-ci checker, and resolved Grease/Ike executables on this host.
-- Unknown: byte/instruction completeness, source-to-machine mapping, verified
-  semantic coverage, library closure and the Fortran language denominator.
-  The [coverage matrix](coverage.tsv) keeps each separate.
-- Historical starting figures from the assignment — x86 2,835 overlapping rows,
-  ARM A32 1,149 instructions, 16 data words, 43 relocations and 64 overlapping x86
-  CALL records — are **unrecomputed inputs**, not new findings.
-- The later ARM softfp tree includes five reference BLAS source/object pairs
-  and a linked ELF. The independent library inventory must examine these.
-  It would be false to label every BLAS body absent from every specimen.
-  The ARM hardfp linked specimen, softfp A32 objects, and T32 material must remain
-  separate; no new instruction-mode determination is claimed here.
+**Byte accounting is checked. Complete instruction semantics, library closure
+and whole-language coverage are not established.**
 
-## Observed refusal
+| Dimension | Observed accounting | Boundary |
+| --- | --- | --- |
+| Frozen inputs | 6 commits; 331 file occurrences; 136 distinct SHA-256 artifacts | Whole pinned trees; overlapping snapshots deduplicated by bytes |
+| Fortran sources | 8 files: 3 QR and 5 reference BLAS | Physical lines recorded, not language-wide support |
+| ELF files/physical bytes | 18 files; 215,080 bytes partitioned | Includes headers, sections and explicit unassigned/padding ranges |
+| Relocations | 1,345 | Includes debug/metadata; old 66 x86 and 43 A32 totals were printed code relocations |
+| Native listing records | 7,426 instructions; 114 data rows in 9 listings | Static occurrences across overlapping specimens, not independent runtime instructions |
+| ISA breakdown | x86-64 2,835; A32 4,523; T32 68 | Routine-copy relationships preserve object/linked distinctions |
+| English alignment | 3,984 distinct instruction rows aligned; 3,442 explicitly missing | Missing linked softfp 2,005 and linked hardfp 1,437 |
+| Complete semantic verification | 0 of 1,542 observed operand-specific forms certified for every required effect | Narrow historical findings remain separate |
+| Library closure | UNKNOWN / UNKNOWN | Embedded BLAS bodies coexist with missing dynamic libraries and loader code |
+| Language catalogue | 35 selected families: 21 source-exhibited; 14 documented/not exercised | Whole Fortran denominator UNKNOWN |
 
-The candidate `emc-fortran-cover-01-preflight` pipeline actually ran at published
-FP control commit `646957bcdf0fbce3492553f84bc67b818dca643f`, using the existing
-maintained `scripts/run-pipeline` interface. That legacy controller uses Python;
-no new Python logic or replacement controller was authored.
+The original A32 objects still contain 1,149 printed instructions and 16 printed
+data words. Seven suppressed DATA ranges contain 60 captured zero bytes, including
+8 omitted from the printed dqrdc2 A32 listing. Nine object code sections contain
+7,340 bytes without their own captured object disassemblies. These are explicit
+missing interpretations, not discarded bytes or invented instructions.
 
-Envelope/material integrity and all six commit-availability stages returned 0.
-`kitchen-owned-recipe` returned 128 because the proposed recipe path does not
-exist at Kitchen `a91df2ef2bf0d37fb32c10be0a2f8208648220e0`.
-The overall run returned 1 / FAIL. The independent-checker stage was **not run**.
-The exact receipt and stdout/stderr are in [preflight/](preflight/).
-The earlier local-control attempt is retained separately, including its original
-commit object text; it is not relabeled as the published-control run.
+## Evidence chain
 
-This proves a failed material-availability preflight only. It does not prove
-protected production admission, model-worker dispatch, an inventory run,
-independent ai-ci acceptance, or leaf-head semantic testing. Even a future
-successful availability check would not prove those claims.
+[Source pins](source-heads.tsv) → [original path/blob occurrences](generated/occurrences.tsv)
+→ [SHA-256 artifacts](generated/artifacts.tsv) → [source lines](generated/source-lines.tsv)
+and [build provenance](generated/build-provenance.tsv) →
+[DWARF line evidence](generated/dwarf-lines.tsv) and
+[source/machine crosswalk](generated/source-machine-crosswalk.tsv) →
+[native bytes/operands](generated/records.tsv) →
+[English crosswalk](generated/english-crosswalk.tsv) →
+[semantic obligations](generated/semantic-forms.tsv) and [gaps](missing.tsv).
 
-## Evidence and preservation
+Every physical source line is retained. DWARF correlations retain ambiguous views,
+absent source files and missing mappings; compiler line ranges do not prove meaning
+or give a valid optimized-source execution denominator.
 
-The draft is based on main `6ffb09e771fecedf4852be34a6cde6cc910ab415`.
-It changes only `coverage/fortran/`; original sources, binaries, annotations,
-historical findings, checks and the QR interpreter are unchanged.
-It neither merges nor restacks the independent experiments.
+[ELF inventory](generated/elf.tsv), [sections](generated/sections.tsv),
+[program headers](generated/program-headers.tsv), [symbols](generated/symbols.tsv)
+and [file ranges](generated/file-ranges.tsv) account for physical structure.
+NOBITS storage is distinguished from file bytes. Unassigned byte ranges retain
+exact digests and unknown meaning.
+[All relocations](generated/relocations.tsv) are separate from
+[printed relocations](generated/printed-relocations.tsv); raw readelf diagnostics
+preserve relocation names. [Listing gaps](generated/listing-gaps.tsv) retain exact
+bytes/offsets, including suppressed zeros and unlisted object code.
 
-Each tree table row preserves PR number, full source commit, mode, object type,
-Git object identity, byte length and exact path from `git ls-tree -r -l`.
-Git blob identity is **not** a newly measured SHA-256 or a semantic certificate.
-The tables include whole trees to avoid dropping a potentially relevant original
-before corpus selection. They deliberately do not select only the three routines.
+Native records retain every original line, section, symbol, operand, ISA, encoded
+width, file offset and sequential execution index. Actual branch/exception
+successors remain semantic obligations.
+The English table has 6,835 versioned instruction/data rows, including historical
+annotation variants. Do not add them to the native instruction total.
+[Missing English](generated/missing-english.tsv) and
+[routine copies](generated/routine-copies.tsv) prevent hidden omissions or treating
+relocated object/executable copies as independent runtime code.
 
-To reproduce tree metadata, obtain each exact commit in source-heads.tsv and use
-Git's recursive long tree listing with `core.quotepath=false`; prepend the PR and
-commit columns and normalize its mode/type/object/size fields into TSV.
-No independent checking script is claimed: authoring and qualification of the
-recipe/checker remain required. No percentage is reported.
+## Semantics and dependencies
 
-## Remaining acceptance
+[Register vocabulary](generated/register-vocabulary.tsv) records observed names,
+widths and general-register aliases; implicit writes, full register-list expansion
+and SIMD overlap effects remain unverified.
+Every observed form has explicit unknown fields for implicit registers, memory
+reads/writes, faults, ordering, flags/predicates, control/exception changes,
+rounding, NaNs, signed zero, denormals, FP exceptions and ABI/call/return effects.
 
-[missing.tsv](missing.tsv) enumerates missing implementation, unexamined areas
-and recovery paths. [follow-ups.md](follow-ups.md) gives the first bounded SUN
-recovery job. Later semantic/corpus jobs must follow actual inventory findings;
-they have not been invented from unexamined sources.
+[Historical findings](generated/historical-semantic-findings.tsv) retain the earlier
+x86 audit and both original/repaired annotation versions. Eight false-CMOV
+occurrences and 117 expanded descriptions do not become whole-state certification.
+No contradiction was deleted to improve coverage.
 
-Required corrupted examples — drop, duplicate, reorder, byte alteration,
-relocation loss, literal-as-code, swallowed gap, duplicate linked copy, false
-library coverage and false semantic completion — remain NOT IMPLEMENTED / NOT RUN.
-The Fortran feature overclaim case remains NOT IMPLEMENTED / NOT RUN too.
+[Calls](generated/calls.tsv) retain 182 static occurrences across specimens,
+including the original 64 x86 CALL rows. They are neither dynamic frequencies nor
+unique logical calls. Relocation targets, PLT stubs, captured addresses and
+unresolved indirect targets remain distinct.
+[Dependencies](generated/dependencies.tsv) and [boundary obligations](boundaries.tsv)
+separate interface evidence from implementation bytes and process closure.
 
-Source availability is 6/6. All other coverage numerators and denominators remain
-UNKNOWN. Existing semantic audit results may prove some facts once examined;
-UNKNOWN must not be replaced with a claim of zero prior knowledge.
+The softfp ELF contains all five reference BLAS bodies. The x86/hardfp ELFs depend
+on dynamic libblas. Captured libc/loader stubs and paths do not capture their
+implementations. Historical recipes mention -lgfortran and -lm, but captured
+linked ELF DT_NEEDED entries do not name those two libraries; no transitive-runtime
+absence or semantic claim follows from this.
+Only the standalone C harness and an R example are archived: the R interpreter,
+Cdqrls integration, model/frame/matrix machinery, allocation/attributes and R-side
+NA/error behavior remain outside captured whole-process implementation evidence.
 
-Do not mark this job COMPLETE or merge the draft from this preflight. Recovery
-requires the named owner implementation and exact runtime identities, a new
-admitted inventory run, a separately pinned independent oracle, all corruption
-negatives, and exact leaf-head receipts.
+## Fortran profile
+
+The described profile is the **archived GNU Fortran 14.2.0 QR/reference-BLAS
+specimens**, not a complete English Major ISO Fortran frontend.
+Recorded commands do not select -std=. Fixed-form .f and free-form dnrm2.f90 are
+present; the latter includes kinds, real(wp), parameter constants and inquiry
+intrinsics. GNU documents its default GNU dialect and extension-based source form
+in [its versioned dialect options](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gfortran/Fortran-Dialect-Options.html).
+This does not establish F77/F90/F95/F2003/F2008/F2018/F2023 conformance.
+
+The [35-family catalogue](generated/fortran-features.tsv) contains lexical source
+witnesses for procedures, arguments, arrays, types, kinds, intrinsics and control
+flow. Modules, derived types, pointers, allocation, Fortran I/O, generic/optional
+interfaces, COMMON/EQUIVALENCE/SAVE, STOP, coarrays/teams, DO CONCURRENT and BIND(C)
+are documented as not exercised. Reused array arguments do not settle aliasing or
+storage-association legality. C printf does not count as Fortran I/O support.
+This catalogue is deliberately not a denominator for the full language.
+
+## Reproduction and acceptance
+
+[The generator](../../examples/autogenerated/fortran-coverage/audit.mjs) uses Node
+built-ins, Git and GNU readelf. It resolves its own root and never runs an original
+executable. From any directory, invoke Node with its absolute path and
+--repository ABSOLUTE_CHECKOUT --output ABSOLUTE_FRESH_DIRECTORY. Use --check
+against the committed generated directory. Existing output is refused for writes.
+All six exact Git objects in source-heads.tsv must be available.
+
+A missing Git object, changed byte, unsupported ELF form or unavailable readelf
+fails at that boundary. Recover the exact original commit/blob/library artifact,
+check its identity and create a new attempt; never replace it with a moving
+branch, rebuilt specimen or altered expected digest.
+
+The independent [isomorphisms/ai-ci PR #291, “Independently check archived Fortran machine-evidence accounting”](https://github.com/isomorphisms/ai-ci/pull/291)
+supplies [oracle a58c37e](https://github.com/isomorphisms/ai-ci/tree/a58c37e913d6866f7fd5737a91e3f68649810a03/fortran-coverage).
+It independently reads Git blobs and readelf section/mapping/relocation evidence,
+without importing the producer or trusting its summary. The original corpus
+passes and 17 targeted mutants fail for their named diagnostics.
+This is **structural acceptance only**; semantic, library and language statuses
+remain unverified/unknown. Exact-head receipts are linked in the draft PR
+description, avoiding a receipt commit changing the tested leaf head.
+
+[Missing elements](missing.tsv), [bounded SUN jobs](follow-ups.md) and
+[primary reference leads](references.tsv) retain the remaining work.
+The Idriç attempt's real compiler-bootstrap failure and the first generator's
+retained-string memory failure are preserved with their recovery paths.
+Original source, objects, binaries, disassembly, annotations and findings are
+unchanged. This inventory grants no merge authority or unbounded completeness claim.

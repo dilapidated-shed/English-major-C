@@ -1,0 +1,6 @@
+reference	url	role	verification_boundary
+Intel SDM instruction reference	https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html	Primary ISA reference lead	No complete per-form semantic verification claimed
+Arm AAELF32	https://github.com/ARM-software/abi-aa/blob/main/aaelf32/aaelf32.rst	Mapping symbols and ELF/ABI reference	Mutable reference lead; pin reviewed revision for semantic certification
+Arm AAPCS32	https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst	Calling convention reference	No complete calling/return effects certified
+GNU Fortran dialect options	https://gcc.gnu.org/onlinedocs/gfortran/Fortran-Dialect-Options.html	GNU default and source-form reference	Archival compiler/profile evidence is separate from current manual
+WG5 Fortran 2018	https://wg5-fortran.org/f2018.html	Language-standard scope reference	No ISO Fortran support claim or complete feature denominator
