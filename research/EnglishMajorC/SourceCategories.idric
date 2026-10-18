@@ -1,0 +1,51 @@
+module EnglishMajorC.SourceCategories
+
+import Data.Text
+
+-- Experimental Idriç type outline for English Major C.
+-- Source items are distinguished by their role, not by a universal
+-- numeric or character type system. The machine operations remain
+-- restricted to the single ARMv7-A T32 target.
+--
+-- The quotation marks and full ordinary-English source sentences
+-- still require lexical recognition and parsing. These declarations
+-- describe the result of that process; they DO NOT perform it.
+
+choice english_source_item one_of
+  machine_target_declaration Text
+  executable_operation permitted_machine_operation
+  nonexecuting_comment Text
+  nonexecuting_explanation Text
+  register_name_declaration Text Text
+  following_instruction_name Text
+
+-- The two Text fields in a register_name_declaration are the name of
+-- the physical machine register and the descriptive English alias.
+-- Their roles must be checked after parsing, before assembly emission.
+--
+-- The machine operations below use temporary Text operands for
+-- descriptive register names and instruction names. This does not
+-- mean that these operands can remain unchecked; a later semantic
+-- checker must resolve them against the declared machine and the
+-- execution-index model.
+
+choice permitted_machine_operation one_of
+  put_zero_into_register_without_changing_flags Text
+  put_low_sixteen_bits_in_register Text
+  put_high_sixteen_bits_in_register Text
+  compare_register_with_zero_and_update_flags Text
+  compare_two_registers_and_update_flags Text Text
+  load_four_bytes_from_named_address_into_register Text Text
+  advance_named_address_by_four_without_changing_flags Text
+  decrease_named_count_by_one_without_changing_flags Text
+  add_named_register_contents_without_changing_flags Text Text
+  replace_execution_index_when_zero_flag_is_one Text
+  replace_execution_index_unconditionally Text
+  copy_register_contents_without_changing_flags Text Text
+  return_to_link_register_instruction_address
+
+-- This is not the full permitted ARM instruction set.
+-- It is a proposed initial source classification for the
+-- 14-instruction unknown-entry sum. A label or explanatory
+-- comment is not itself an executable machine instruction.
+-- No Idriç compiler run or English-text parsing is claimed.
