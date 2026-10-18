@@ -1,0 +1,36 @@
+name: Verify extracted R lm native QR disassembly
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-extracted-reference:
+    name: verify-extracted-reference
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the exact proposed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Require the checked-out revision to match the claimed head
+        shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual=$(git rev-parse HEAD)
+          if [ "$actual" != "$EXPECTED_HEAD" ]; then
+            printf 'WRONG-CHECKOUT expected=%s actual=%s\n' "$EXPECTED_HEAD" "$actual" >&2
+            exit 1
+          fi
+          printf 'verified_commit=%s\n' "$actual"
+      - name: Check extracted bytes, ledger and negative mutation fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B examples/r-lm-native-x86-64/verify_extracted.py --self-test

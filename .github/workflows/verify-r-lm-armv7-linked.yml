@@ -1,0 +1,98 @@
+name: Verify linked ARMv7 hardfp QR evidence and numeric result
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-linked-arm:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact proposed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Confirm exact head and install ARM binutils
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends binutils-arm-linux-gnueabihf
+
+      - name: Verify the original bytes, complete linked disassembly and numerical oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(pwd)/examples/r-lm-native-armv7-linux-hardfp-linked"
+          cd "$source_dir"
+          sha256sum -c SHA256SUMS
+          binary=call_r_qr.armv7-hardfp
+          listing=linked-executable.armv7-hardfp.disasm.txt
+          arm-linux-gnueabihf-readelf -h "$binary" | grep -q 'Machine:[[:space:]]*ARM'
+          arm-linux-gnueabihf-readelf -A "$binary" | grep -q 'Tag_ABI_VFP_args: VFP registers'
+          arm-linux-gnueabihf-readelf -d "$binary" | grep -q 'libblas.so.3'
+          mkdir -p /tmp/r-qr-arm-linked
+          cp "$binary" "/tmp/r-qr-arm-linked/$binary"
+          arm-linux-gnueabihf-objdump -d "/tmp/r-qr-arm-linked/$binary" \
+            > "/tmp/r-qr-arm-linked/$listing"
+          cmp "$listing" "/tmp/r-qr-arm-linked/$listing"
+          for symbol in main dqrls_ dqrdc2_ dqrsl_; do
+            grep -q "<${symbol}>:" "$listing"
+          done
+          # Independent expected values derived from the six given data points:
+          # intercept = 17/21, slope = 33/35, vertical SSE = 134/105.
+          awk -F= '
+            $1 == "rank" { rank = $2; n_rank++ }
+            $1 == "intercept" { intercept = $2; n_intercept++ }
+            $1 == "slope" { slope = $2; n_slope++ }
+            $1 == "sum_of_squared_vertical_errors" { sse = $2; n_sse++ }
+            $1 == "exit_status" { exit_status = $2; n_status++ }
+            END {
+              a = intercept - 17/21; if (a < 0) a = -a
+              b = slope - 33/35; if (b < 0) b = -b
+              c = sse - 134/105; if (c < 0) c = -c
+              if (n_rank != 1 || n_intercept != 1 || n_slope != 1 || n_sse != 1 ||
+                  n_status != 1 || rank != 2 || exit_status != 0 ||
+                  a > 1e-12 || b > 1e-12 || c > 1e-12) exit 1
+            }
+          ' test-output.txt
+          echo 'PASS original linked ELF, exact full ARM disassembly, hardfp ABI and independent numerical oracle'
+
+      - name: Require corrupted machine bytes, listing, results and checksum ledger to fail
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(pwd)/examples/r-lm-native-armv7-linux-hardfp-linked"
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          cp -a "$source_dir/." "$work/"
+          cd "$work"
+          sha256sum -c SHA256SUMS
+          printf 'corrupted binary' >> call_r_qr.armv7-hardfp
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: corrupted linked ELF passed' >&2; exit 1
+          fi
+          cp "$source_dir/call_r_qr.armv7-hardfp" .
+          printf 'corrupted disassembly' >> linked-executable.armv7-hardfp.disasm.txt
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: corrupted ARM disassembly passed' >&2; exit 1
+          fi
+          cp "$source_dir/linked-executable.armv7-hardfp.disasm.txt" .
+          printf 'fake execution' >> test-output.txt
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: forged execution report passed' >&2; exit 1
+          fi
+          cp "$source_dir/test-output.txt" .
+          sed -i '1s/^./0/' SHA256SUMS
+          if sha256sum -c SHA256SUMS >/dev/null 2>&1; then
+            echo 'FAIL: corrupted SHA ledger passed' >&2; exit 1
+          fi
+          echo 'PASS four altered-artifact fixtures all rejected'

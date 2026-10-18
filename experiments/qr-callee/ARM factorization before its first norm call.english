@@ -1,0 +1,45 @@
+(NOTE: Executable English for the original A32 dqrdc2 object from entry through offset 0xa8. The first dnrm2 call at 0xac is an explicit stop, not a modeled library call.)
+(NOTE: Addresses are relative to dqrdc2. The original R_ARM_REL32 literal is relocated into a diagnostic load image; no arithmetic instruction is regenerated.)
+At byte offset 0x0, save four-byte values from registers r4, r5, r6, r7, r8, r9, r10, r11, r14 on a descending stack in ascending register order.
+At byte offset 0x4, copy the four-byte value in register r3 into register r12.
+At byte offset 0x8, save eight-byte floating register payloads d8, d9, d10, d11 on a descending stack in ascending register order.
+At byte offset 0xc, subtract 0x94 from stack register r13 without changing flags.
+At byte offset 0x10, read a four-byte word at register r12 plus 0x0 into register r14.
+At byte offset 0x14, store the four-byte value in register r3 at register r13 plus 0x28.
+At byte offset 0x18, read a four-byte word at register r1 plus 0x0 into register r3.
+At byte offset 0x1c, store the four-byte value in register r2 at register r13 plus 0x58.
+At byte offset 0x20, store the four-byte value in register r0 at register r13 plus 0x30.
+At byte offset 0x24, retain register r3 in register r1 when its signed four-byte value is nonnegative; otherwise write zero.
+At byte offset 0x28, read a four-byte word at register r2 plus 0x0 into register r3.
+At byte offset 0x2c, store the four-byte value in register r1 at register r13 plus 0x20.
+At byte offset 0x30, complement the four-byte value in register r1 into register r2 without changing flags.
+At byte offset 0x34, compare the four-byte value in register r3 with zero and update ARM arithmetic flags.
+At byte offset 0x38, store the four-byte value in register r2 at register r13 plus 0x38.
+At byte offset 0x3c, branch to procedure byte offset 0x6dc only when the signed comparison is less than or equal to zero.
+At byte offset 0x40, compare the four-byte value in register r14 with zero and update ARM arithmetic flags.
+At byte offset 0x44, branch to procedure byte offset 0x518 only when the signed comparison is less than or equal to zero.
+At byte offset 0x48, retain register r14 in register r10 when its signed four-byte value is nonnegative; otherwise write zero.
+At byte offset 0x4c, read the four-byte literal at procedure byte offset 0x6f8 into register r9.
+At byte offset 0x50, complement the four-byte value in register r10 into register r11 without changing flags.
+At byte offset 0x54, read a four-byte word at register r13 plus 0x20 into register r2.
+At byte offset 0x58, shift the four-byte value in register r10 left by 1 bits into register r10 without changing flags.
+At byte offset 0x5c, add the current ARM instruction address plus eight to register r9 into register r9 without changing flags.
+At byte offset 0x60, add the four-byte values in registers r10 and r11 into register r3 without changing flags.
+At byte offset 0x64, store the four-byte value in register r3 at register r13 plus 0x3c.
+At byte offset 0x68, add 0x1 to the four-byte value in register r3 into register r4 without changing flags.
+At byte offset 0x6c, read a four-byte word at register r13 plus 0xe8 into register r3.
+At byte offset 0x70, read a four-byte word at register r13 plus 0xe0 into register r8.
+At byte offset 0x74, write 0x1 into the four-byte view of register r5 without changing flags.
+At byte offset 0x78, read a four-byte word at register r13 plus 0x30 into register r6.
+At byte offset 0x7c, copy the four-byte value in register r3 into register r7.
+At byte offset 0x80, store the four-byte value in register r10 at register r13 plus 0x10.
+At byte offset 0x84, add the four-byte value in register r3 to register r4 multiplied by 0x8 into register r4 without changing flags.
+At byte offset 0x88, copy the four-byte value in register r9 into register r10.
+At byte offset 0x8c, copy the four-byte value in register r14 into register r9.
+At byte offset 0x90, shift the four-byte value in register r2 left by 3 bits into register r2 without changing flags.
+At byte offset 0x94, write the exact binary64 representation of positive one into floating register d8 without changing floating status.
+At byte offset 0x98, store the four-byte value in register r2 at register r13 plus 0xc.
+At byte offset 0x9c, copy the four-byte value in register r6 into register r1.
+At byte offset 0xa0, read a four-byte word at register r13 plus 0x58 into register r0.
+At byte offset 0xa4, copy the four-byte value in register r10 into register r2.
+At byte offset 0xa8, add 0x1 to the four-byte value in register r5 into register r5 without changing flags.

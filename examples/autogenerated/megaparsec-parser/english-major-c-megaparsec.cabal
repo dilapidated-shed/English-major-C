@@ -1,0 +1,38 @@
+cabal-version: 2.4
+name: english-major-c-megaparsec
+version: 0.1.0.0
+synopsis: An experimental typed parser for existing English Major C sentences
+build-type: Simple
+data-files: fixtures/*.english
+
+common settings
+  default-language: Haskell2010
+  ghc-options: -Wall
+  build-depends:
+      base >=4.14 && <5
+    , text >=1.2 && <3
+    , containers >=0.6 && <0.8
+    , megaparsec >=9.2 && <10
+
+library
+  import: settings
+  hs-source-dirs: src
+  exposed-modules:
+      EnglishMajorC.Syntax
+      EnglishMajorC.Parser
+      EnglishMajorC.Validation
+
+executable parse-english-major-c
+  import: settings
+  hs-source-dirs: app
+  main-is: Main.hs
+  build-depends: english-major-c-megaparsec
+
+test-suite parser-tests
+  import: settings
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Main.hs
+  other-modules: Paths_english_major_c_megaparsec
+  autogen-modules: Paths_english_major_c_megaparsec
+  build-depends: english-major-c-megaparsec

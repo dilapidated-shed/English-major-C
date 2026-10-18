@@ -1,0 +1,1072 @@
+English machine reading of the actual ARM A32 dqrls_ object
+==========================================================
+
+Source: ../dqrls.armv7-a32.disasm.txt
+Status: first-pass textual operation concordance; NOT executable proof.
+Address values are unlinked .text byte offsets, not runtime addresses.
+Data .word literal pool entries are specifically marked non-instructions.
+A32 instructions occupy 4 bytes; in normal sequential execution the
+execution index moves from instruction address A to A+4. Branch, return,
+PC writes, exceptions and unresolved linker relocations can change this.
+Refer to the companion A32 machine-state document for PC+8 operand
+reads, condition predicates, integer and FPSCR state, softfp ABI,
+memory and external library boundaries.
+
+INSTRUCTION 0001 | 0x0 | e92d4ff0 | push {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Save a specified group of general registers on the full-descending machine stack.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "{r4, r5, r6, r7, r8, r9, sl, fp, lr}", decrement the stack pointer and store the listed 32-bit register values in architectural address order; inspect overlapping or PC forms separately. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0002 | 0x4 | e1a06003 | mov r6, r3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, r3", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0003 | 0x8 | e592c000 | ldr ip, [r2]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [r2]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0004 | 0xc | e24dd04c | sub sp, sp, #76	@ 0x4c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Subtract the second integer operand from the first.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "sp, sp, #76	@ 0x4c", compute the 32-bit modular difference at the specified width and write the named destination. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x10 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0005 | 0x10 | e5914000 | ldr r4, [r1]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r4, [r1]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x14 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0006 | 0x14 | e1a03002 | mov r3, r2
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, r2", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x18 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0007 | 0x18 | e1a0a001 | mov sl, r1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "sl, r1", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0008 | 0x1c | e1cc8fcc | bic r8, ip, ip, asr #31
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Clear the destination bits selected by an integer mask.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r8, ip, ip, asr #31", calculate first operand AND the bitwise complement of mask/shifted last operand, then store its 32-bit result. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x20 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0009 | 0x20 | e59dc074 | ldr ip, [sp, #116]	@ 0x74
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [sp, #116]	@ 0x74", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x24 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0010 | 0x24 | e1c44fc4 | bic r4, r4, r4, asr #31
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Clear the destination bits selected by an integer mask.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r4, r4, r4, asr #31", calculate first operand AND the bitwise complement of mask/shifted last operand, then store its 32-bit result. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x28 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0011 | 0x28 | e59d2084 | ldr r2, [sp, #132]	@ 0x84
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #132]	@ 0x84", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x2c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0012 | 0x2c | e58dc000 | str ip, [sp]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [sp]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x30 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0013 | 0x30 | e59dc088 | ldr ip, [sp, #136]	@ 0x88
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [sp, #136]	@ 0x88", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x34 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0014 | 0x34 | e58d2004 | str r2, [sp, #4]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #4]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x38 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0015 | 0x38 | e58dc00c | str ip, [sp, #12]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [sp, #12]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x3c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0016 | 0x3c | e59d208c | ldr r2, [sp, #140]	@ 0x8c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #140]	@ 0x8c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x40 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0017 | 0x40 | e59dc090 | ldr ip, [sp, #144]	@ 0x90
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [sp, #144]	@ 0x90", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x44 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0018 | 0x44 | e58d2008 | str r2, [sp, #8]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #8]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x48 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0019 | 0x48 | e1a02001 | mov r2, r1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, r1", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x4c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0020 | 0x4c | e58dc010 | str ip, [sp, #16]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [sp, #16]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x50 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0021 | 0x50 | e58d0028 | str r0, [sp, #40]	@ 0x28
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r0, [sp, #40]	@ 0x28", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x54 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0022 | 0x54 | e58d302c | str r3, [sp, #44]	@ 0x2c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #44]	@ 0x2c", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x58 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0023 | 0x58 | e58d8038 | str r8, [sp, #56]	@ 0x38
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r8, [sp, #56]	@ 0x38", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x5c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0024 | 0x5c | ebfffffe | bl 0 <dqrdc2_>
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Save the ARM return address and call a target instruction.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "0 <dqrdc2_>", set LR to the return instruction address and branch to the linker-resolved target; the original object may contain only an unresolved relocation placeholder. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x60 (4 encoded bytes).
+  Link-time relocation: R_ARM_CALL dqrdc2_.
+
+INSTRUCTION 0025 | 0x60 | e59d3084 | ldr r3, [sp, #132]	@ 0x84
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #132]	@ 0x84", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x64 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0026 | 0x64 | e5930000 | ldr r0, [r3]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r0, [r3]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x68 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0027 | 0x68 | e59d302c | ldr r3, [sp, #44]	@ 0x2c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #44]	@ 0x2c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x6c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0028 | 0x6c | e3500000 | cmp r0, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r0, #0", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x70 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0029 | 0x70 | da000049 | ble 19c <dqrls_+0x19c>
+  Original section or symbol: dqrls_.
+  Predicate: LE (zero Z is one or negative N differs from overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when zero Z is one or negative N differs from overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "19c <dqrls_+0x19c>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x74 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0030 | 0x74 | e59d2070 | ldr r2, [sp, #112]	@ 0x70
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #112]	@ 0x70", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x78 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0031 | 0x78 | e592b000 | ldr fp, [r2]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "fp, [r2]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x7c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0032 | 0x7c | e35b0000 | cmp fp, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "fp, #0", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x80 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0033 | 0x80 | da000028 | ble 128 <dqrls_+0x128>
+  Original section or symbol: dqrls_.
+  Predicate: LE (zero Z is one or negative N differs from overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when zero Z is one or negative N differs from overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "128 <dqrls_+0x128>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x84 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0034 | 0x84 | e59f2180 | ldr r2, [pc, #384]	@ 20c <dqrls_+0x20c>
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [pc, #384]	@ 20c <dqrls_+0x20c>", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x88 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0035 | 0x88 | e1a04184 | lsl r4, r4, #3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Shift the source register bits left.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r4, r4, #3", move bits toward more significant positions and fill vacated low positions with zero, with the exact count and APSR effects determined by the encoded form. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x8c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0036 | 0x8c | e59d507c | ldr r5, [sp, #124]	@ 0x7c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, [sp, #124]	@ 0x7c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x90 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0037 | 0x90 | e59d7080 | ldr r7, [sp, #128]	@ 0x80
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r7, [sp, #128]	@ 0x80", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x94 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0038 | 0x94 | e08f2002 | add r2, pc, r2
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, pc, r2", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x98 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0039 | 0x98 | e59d9078 | ldr r9, [sp, #120]	@ 0x78
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r9, [sp, #120]	@ 0x78", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x9c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0040 | 0x9c | e58d2030 | str r2, [sp, #48]	@ 0x30
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #48]	@ 0x30", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xa0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0041 | 0xa0 | e1a02188 | lsl r2, r8, #3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Shift the source register bits left.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, r8, #3", move bits toward more significant positions and fill vacated low positions with zero, with the exact count and APSR effects determined by the encoded form. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xa4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0042 | 0xa4 | e3a08001 | mov r8, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r8, #1", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xa8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0043 | 0xa8 | e58d202c | str r2, [sp, #44]	@ 0x2c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #44]	@ 0x2c", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xac (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0044 | 0xac | e58d303c | str r3, [sp, #60]	@ 0x3c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #60]	@ 0x3c", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xb0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0045 | 0xb0 | e28d2044 | add r2, sp, #68	@ 0x44
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, sp, #68	@ 0x44", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xb4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0046 | 0xb4 | e58d2034 | str r2, [sp, #52]	@ 0x34
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #52]	@ 0x34", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xb8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0047 | 0xb8 | e59d3034 | ldr r3, [sp, #52]	@ 0x34
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #52]	@ 0x34", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xbc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0048 | 0xbc | e1a0200a | mov r2, sl
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, sl", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xc0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0049 | 0xc0 | e58d3020 | str r3, [sp, #32]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #32]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xc4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0050 | 0xc4 | e1a0100a | mov r1, sl
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, sl", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xc8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0051 | 0xc8 | e59d3030 | ldr r3, [sp, #48]	@ 0x30
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #48]	@ 0x30", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xcc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0052 | 0xcc | e2888001 | add r8, r8, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r8, r8, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xd0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0053 | 0xd0 | e58d301c | str r3, [sp, #28]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #28]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xd4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0054 | 0xd4 | e59d308c | ldr r3, [sp, #140]	@ 0x8c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #140]	@ 0x8c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xd8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0055 | 0xd8 | e58d5018 | str r5, [sp, #24]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, [sp, #24]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xdc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0056 | 0xdc | e58d5014 | str r5, [sp, #20]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, [sp, #20]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xe0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0057 | 0xe0 | e58d9010 | str r9, [sp, #16]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r9, [sp, #16]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xe4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0058 | 0xe4 | e58d700c | str r7, [sp, #12]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r7, [sp, #12]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xe8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0059 | 0xe8 | e0877004 | add r7, r7, r4
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r7, r7, r4", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xec (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0060 | 0xec | e58d5008 | str r5, [sp, #8]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, [sp, #8]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xf0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0061 | 0xf0 | e0855004 | add r5, r5, r4
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, r5, r4", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xf4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0062 | 0xf4 | e58d6004 | str r6, [sp, #4]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, [sp, #4]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xf8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0063 | 0xf8 | e0866004 | add r6, r6, r4
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, r6, r4", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0xfc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0064 | 0xfc | e58d3000 | str r3, [sp]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write one four-byte machine word into computed memory.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp]", evaluate the exact effective address and write the source register's low 32 bits; memory permissions and alignment remain material. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x100 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0065 | 0x100 | e59d0028 | ldr r0, [sp, #40]	@ 0x28
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r0, [sp, #40]	@ 0x28", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x104 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0066 | 0x104 | e59d3084 | ldr r3, [sp, #132]	@ 0x84
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #132]	@ 0x84", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x108 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0067 | 0x108 | ebfffffe | bl 0 <dqrsl_>
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Save the ARM return address and call a target instruction.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "0 <dqrsl_>", set LR to the return instruction address and branch to the linker-resolved target; the original object may contain only an unresolved relocation placeholder. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x10c (4 encoded bytes).
+  Link-time relocation: R_ARM_CALL dqrsl_.
+
+INSTRUCTION 0068 | 0x10c | e59d302c | ldr r3, [sp, #44]	@ 0x2c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #44]	@ 0x2c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x110 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0069 | 0x110 | e15b0008 | cmp fp, r8
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "fp, r8", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x114 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0070 | 0x114 | e0899003 | add r9, r9, r3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r9, r9, r3", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x118 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0071 | 0x118 | aaffffe6 | bge b8 <dqrls_+0xb8>
+  Original section or symbol: dqrls_.
+  Predicate: GE (negative N equals overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when negative N equals overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "b8 <dqrls_+0xb8>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x11c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0072 | 0x11c | e59d2084 | ldr r2, [sp, #132]	@ 0x84
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #132]	@ 0x84", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x120 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0073 | 0x120 | e59d303c | ldr r3, [sp, #60]	@ 0x3c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #60]	@ 0x3c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x124 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0074 | 0x124 | e5920000 | ldr r0, [r2]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r0, [r2]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x128 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0075 | 0x128 | e5936000 | ldr r6, [r3]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, [r3]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x12c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0076 | 0x12c | e280e001 | add lr, r0, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "lr, r0, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x130 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0077 | 0x130 | e15e0006 | cmp lr, r6
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "lr, r6", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x134 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0078 | 0x134 | ca000016 | bgt 194 <dqrls_+0x194>
+  Original section or symbol: dqrls_.
+  Predicate: GT (zero Z is zero and negative N equals overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when zero Z is zero and negative N equals overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "194 <dqrls_+0x194>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x138 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0079 | 0x138 | e59d3070 | ldr r3, [sp, #112]	@ 0x70
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #112]	@ 0x70", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x13c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0080 | 0x13c | e2866001 | add r6, r6, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, r6, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x140 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0081 | 0x140 | e5931000 | ldr r1, [r3]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, [r3]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x144 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0082 | 0x144 | e59d3078 | ldr r3, [sp, #120]	@ 0x78
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #120]	@ 0x78", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x148 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0083 | 0x148 | e3510000 | cmp r1, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, #0", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x14c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0084 | 0x14c | e083c180 | add ip, r3, r0, lsl #3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, r3, r0, lsl #3", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x150 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0085 | 0x150 | e59d3038 | ldr r3, [sp, #56]	@ 0x38
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, [sp, #56]	@ 0x38", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x154 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0086 | 0x154 | e1a00183 | lsl r0, r3, #3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Shift the source register bits left.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r0, r3, #3", move bits toward more significant positions and fill vacated low positions with zero, with the exact count and APSR effects determined by the encoded form. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x158 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0087 | 0x158 | da00000d | ble 194 <dqrls_+0x194>
+  Original section or symbol: dqrls_.
+  Predicate: LE (zero Z is one or negative N differs from overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when zero Z is one or negative N differs from overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "194 <dqrls_+0x194>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x15c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0088 | 0x15c | e2811001 | add r1, r1, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, r1, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x160 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0089 | 0x160 | e3a04000 | mov r4, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r4, #0", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x164 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0090 | 0x164 | e3a05000 | mov r5, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, #0", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x168 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0091 | 0x168 | e1a0200c | mov r2, ip
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, ip", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x16c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0092 | 0x16c | e3a03001 | mov r3, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, #1", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x170 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0093 | 0x170 | e2833001 | add r3, r3, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r3, r3, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x174 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0094 | 0x174 | e1c240f0 | strd r4, [r2]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write two adjacent machine words from a register pair.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r4, [r2]", store an eight-byte pair of 32-bit register contents using the encoded address and register-pair rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x178 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0095 | 0x178 | e1510003 | cmp r1, r3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, r3", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x17c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0096 | 0x17c | e0822000 | add r2, r2, r0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, r2, r0", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x180 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0097 | 0x180 | 1afffffa | bne 170 <dqrls_+0x170>
+  Original section or symbol: dqrls_.
+  Predicate: NE (the zero flag Z is zero).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when the zero flag Z is zero; if false, no ordinary operand memory read/write or destination update occurs. For original operands "170 <dqrls_+0x170>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x184 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0098 | 0x184 | e28ee001 | add lr, lr, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "lr, lr, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x188 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0099 | 0x188 | e28cc008 | add ip, ip, #8
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, ip, #8", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x18c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0100 | 0x18c | e156000e | cmp r6, lr
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, lr", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x190 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0101 | 0x190 | 1afffff4 | bne 168 <dqrls_+0x168>
+  Original section or symbol: dqrls_.
+  Predicate: NE (the zero flag Z is zero).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when the zero flag Z is zero; if false, no ordinary operand memory read/write or destination update occurs. For original operands "168 <dqrls_+0x168>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x194 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0102 | 0x194 | e28dd04c | add sp, sp, #76	@ 0x4c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "sp, sp, #76	@ 0x4c", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x198 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0103 | 0x198 | e8bd8ff0 | pop {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Restore a specified group of registers from the stack.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "{r4, r5, r6, r7, r8, r9, sl, fp, pc}", read the listed 32-bit register values from the stack and advance SP; loading PC is a control transfer rather than normal sequential execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x19c (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0104 | 0x19c | e59a7000 | ldr r7, [sl]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r7, [sl]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1a0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0105 | 0x1a0 | e3570000 | cmp r7, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r7, #0", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1a4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0106 | 0x1a4 | daffffdf | ble 128 <dqrls_+0x128>
+  Original section or symbol: dqrls_.
+  Predicate: LE (zero Z is one or negative N differs from overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when zero Z is one or negative N differs from overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "128 <dqrls_+0x128>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1a8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0107 | 0x1a8 | e59d2070 | ldr r2, [sp, #112]	@ 0x70
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, [sp, #112]	@ 0x70", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1ac (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0108 | 0x1ac | e2877001 | add r7, r7, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r7, r7, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1b0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0109 | 0x1b0 | e59de07c | ldr lr, [sp, #124]	@ 0x7c
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "lr, [sp, #124]	@ 0x7c", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1b4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0110 | 0x1b4 | e1a04184 | lsl r4, r4, #3
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Shift the source register bits left.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r4, r4, #3", move bits toward more significant positions and fill vacated low positions with zero, with the exact count and APSR effects determined by the encoded form. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1b8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0111 | 0x1b8 | e592c000 | ldr ip, [r2]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read one four-byte machine word from a computed byte address.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, [r2]", evaluate the instruction's exact effective address and load four bytes into the target general register; a PC-relative form reads PC according to ARM-state operand rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1bc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0112 | 0x1bc | e35c0000 | cmp ip, #0
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, #0", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1c0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0113 | 0x1c0 | daffffd8 | ble 128 <dqrls_+0x128>
+  Original section or symbol: dqrls_.
+  Predicate: LE (zero Z is one or negative N differs from overflow V).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when zero Z is one or negative N differs from overflow V; if false, no ordinary operand memory read/write or destination update occurs. For original operands "128 <dqrls_+0x128>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1c4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0114 | 0x1c4 | e28cc001 | add ip, ip, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "ip, ip, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1c8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0115 | 0x1c8 | e3a05001 | mov r5, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, #1", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1cc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0116 | 0x1cc | e1a0800e | mov r8, lr
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r8, lr", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1d0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0117 | 0x1d0 | e1a01006 | mov r1, r6
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, r6", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1d4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0118 | 0x1d4 | e3a02001 | mov r2, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Copy the encoded register/immediate/shifted operand's bit pattern.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, #1", copy the calculated operand value to its named register destination, without changing APSR flags unless the actual encoding specifies S; writing PC, if present, would change execution. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1d8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0119 | 0x1d8 | e1c1a0d0 | ldrd sl, [r1]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Read two adjacent machine words into a register pair.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "sl, [r1]", load eight bytes at the exact effective address into the encoded adjacent destination registers, honoring pair legality and alignment. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1dc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0120 | 0x1dc | e2822001 | add r2, r2, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, r2, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1e0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0121 | 0x1e0 | e1c8a0f0 | strd sl, [r8]
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Write two adjacent machine words from a register pair.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "sl, [r8]", store an eight-byte pair of 32-bit register contents using the encoded address and register-pair rules. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1e4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0122 | 0x1e4 | e152000c | cmp r2, ip
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r2, ip", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1e8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0123 | 0x1e8 | e0811004 | add r1, r1, r4
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r1, r1, r4", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1ec (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0124 | 0x1ec | e0888004 | add r8, r8, r4
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r8, r8, r4", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1f0 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0125 | 0x1f0 | 1afffff8 | bne 1d8 <dqrls_+0x1d8>
+  Original section or symbol: dqrls_.
+  Predicate: NE (the zero flag Z is zero).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when the zero flag Z is zero; if false, no ordinary operand memory read/write or destination update occurs. For original operands "1d8 <dqrls_+0x1d8>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1f4 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0126 | 0x1f4 | e2855001 | add r5, r5, #1
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, r5, #1", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1f8 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0127 | 0x1f8 | e2866008 | add r6, r6, #8
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r6, r6, #8", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x1fc (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0128 | 0x1fc | e28ee008 | add lr, lr, #8
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Add two fixed-width machine integer operands.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "lr, lr, #8", compute the 32-bit modular sum of the named source operands and write the designated destination, considering PC-relative/shifter operands explicitly. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x200 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0129 | 0x200 | e1550007 | cmp r5, r7
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Compare machine integers by setting arithmetic condition status.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "r5, r7", subtract the indicated second operand from the first for APSR NZCV flags only, writing no arithmetic result register. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x204 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0130 | 0x204 | 1afffff0 | bne 1cc <dqrls_+0x1cc>
+  Original section or symbol: dqrls_.
+  Predicate: NE (the zero flag Z is zero).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Perform this operation ONLY when the zero flag Z is zero; if false, no ordinary operand memory read/write or destination update occurs. For original operands "1cc <dqrls_+0x1cc>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x208 (4 encoded bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0131 | 0x208 | eaffffc6 | b 128 <dqrls_+0x128>
+  Original section or symbol: dqrls_.
+  Predicate: AL (unconditionally).
+  Long operation: Set the next instruction address by a direct encoded conditional branch.
+  First-pass state effect: Complete this operation if the instruction is permitted and does not fault. For original operands "128 <dqrls_+0x128>", replace the execution index with the branch target when its architectural predicate holds, otherwise advance four bytes. This is a first-pass ordinary-English description, not an independently verified complete state transformer.
+  Normal sequential execution index only: 0x20c (4 encoded bytes).
+  Link-time relocation: none.
+
+DATA 0001 | 0x20c | 00000170 | .word 0x00000170
+  Original section or symbol: dqrls_.
+  Purpose: literal/data word; not a granted executable ARM instruction.
+  Meaning: eight printed hexadecimal digits represent four preserved little-endian bytes in the original ELF object; consumers may load them via a literal reference. Do not invent a decoded machine operation here.
+  Relocation: R_ARM_REL32 .rodata.
+
+Unprinted ranges explicitly NOT translated as instructions
+----------------------------------------------------------
+No gaps between successive displayed instruction/data records.
+Original GNU objdump ellipsis markers: 0; no instruction is synthesized for an ellipsis.

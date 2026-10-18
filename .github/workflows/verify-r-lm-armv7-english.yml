@@ -1,0 +1,44 @@
+name: Verify ARM A32 QR instruction English source coverage
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-source-and-annotations:
+    name: Exact-head all ARM instructions literals and negative mutations
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact reviewed head rather than synthetic PR merge
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify revision used for every source assertion
+        shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual=$(git rev-parse HEAD)
+          if [ "$actual" != "$EXPECTED_HEAD" ]; then
+            echo "FAIL: wrong source head $actual expected $EXPECTED_HEAD" >&2
+            exit 1
+          fi
+          echo "ARM_English_source_sha=$actual"
+      - name: Select Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify every original A32 word and reject mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          node examples/r-lm-native-armv7-a32/english-concordance/verify-arm-English-concordance.mjs --self-test
+
+# Structural coverage only: not a certified ARM decoder, not QR execution,
+# not validated VFP semantics and not independent ai-ci acceptance.

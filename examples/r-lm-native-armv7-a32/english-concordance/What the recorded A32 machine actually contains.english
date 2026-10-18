@@ -1,0 +1,207 @@
+What the recorded A32 machine actually contains
+===============================================
+
+Authority, snapshot, and exact incompleteness
+---------------------------------------------
+This machine description is intended for the original ARMv7-A A32
+instruction bytes in the parent directory: genuine cross-compiled
+objects for dqrls_, dqrdc2_, dqrsl_ from R's Fortran numerical path.
+The authoritative architectural reference for interpreting those bytes
+is ARM Architecture Reference Manual ARMv7-A/R, DDI 0406C.d. The
+archived compiler selected -march=armv7-a, -marm, VFPv3-D16,
+-mfloat-abi=softfp. Object format ELF32 little-endian ARM EABI v5.
+
+This is NOT the existing English Major C 73-operation ARMv7 T32 grant.
+T32 instructions can use two or four bytes; these are **A32** machine
+instructions of four bytes each, with distinct encodings and their own
+predicate conditions. Do not conflate A32 and T32 or assume the grammar
+from the small summation program can execute QR VFP operations.
+
+Program state to be declared before each instruction
+---------------------------------------------------
+1. Execution index: the memory byte address containing the next
+   architectural instruction to fetch. For an ordinary permitted A32
+   instruction completing normally with no branch, return, exception,
+   instruction-set-state change, or write to PC, the successor is the
+   old execution index plus exactly FOUR bytes. An object-file address
+   such as 0x5c is relative to the unlinked section, not necessarily
+   the final address in a process or a QEMU trace.
+
+2. ARM-state PC operand: when an A32 instruction reads ordinary PC
+   (R15) as an operand, the architectural value is usually the
+   current instruction byte address plus EIGHT. That value is NOT
+   identical to the execution index or the next sequential fetch
+   address. Literal loads and PC-relative address computation depend
+   on the instruction's exact encoding and PC-alignment rules.
+   Branch-relative immediates use the architecture's PC+8 basis.
+   Relocation entries can replace an object's placeholder branch
+   displacement at link time.
+
+3. R0 to R15 are 32-bit integer registers. R10 may be printed SL,
+   R11 FP, R12 IP, R13 SP, R14 LR and R15 PC. Aliases identify the
+   SAME physical machine registers, not additional registers.
+   R14 (LR) often contains a return address after BL; it is not
+   itself the execution index until an instruction branches to it.
+   R13 holds the stack address. Multiplication can write two
+   distinct register results. Operations with SP and PC must use
+   their specific encoding/access rules, not generic assignment.
+
+4. APSR condition flags: N (negative), Z (zero), C (carry), V
+   (overflow). A32 operations can carry a 4-bit condition field.
+   EQ/NE refer to Z; GT/GE/LT/LE inspect N/V with Z; HI/LS refer
+   to C and Z. A failed ordinary predicate does NOT read/write
+   the normal instruction's data operands or perform that memory
+   access, though it consumes an instruction slot and advances
+   the execution index. A relocated branch/call retains its
+   condition meaning after linking.
+
+5. FPSCR and VFPv3-D16: floating operations act on VFP D registers,
+   normally holding a 64-bit double-precision payload in these
+   routines. FPSCR tracks applicable floating-point status and
+   control. VFP comparisons set FPSCR NZCV; VMRS can move these
+   bits into the integer condition status before a later ARM branch.
+   This distinguishes a VFP compare from an integer CMP; their
+   condition effects and NaN/exception behavior cannot be guessed.
+   VFP fused versus non-fused, rounding, denormal, signaling-NaN,
+   signed-zero and saturation behavior require encoding-by-encoding
+   ARM reference verification. A mnemonic family name alone is
+   insufficient to claim a full numerical semantics.
+
+6. Memory: byte-addressed, ELF32 little endian. LDR/STR normally
+   load/store 4-byte words. LDRD/STRD transfer two adjacent 32-bit
+   register words (eight bytes overall), subject to register-pair,
+   addressing and alignment restrictions. Addressing may include
+   immediate offset, pre/post-index updates and register shifts.
+   LDM/STM and PUSH/POP transfer multiple integer registers with
+   a definite address order and SP/base writeback; their aliases
+   can hide this order. VLDR/VSTR, VLDM/VSTM and VPUSH/VPOP transfer
+   VFP values, not ordinary integer register values. All data
+   accesses can fault or be prohibited by memory permissions.
+
+7. Procedure boundary: BL stores the return instruction address
+   in LR and transfers to a target, possibly carrying a linker
+   relocation to dqrdc2_/dqrsl_/BLAS/libc. A32 direct BL under
+   ARM state sets LR to the address of the next A32 instruction,
+   subject to link-time interworking stubs and ARM state changes.
+   A successful return in these objects may be the POP restoring
+   PC or a separate branch-to-LR form. Unlinked BL encodings
+   printed with a zero placeholder are NOT calls to that literal
+   self-address. Four entry argument registers R0-R3 plus stack
+   arguments are used under AAPCS32; double/FP arguments and
+   by-reference Fortran arrays follow the particular ABI and
+   compiler output. Softfp is **not** hard-float register-argument
+   calling convention. The recorded source routines use Fortran
+   by-reference arguments, but mapping of each access requires
+   tracing stack/register state rather than guessing from the
+   Fortran routine signature alone.
+
+Long operation names for instruction families in this capture
+--------------------------------------------------------------
+These names describe intended normal-case effects. Every single
+record must still retain the original exact encoded machine word,
+GNU mnemonic, operands and condition. Do not equate the names with
+validated total state transformers.
+
+- MOV / MOVW / MOVT: copy a 32-bit value, load the low immediate
+  halfword while zeroing the remaining half, or replace the high
+  immediate halfword while retaining the low half. A shifted
+  operand can alter the data being copied. Without an 'S' setting
+  condition flags, these do not modify APSR.
+- MVN / BIC: complement every selected operand bit or clear the
+  bit positions selected by the mask in a target register.
+- ADD / SUB / RSB: add operands, subtract in normal order,
+  or subtract in reversed operand order, all at 32-bit width
+  with normal wraparound unless an explicitly signed/excursion
+  rule applies. The S-bit determines whether APSR is written.
+- CMP: compute arithmetic difference for NZCV comparison flags
+  without writing its result. CMPLS is CMP executed only under
+  the lower-or-same condition, not a separate mathematical family.
+- LSL / ASR: shift bits left, or right while copying the sign bit.
+  The shifter and register/immediate count encoding matter.
+- MLA / MLS / SMULL: integer multiply-and-add; multiply-and-
+  subtract; signed 32-by-32 producing separate low/high halves
+  of the 64-bit product. Full operand order matters.
+- LDR / STR / LDRD / STRD: read/write one or two adjacent 32-bit
+  words, including the address-mode and register-pair effects.
+- LDM/STM/PUSH/POP: transfer ordered groups of integer words
+  between registers and memory, with base/stack address updates
+  where the encoded form permits. POP including PC is a return
+  or control transfer, not a normal sequential operation.
+- B: set the next execution index to an encoded target if the
+  predicate is satisfied; otherwise continue sequentially.
+- BL: save the return address and branch if the predicate is
+  satisfied, using the linker-resolved branch target. Does not
+  prove the callee body is inside the recorded object.
+- VLD*/VST*/VPUSH/VPOP: transfer one or multiple VFP register
+  payloads to/from memory; address order and state must be checked.
+- VMOV: transfer a VFP payload or individual bit pattern to
+  the destination, with its encoded register width.
+- VABS/VNEG: floating absolute value/sign negation, including
+  special floating bit patterns under the architecture.
+- VADD/VMUL/VDIV/VSQRT: floating add, multiply, divide or square
+  root with FPSCR control and exception behavior.
+- VMLS: VFP multiply-and-subtract result; do not silently call
+  it mathematically exact or fused without checking the target
+  VFP version's actual arithmetic steps and rounding.
+- VCMP/VCMPE: floating comparisons, with their differing invalid
+  operation signaling for unordered operands, writing FPSCR
+  comparison condition state. VMRS copies FPSCR status to the
+  targeted architecture register/status field.
+- A suffix EQ, NE, GE, LT, GT, LE, HI or LS restricts the whole
+  instruction's side effects to states satisfying the associated
+  APSR predicate. Do not interpret 'VSTRNE' as a branch:
+  it is a conditional memory store.
+
+Literal pool and disassembly omissions
+---------------------------------------
+The original GNU objdump listings include literal-pool words shown
+as ".word", often with R_ARM_REL32 relocations referring to read-only
+numeric constants. These bytes are DATA in the current disassembly
+and are NOT admitted as executable A32 instruction operations.
+References from LDR [PC, offset] may read them. Their alignment,
+placement and values matter to execution, even when ignored by a
+naive list of instruction mnemonics.
+
+The dqrdc2 listing contains a literal printed "..." by objdump
+between instruction bytes and a literal pool. That indicates
+omitted/unprinted bytes. A first-pass address-based concordance
+must explicitly preserve a gap marker and not invent decoded
+instructions in those omitted bytes. Reconstruct any missing bytes
+only by inspecting the archived ELF section itself, not by guessing
+that zero padding will remain zero in another compilation.
+
+Competing implementations and why this path is used
+----------------------------------------------------
+A. Translate the genuine A32 machine code into long ordinary-English
+   effects before invoking QR mathematics (CURRENT).
+   Best provenance and faithful architecture-specific detail;
+   requires lengthy ABI/FP/condition specification.
+B. Start with Fortran formulas and fabricate convenient A32 steps.
+   Shorter explanation but does not preserve the actual compiler's
+   decision-making; REJECTED as a machine translation.
+C. Treat x86-64 machine instructions as a one-to-one ARM equivalent.
+   Tempting table but wrong for flags, vector state, calling ABI,
+   instruction length and code generation; REJECTED.
+D. Build a typed micro-operation interpreter with separate ARM and
+   x86 frontends, then compare their state transitions.
+   Promising for executable checking; DEFERRED until machine effects
+   are properly defined.
+E. Run equivalent numerical functions under emulation to compare
+   externally observed coefficients and residuals.
+   Useful system-level evidence but cannot alone establish
+   instruction-by-instruction semantic equality; PLANNED and
+   currently absent for QR.
+F. Execute on a physical Android ARM32 CPU instead of QEMU.
+   Required only for claims of concrete device ABI/driver behavior,
+   not a prerequisite to source-level exploration; DEFERRED.
+
+Open semantic blockers
+----------------------
+Before these English rows become an executable language, independently
+audit each encoded instruction and predicate against DDI 0406C.d,
+including exact register aliasing, carry/overflow and APSR liveness,
+VFP FPSCR state, PC-relative literals, relocation/linker behavior,
+stack argument mapping, memory alignment and faults, and external
+numerical libraries. Without a complete linker/runtime image and
+concrete input memory, the disassembly cannot produce an observed
+full numerical execution trace. Preserve honest UNKNOWN boundaries.

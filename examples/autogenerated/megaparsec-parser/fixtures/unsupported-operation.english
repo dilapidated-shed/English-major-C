@@ -1,0 +1,2 @@
+This program uses ARMv7-A Thumb instructions.
+Multiply "current entry" by "running total".

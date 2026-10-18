@@ -1,0 +1,276 @@
+What exists in this x86-64 machine execution
+============================================
+
+Purpose and authority
+---------------------
+This is a source-level description of how to READ the captured x86-64
+disassembly, not a declaration that the English translator is complete or
+executable. The authoritative sources are (1) the byte-identical original
+object/executable listings under the parent directory; (2) the Intel 64 and
+IA-32 Software Developer Manuals, especially Volumes 1 and 2 for instruction
+form and semantics, at
+https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html;
+and (3) the System V AMD64 ABI convention for the observed Debian x86-64
+harness. This is a *specific historical compiler output*: GCC/GFortran
+14.2.0, x86-64 Debian 13, object flags -O2 -g -fno-inline -fPIC.
+
+Define a machine state before an instruction
+---------------------------------------------
+A. The execution index: address of next machine instruction; it is a BYTE
+   address, not the ordinal number of an instruction. The fetched encoding
+   can occupy a different number of bytes than its neighbor, with a maximum
+   instruction length of 15 bytes in x86-64 long mode. For a successfully
+   completed instruction with no branch/call/return/fault, advance it by
+   that instruction's decoded byte length. Do not treat an objdump offset
+   as an executed event.
+B. General-purpose registers: RAX, RBX, RCX, RDX, RSI, RDI, RSP, RBP,
+   R8 through R15 and the architectural instruction-pointer register RIP.
+   Their useful common view here is 64 bits. EAX and corresponding E*
+   and R8D names address low 32 bits; writing a 32-bit general-purpose
+   register in 64-bit mode clears the upper 32 bits. AX, AH/AL and other
+   smaller aliases have their separately defined partial-write rules.
+   Sign extension is different from zero extension.
+C. Condition flags (RFLAGS): carry (CF), parity (PF), auxiliary carry
+   (AF), zero (ZF), sign (SF), overflow (OF), with exact defined,
+   preserved or undefined cases specific to each instruction. Numeric
+   comparisons must say whether they are signed (SF/OF) or unsigned
+   (CF/ZF). Floating-point compare flags use their own mapping.
+D. Vector and scalar-floating registers: XMM0 through XMM15 (128-bit
+   architectural views for these recorded SSE instructions), with
+   double-precision values in the low 64-bit lane for scalar forms.
+   Never call the whole 128-bit register "a floating-point number".
+   Packed instructions can operate on all its bits or both 64-bit lanes.
+E. Floating-point environment: MXCSR rounding control, sticky exception
+   status, exception masks and other applicable state. Results from
+   IEEE-754 operations must distinguish rounding and NaN/infinity/
+   signed-zero/exception behavior from ideal real arithmetic. The
+   recording does not declare the running environment's MXCSR bits.
+F. Memory: a byte-addressed space with read/write/executable permissions.
+   A QWORD PTR is an eight-byte memory access, DWORD PTR is four bytes,
+   XMMWORD PTR is sixteen, and a source operand may be a register,
+   immediate number or memory location. Effective-address expressions
+   may contain a base register, an index register, a scale and displacement.
+   A RIP-relative displacement is relative to the address of the NEXT
+   instruction. Machine-endian storage on this x86-64 host is little endian.
+G. Control stack: RSP holds a machine address. Ordinary 64-bit push
+   allocates eight bytes by decrementing RSP, then stores an eight-byte
+   value. Pop reads eight bytes and advances RSP; special overlap cases
+   are not admitted by these prose abbreviations. Call and return have
+   separate return-address effects and are not mere branch synonyms.
+   Alignment and calling conventions matter at external boundaries.
+H. External environment: the operating system, dynamic linker, PLT/GOT,
+   memory mapping, signal/exception machinery, BLAS, libc, libgfortran
+   and libm. The disassembly does not contain a complete definition of
+   all these processes.
+
+Instruction spelling is evidence, not a language definition
+----------------------------------------------------------
+Each line preserves the Intel-syntax disassembly and the ORIGINAL bytes.
+"xmm0", "DWORD PTR", "rip", "je" or "dqrdc2_" are source data; the
+English operation has a long descriptive name that does not require
+readers to know the abbreviated spelling. Explain the words *and*
+preserve exact bytes for checking.
+
+For any two-operand Intel-syntax integer instruction, the left operand
+is conventionally the destination. A special-case instruction can use
+implicit operands, and floating instructions do not all treat their
+upper vector lanes the same way. The width of a written destination
+must be determined from both operands and the actual decoded encoding,
+not guessed from the human-readable mnemonic alone.
+
+Named primitive operations used by the first-pass ledger
+---------------------------------------------------------
+Move bytes/value:
+- "Copy the source value to the destination, according to its
+  architectural width" is MOV. It normally does not modify flags.
+  The 32-bit destination-zero-extension and memory faults still apply.
+- "Read a signed four-byte integer and extend its sign into an
+  eight-byte register" is MOVSXD.
+- "Calculate the effective address without dereferencing it" is LEA.
+  LEA is arithmetic on address expression operands, not a memory load;
+  it does not change flags.
+- "Copy a low 64-bit scalar floating payload" is MOVSD. For legacy
+  SSE, a register destination with a register source preserves the
+  upper 64 bits of the destination, whereas a memory-to-register form
+  zeroes them. The memory-source/destination cases and operand widths
+  must be resolved from encoding.
+- "Copy 128 aligned packed floating bits" is MOVAPD/MOVAPS: payload
+  copying, not a mathematical calculation; 16-byte alignment of a
+  memory operand is relevant.
+- "Copy a 64-bit payload between general/vector registers or memory"
+  is MOVQ. Register and memory forms have different upper-lane rules.
+
+Control stack and entry:
+- "Allocate one eight-byte stack slot and write a value there" is PUSH.
+  If source uses RSP as an address component, resolve source using
+  the pre-decrement state.
+- "Read the stack's top eight-byte slot and restore the stack pointer"
+  is POP; register write ordering matters for special forms.
+- "Save the return execution address then enter the called routine"
+  is CALL. A call through a linker relocation does not target the
+  printed unlinked placeholder address. A call through PLT can cross
+  into a runtime library that is not in the listing.
+- "Restore the saved return execution address and transfer execution
+  to it" is RET; malformed stack/target can fault.
+- "Continue at a branch target instead of the sequential next
+  instruction" is JMP.
+- "Do no architecturally useful computation, advance by the full
+  encoded length" is NOP, including prefix-rich multi-byte padding
+  displayed as DATA16 or CS NOP. Do not count a prefix as a second
+  instruction.
+- "Halt the processor when privileged or fault when forbidden"
+  is HLT. This appears in executable startup/teardown scaffolding
+  and is *not* an ordinary unprivileged return.
+- "Mark a valid indirect branch target under enabled control-flow
+  enforcement" is ENDBR64; feature configuration remains distinct.
+
+Integer values and status:
+- "Add the source integer to the destination integer modulo the
+  destination width and update the defined arithmetic flags" is ADD.
+- "Subtract the source integer from the destination integer modulo
+  destination width and update the defined arithmetic flags" is SUB.
+- "Compute integer equality/order flags from a subtraction without
+  writing back the arithmetic result" is CMP.
+- "Compute condition flags from a bitwise AND without storing the
+  result" is TEST (and OF/CF are cleared, AF undefined).
+- "Store the bitwise exclusive-or of the operands and update the
+  defined logic flags" is XOR. XOR of a register with itself is a
+  zeroing idiom but still changes flags, unlike MOV.
+- "Store the bitwise AND and update the defined logic flags" is AND.
+- "Complement every bit of the destination without changing status
+  flags" is NOT.
+- "Multiply signed integers and store the architecturally selected
+  low result, reporting overflow through CF/OF" is IMUL. The one-,
+  two-, and three-operand forms are distinct and require the encoded
+  form to choose the destination and high-product handling.
+- "Shift bits left and fill vacated low bits with zero" is SHL.
+- "Shift bits right while preserving the original sign" is SAR.
+- "Shift bits right and fill vacated high bits with zero" is SHR.
+  Effective count masking, count zero and OF/CF corner cases cannot
+  be omitted from a final state transformer.
+- "Swap the two operand values" is XCHG, including implicit
+  atomicity for memory form.
+- "Convert the signed 32-bit integer in EAX to a signed 64-bit
+  integer in RAX" is CDQE.
+
+Conditional transfer:
+- JE = "branch if the last relevant comparison establishes equality
+  (zero flag set)".
+- JNE = "branch if the zero flag is clear".
+- JA = "branch if unsigned strictly above (carry=0 and zero=0)".
+- JAE = "branch if unsigned above or equal (carry=0)".
+- JBE = "branch if unsigned below or equal (carry=1 or zero=1)".
+- JG = "branch if signed strictly greater (zero=0 and sign=overflow)".
+- JGE = "branch if signed greater or equal (sign=overflow)".
+- JL = "branch if signed less (sign != overflow)".
+- JLE = "branch if signed less or equal (zero=1 or sign != overflow)".
+- JP = "branch if parity flag is set"; immediately after a
+  scalar floating comparison it detects an *unordered* comparison.
+- CMOVS, CMOVNS, CMOVE, CMOVLE, CMOVG = "select a register value
+  conditionally without branching." When the condition is false, only
+  the destination low-width value is selected again. A 32-bit CMOV
+  destination ALWAYS zero-extends into its encompassing 64-bit register,
+  including on a false condition; a 64-bit CMOV destination preserves
+  all 64 bits on a false condition. A memory source can still be read
+  and fault regardless of the condition. RFLAGS are unchanged.
+- SETA = "write one byte representing whether unsigned above is true".
+
+Scalar floating values and status:
+- MULSD/ADDSD/SUBSD/DIVSD = "multiply/add/subtract/divide low
+  double-precision floating lanes according to the floating-point
+  environment, preserving the unchanged upper lane as prescribed
+  by the exact legacy encoding". They are not exact real arithmetic.
+- SQRTSD = "compute the appropriately rounded double-precision
+  square root of the low source lane".
+- MAXSD = "choose low-lane maximum according to the instruction's
+  legacy operand-order rules for NaN and signed-zero ties"; not
+  a generic commutative mathematical maximum.
+- UCOMISD/COMISD = "compare two low double-precision lanes and write
+  zero/carry/parity flags; unordered (NaN) sets all three"; the two
+  forms differ in invalid-operation exception signaling for NaNs.
+  OF/SF/AF are cleared for a completed comparison.
+- CVTSI2SD = "convert signed integer to low double-precision lane
+  subject to rounding".
+
+Packed vector-bit transformations:
+- PXOR/XORPD = "bitwise exclusive-or the full vector payload".
+- ANDPD = "bitwise AND all vector bits".
+- ANDNPD = "bitwise AND the bitwise complement of the OLD
+  destination bits with source bits".
+- ORPD = "bitwise OR all vector bits".
+- UNPCKLPD = "interleave the low double-lane of the old destination
+  with the low double-lane of the source into the two result lanes".
+  These are 128-bit bit-pattern operations, not necessarily
+  operations on numeric double values.
+
+What we can learn before examining any Fortran mathematics
+----------------------------------------------------------
+1. A register movement often prepares arguments to a later call.
+2. A conditional branch selects a machine path based on specific
+   flags, not a vague "true/false".
+3. An SSE data movement can preserve, clear or transform unrelated
+   high bits, so it may not equal a scalar-language assignment.
+4. A memory address in parentheses/brackets is not automatically an
+   accessed matrix element: LEA is explicitly an address calculation.
+5. A function call is observable through its calling boundary,
+   but a symbol name is not proof of its internal machine effects.
+6. A source-level loop may be radically reorganized by optimization.
+   Reconstruct algorithm structure *after* inspecting the machine
+   paths and the source correspondence, not before.
+
+Choices to keep visible
+-----------------------
+Option 1 — Translate x86-64 bytes directly to English *first*.
+  Advantage: faithful to the archived executable and shows every
+  implementation-specific memory and control-flow decision.
+  Cost: long, platform-specific and dependent on linker/runtime.
+  DECISION: use this now.
+Option 2 — Translate Fortran statements first and decorate with
+  imagined assembly. Advantage: shorter numerical overview.
+  Cost: disguises the compiler's actual decisions.
+  DECISION: retain Fortran as a later cross-check, not an oracle.
+Option 3 — Introduce a typed, architecture-neutral micro-operation
+  representation with explicit flags, memory and effects.
+  Advantage: potential shared frontend/backend and equivalence tests.
+  Cost: requires chosen semantics for undefined cases, SSE status,
+  ABI and executable storage; cannot assume portable meaning.
+  DECISION: exploration later, not silently implemented now.
+Option 4 — Recompile Fortran for ARM with the Android NDK and inspect
+  new real disassembly. Advantage: a valid ARM machine specimen.
+  Cost: not the same x86 instructions and not byte-equivalent;
+  numerical behavior can vary across BLAS/FP environments.
+  DECISION: a separate optional experiment only after current work.
+Option 5 — Emulate the exact x86-64 instruction stream under an
+  explicit target model. Advantage: concrete state-based oracle.
+  Cost: needs all memory mappings, library calls and exception
+  behavior; cross-check emulated and native boundary.
+  DECISION: a future validation mechanism, not claimed.
+Option 6 — Ask a language model to write per-instruction prose and
+  mechanically verify only address/byte alignment. Advantage:
+  rapid inspection-first concordance. Cost: matching bytes
+  does NOT mean semantic sentences are correct.
+  DECISION: permissible as an *explicitly unverified* first pass.
+
+This list deliberately exposes rejected and deferred approaches
+instead of rewriting the history as if only one possible language
+design existed.
+
+Unresolved boundaries for complete specification
+------------------------------------------------
+- Full Intel opcode/REX/prefix decoding and operand-size legality;
+  machine bytes must independently corroborate the mnemonic.
+- Precise effects on ALL status bits, including undefined outcomes
+  and zero-shift/overflow conditions.
+- Floating-point control/exception state, NaNs and signed zero.
+- Vector memory alignment, page permissions and possible faults.
+- C and Fortran calling contract, by-reference arguments, return
+  values, stack alignment, unwind/debug metadata and special cases.
+- Static relocations, GOT/PLT behavior and dynamic loader results.
+- Execution of BLAS and libgfortran code; whether the complete
+  required implementation is even captured.
+- A specified startup machine state and observed full dynamic
+  path for the smoke fixture, not just an archived output.
+- An ARM instruction correspondence with explicit source-target
+  correctness conditions, not a rename of opcodes.
+
+No text in this document overrides the preserved raw listing.
