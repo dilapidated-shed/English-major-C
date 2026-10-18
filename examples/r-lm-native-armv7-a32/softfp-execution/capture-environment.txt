@@ -1,0 +1,50 @@
+EMC-2 archived softfp execution capture
+Source checkout before this follow-up: 37d544bb457db7362a438f7b4ca855ad44146285
+Original softfp object capture source: 2cb1fcae88fde81af16a54e5f4d0b46086585da8
+Host: Ubuntu 24.04.3, Linux 6.18.44 x86_64, disposable container
+Original objects linked unchanged:
+dqrdc2.armv7-a32.o sha256 73bd4d571441e67b25c0e7c863b95c89ded9e23bef68f1bacc614bfc95474785
+dqrls.armv7-a32.o sha256 4d3afbce9a3e6466c3af06f0fd07e1c556c387e7bf70ad115e7e81e62873299b
+dqrsl.armv7-a32.o sha256 caea365649815ea3b77158cb69ec765cb798c15e4036357d99546a2258fc408a
+Fresh GNU Fortran reproduction .text byte comparisons: all three identical.
+Fresh .text SHA256:
+dqrdc2 e2a9e6e29f8c4076f5143d0b2c1f5c23ca800cf76b5adbd80b1917ba684c9246
+dqrls ac307e065ac0e613c84eb878708ad6e92299a4c142235ba1d9bcf8b296990a03
+dqrsl 403cdf00dfcbaa62bd341f18c7631d9d86148ebad429466e261ba3c8d34da62d
+
+BLAS source: Reference-LAPACK/lapack commit 0ac327b5e0b3586a87a2b25e50bbc570f20702d0
+Only BLAS/SRC/daxpy.f, dcopy.f, ddot.f, dnrm2.f90, dscal.f compiled.
+Fortran: arm-linux-gnueabihf-gfortran-14, GNU Fortran 14.2.0
+Package: 14.2.0-4ubuntu2~24.04.1cross1 (Ubuntu 24.04 cross compiler)
+Fortran flags: -O2 -g -fno-inline -fPIC -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=softfp
+C caller: original unchanged ../r-lm-native-x86-64/call_r_qr.c
+C compile and link: arm-linux-gnueabi-gcc 13.3.0, package 13.3.0-6ubuntu2~24.04cross1
+C flags: -O2 -g -no-pie -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=softfp
+Link inputs: original C source, three original QR objects, five saved BLAS objects, -lm
+Compiler/tool binaries extracted into the task workspace from Ubuntu packages.
+No mobile host build occurred.
+GNU assembler/linker/objdump: 2.42, packages 2.42-4ubuntu2.10
+Runtime package: libc6-armel-cross 2.39-0ubuntu8cross1
+Runtime libc.so.6 sha256 46474d6c2d5a465011670150d737a89bdb4bb253ea6301a5e4c042a0058d8b12
+Runtime ld-linux.so.3 sha256 8ba201dd31c40757060fcb87ec7e61e22f6064c549a8bba7a1c31272a0fd32da
+ELF: ELF32 little-endian ARM ET_EXEC, EABI5, soft-float argument ABI
+ELF attributes: ARMv7-A, ARM ISA use Yes, VFPv3-D16, no hardfp VFP argument attribute
+Entry point: 0x10758
+QR linked symbol intervals:
+dqrdc2_ 0x10850 through 0x10f53 (0x704 bytes)
+dqrls_ 0x10f54 through 0x11163 (0x210 bytes)
+dqrsl_ 0x11164 through 0x11a8b (0x928 bytes)
+ELF dynamic dependencies: libc.so.6 and ld-linux.so.3
+BLAS code is linked into this ELF; libc and loader bodies are not archived.
+
+QEMU: 8.2.2, Ubuntu package 1:8.2.2+ds-0ubuntu1.18
+CPU model: cortex-a7
+Execution arguments: -cpu cortex-a7 -one-insn-per-tb -d in_asm,cpu,fpu,nochain -dfilter 0x10850..0x11a8b -D TRACE -L ARMEL_LIBRARY_PREFIX BINARY
+Execution exit: 0
+994 pre-instruction CPU states: dqrdc2 475, dqrls 80, dqrsl 439
+734 distinct visited byte addresses
+Initial dqrls execution index: 0x10f54, A32
+Initial SP: 0x407ff710; after first instruction: 0x407ff6ec
+Initial FPSCR: 0x00000000
+The trace is filtered to these three routines; it is not a whole-process trace or a memory dump.
+No Android, physical-device, ICK/NDK or executable EMC acceptance is claimed.

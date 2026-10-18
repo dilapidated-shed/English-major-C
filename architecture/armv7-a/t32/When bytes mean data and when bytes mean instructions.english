@@ -1,0 +1,293 @@
+WHEN BYTES MEAN DATA AND WHEN BYTES MEAN INSTRUCTIONS.
+
+A detailed English Major C architecture document.
+Status: normative-draft semantics of CODE and DATA for a symbolic
+ARMv7-A unprivileged T32 program. No parser or executable realization.
+Bound by "Given a machine - objects and execution.english" and
+"All and only these initial operations are permitted.english".
+This document grants no additional operations.
+
+PART ONE. DECLARE THE OBJECT, NOT ITS INTERPRETATION.
+
+A byte is an eight-bit value stored at a byte-addressed location.
+A sequence of bytes can be copied, compared, stored or loaded as data
+without carrying any intrinsic language-level declaration of its
+eventual meaning.
+
+An object of four consecutive bytes does not inherently declare:
+  - that the bytes form a signed thirty-two-bit integer;
+  - that they form an unsigned thirty-two-bit integer;
+  - that they form one or more encoded characters;
+  - that they form a virtual address;
+  - that they form one 32-bit T32 instruction;
+  - that they form two 16-bit T32 instructions;
+  - that they form data for a table branch;
+  - that the machine is permitted to execute them.
+
+Those interpretations result from the operation used, the current
+instruction state, the selected data representation, and the
+mapping/permission contract. A word-sized integer data load does
+not ask the CPU to decode a T32 instruction; a T32 instruction
+fetch does not ask the CPU to return an ordinary integer datum.
+
+PART TWO. THE FOUR SEPARATE ROLES OF AN ADDRESS.
+
+First, a DATA ADDRESS is used to read or write a datum of a
+specified width and encoding.
+
+Second, an INSTRUCTION ADDRESS is used in a permitted T32
+instruction-fetch/decode path to obtain an instruction.
+
+Third, a BRANCH TARGET VALUE is a numerical value used by a
+branch to select a later instruction address. In the special
+BX/BLX case its low bit includes an instruction-state tag and
+is not part of the actual Thumb-aligned instruction address.
+
+Fourth, a PC-RELATIVE BASE is the architectural address from
+which an instruction computes a displacement. In common T32
+cases it is the instruction's address plus four, but certain
+literal and address-generation operations align it first.
+
+Although these roles may sometimes be represented by the same
+32-bit bit pattern, they are NOT interchangeable operations.
+
+PART THREE. TWO WAYS OF LOOKING AT THE SAME FOUR BYTES.
+
+Take an illustrative region beginning at virtual address
+0x00004000 with four bytes in increasing address order:
+0x00, 0xBF, 0x70, 0x47.
+
+This example chooses little-endian instruction bytes,
+subject to an actual target manifest that declares the
+relevant encoding and memory interpretation.
+
+If an authorized 32-bit little-endian data load reads
+these four bytes from 0x00004000, the resulting
+data bit pattern is hexadecimal 0x4770BF00.
+
+If T32 instruction fetch begins at the halfword boundary
+0x00004000, the first 16-bit instruction encoding is
+0xBF00, corresponding to a T32 NOP in a compatible
+target encoding. Sequential T32 fetch would then reach
+0x00004002, where halfword 0x4770 is the encoding
+commonly shown as BX LR.
+
+Thus the same four bytes, with the same memory addresses,
+can be one 32-bit datum or two different 16-bit instructions,
+depending on which architectural operation uses them.
+
+This document does not claim that a given process has
+permission to execute from 0x00004000 or that the
+contents of LR point to a safe destination. An NOP
+followed by BX LR is NOT by itself a complete safely
+callable function without a valid runtime entry state,
+executable mapping and permitted return location.
+
+A different choice of first execution address could
+produce an entirely different decode. The bare CPU
+does not store "these bytes were supposed to be code"
+as a semantic tag for each instruction boundary.
+A checked English program must carry or reconstruct
+the intended instruction boundaries independently.
+
+PART FOUR. A TABLE VALUE IS DATA USED BY CONTROL FLOW.
+
+Given TBB or TBH, the CPU performs a data-memory
+read for the table entry even though the overall
+instruction is an instruction that transfers control.
+
+The data value from that table does not become a new
+instruction encoding. It is multiplied by two and
+added to the architecture-defined PC-relative
+branch base to produce the next instruction address.
+
+This is a direct example of data-dependent control flow,
+not a case of the table's own bytes becoming executable
+machine instructions.
+
+A compiler choosing a table branch must prove
+that the index and target are within the declared
+program's permitted sets. TBB/TBH themselves provide
+no high-level array-bounds check merely by being
+named "table" instructions.
+
+PART FIVE. AN INTERPRETER AND A NATIVE CPU EXECUTE DIFFERENT THINGS.
+
+Suppose a byte array contains encoding values for a
+hypothetical instruction language invented by the
+English Major C project.
+
+An interpreter written for ARM may read those bytes
+as ordinary data, test or dispatch on their values,
+and perform ARM operations to implement the abstract
+language's effects. The CPU is executing the
+interpreter's actual ARM machine instructions.
+The interpreted array is NOT thereby ARM machine code.
+
+A native-code generator is different. It writes bytes
+intended to be decoded directly as instructions by
+the physical processor. Moving from generated data
+bytes to CPU fetch of those bytes needs a separately
+authorized execution transition and the operating
+system's permissions and code visibility rules.
+
+A source-code preprocessor is different again:
+it consumes text and produces source or an intermediate
+representation. Text enclosed in an explanatory
+NOTE or WHY block is inert with respect to execution
+under the proposed English Major C source rules.
+Such a block may mention "branch", "register", or
+any assembly mnemonic without granting the operation.
+
+PART SIX. WHY MEMORY PERMISSIONS MUST BE A DECLARED PREMISE.
+
+A virtual-memory page may be mapped readable,
+writable, executable, or subject to other protections
+and operating-system policies. The actual protection
+policy must be established for the target process.
+
+A normal data read from address A, a data write to
+address A, and an instruction fetch from address A
+may have different permission and fault behavior.
+A declaration that address A contains instruction
+bytes does not authorize fetching them.
+
+No right to simultaneously hold an arbitrarily
+writable and executable memory mapping is asserted.
+No permission to remap a page, produce executable
+code on an Android device, call a dynamic loader,
+or change process privilege is implied by this
+first architecture grant.
+
+The operation grant excludes system calls, cache
+maintenance, dynamic code generation and the OS
+facilities required to make those operations safe
+and visible on a real target. A later extension
+must specify those operations explicitly.
+
+PART SEVEN. PHYSICAL CACHES AND PREFETCH ARE NOT SOURCE DATA TYPES.
+
+A virtual instruction fetch might be served by an
+instruction cache. A data load might be served
+by a data cache, other levels of cache, or memory.
+Physical implementations differ. The English source
+may not claim a specific DRAM-to-CPU bus event
+for each architectural load, or that every source-level
+instruction fetch is a separate physical DRAM read.
+
+If software writes new instructions to an address
+and later fetches that address, successful coherent
+visibility depends on the architecture, cache maintenance
+and synchronization protocol and OS permissions.
+The English Major C draft does not yet grant these
+facilities. The fact that a store returned does
+not alone prove that later instruction fetches
+observe the intended new instruction bytes.
+
+Prefetching an instruction does not, on its own,
+mean that the instruction is architecturally
+executed. An incorrectly predicted path does not
+become the program's chosen next instruction
+address merely by having had bytes fetched.
+
+PART EIGHT. ALTERNATIVE LANGUAGE DESIGNS CONSIDERED.
+
+Alternative A: Make code and data one untyped
+addressable collection and allow arbitrary casts
+to and from instruction addresses.
+Potential appeal: matches the superficial appearance
+of ordinary machine memory.
+Objection: hides execution permission, instruction
+state, alignment, decode validity, and cache visibility.
+Decision: NOT automatically permitted.
+
+Alternative B: Keep a source-level distinction
+between ordinary values and executable entry points,
+while lowering both into machine-defined address
+representations where allowed.
+Potential appeal: explicitly captures validation
+requirements and separates table data from code.
+Objection: requires a genuine checked interpretation
+and a way to represent indirect and computed branches.
+Decision: candidate, NOT yet implemented.
+
+Alternative C: Represent machine instruction bytes
+as typed immutable data that a privileged assembler
+or loader separately validates and publishes as
+executable machine code.
+Potential appeal: ties code publication to a
+recorded validation and permission transition.
+Objection: adds OS and cache-coherency boundaries,
+and cannot be implemented under the current grant.
+Decision: candidate for later extensions.
+
+Alternative D: Interpret English Major C operations
+without generating native machine code.
+Potential appeal: can preserve rich long-form operation
+descriptions, traced effects and explicit rejected cases
+without treating author text as arbitrary native code.
+Objection: interpreter correctness and its instruction
+semantics still need separate tests. It executes
+interpreter machine code, not ARM encodings simply
+because they appear as English words.
+Decision: possible initial runtime, not selected.
+
+Alternative E: Use native assembly directly as
+the executable ground truth and produce an
+exhaustive English translation alongside it.
+Potential appeal: matches the project's bottom-up
+goal and preserves the original final-machine target.
+Objection: translation must faithfully account for
+EVERY executed operation and external boundary,
+and cannot manufacture semantics missing from the
+instruction manual or binary evidence.
+Decision: selected initial EXPERIMENTAL METHOD,
+not a complete compiler architecture.
+
+No assertion about a future frontend to Idris,
+preprocessor, interpreter, source grammar or native
+compiler is established by choosing an experimental
+method to inspect assembly.
+
+PART NINE. CHECKABLE EXAMPLES AND FAILURES.
+
+Positive case one: interpret bytes 00 BF 70 47 as
+one 32-bit little-endian data word. Expect the
+data bit pattern 0x4770BF00. No instruction
+is executed by this data load.
+
+Positive case two: starting T32 decoding at
+0x4000, interpret the same bytes as two
+consecutive 16-bit instructions. Expect the
+instruction starting addresses 0x4000 and
+0x4002, conditional on valid executable access.
+No data load is implied by this instruction fetch.
+
+Negative case one: reject a translation that
+calls those bytes ONE 32-bit T32 instruction
+solely because four bytes are contiguous.
+
+Negative case two: reject a translation that
+claims the branch table's byte value was
+executed as machine code when TBB was used.
+
+Negative case three: reject a native-code
+execution claim based only on the existence
+of generated bytes in ordinary writable memory.
+
+Negative case four: reject a translation that
+calls an interpreter's bytecode stream the
+same thing as the CPU's native instruction stream.
+
+Negative case five: reject an English program
+which branches to bytes outside its verified
+entry-point set even when those bytes happen
+to be halfword-aligned and readable.
+
+Negative case six: reject a physical-performance
+claim deriving a particular instruction-cache
+fetch or DRAM transaction from source execution
+without any identified silicon or measurements.
+
+These are REQUIRED FUTURE TESTS, not already
+executed or independently accepted evidence.

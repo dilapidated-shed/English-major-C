@@ -1,0 +1,259 @@
+AUDIT RECEIPT: E000..E7FF BRANCHES AND BE00..BEFF BREAKPOINTS.
+
+Work date in America/Detroit: October 11, 2026 (late evening).
+Job envelope: https://github.com/isomorphisms/flexible-pipes/issues/91
+English Major C review surface:
+https://github.com/dilapidated-shed/English-major-C/pull/3
+
+This receipt records ACTUALLY PERFORMED temporary diagnostic work
+plus source/bitfield reasoning. It is NOT a report of
+executed English Major C programs, a new compiler,
+physical ARM execution, or independent AICI acceptance.
+
+NORMATIVE MACHINE-SPECIFICATION REFERENCE.
+
+ARM DDI 0406C.d, ID040418:
+  A6.2 sixteen-bit Thumb decoding;
+  A8.8.18 B T2: 11100 imm11; outside or last in IT;
+  A8.8.14 BKPT T1: 10111110 imm8;
+  relevant C2/C3 debug configuration and debug events.
+The architecture manual remains authoritative over
+the display preferences of an assembler or debugger.
+
+PINNED FOREIGN DIAGNOSTIC TOOLS.
+
+Host: local Linux x86-64 analysis container.
+Clang: 17.0.0 (Swift LLVM revision
+10999b6d034fe318f3d56c83bddb6572593a8bb0).
+LLVM objdump: LLVM 17.0.0.
+The actual executable binary file hashes and its dynamic
+library closure were NOT captured, so this is not a
+bit-identical future binary toolchain qualification.
+Target selected for source assembly:
+   clang --target=armv7a-none-eabi -mthumb
+Decoder selected for inspection:
+   llvm-objdump --triple=thumbv7-none-eabi -d
+The generated output format was ELF32 little-endian ARM.
+
+Both tools belong to the LLVM family and therefore
+do not provide an independent cross-vendor compiler proof.
+They are foreign diagnostic tools and NOT a maintained
+English Major C ICK/NDK application build stage.
+
+FIRST COMPLETE FINITE DECODE: E000..E7FF.
+
+A temporary .s file used .syntax unified, .arch armv7-a,
+.thumb and literal .hword directives to represent every
+unsigned halfword from 0xE000 through 0xE7FF.
+There were exactly 2048 halfwords, and the source
+placed them in strictly increasing numerical order.
+
+SHA256 of the temporary assembler source:
+2d77c2089543db862b22812e8a403ceae272d3906249a0833aabc9fa44131bec
+
+SHA256 of the produced ELF32 ARM object:
+d8e7854bff43f88ca6a588d3cde785eb3d38d2caef420cf02d3a682ea2edfd29
+
+SHA256 of the resulting decoder text:
+2438bed26877a64a9191156192aa3a356403d048158b4a2c0c40fae12568956e
+
+The temporary disassembler output was parsed as
+2048 address/halfword/branch-target/immediate records.
+For every record a separate bitfield oracle checked:
+  instruction offset equals 2*(halfword - 0xE000);
+  raw decoded halfword equals the requested halfword;
+  the operation class is a two-byte immediate B;
+  encoded imm11 equals halfword minus 0xE000;
+  signed imm11 is imm11 for 0..1023 and
+    imm11-2048 for 1024..2047;
+  displacement in BYTES equals 2*signed imm11;
+  the printed branch target equals instruction
+    address plus FOUR plus displacement.
+
+Observed 2048 matching records and ZERO discrepancies.
+This is a decoder/bitfield check, not a loop that
+EXECUTED 2048 branches on a physical ARM CPU.
+
+Corresponding committed source files:
+  fixtures/armv7-a-t32-unconditional-branch-halfwords.tsv
+  architecture/armv7-a/t32/
+  Every short unconditional branch halfword.english
+
+The TSV records each halfword's calculated target
+assuming virtual instruction address A=0x1000.
+That A is an explicit numerical example, not
+the transient object's actual loaded address.
+
+Sign-boundary example data checked:
+  E000 -> displacement 0,      target 0x1004.
+  E3FF -> displacement +2046,  target 0x1802.
+  E400 -> displacement -2048,  target 0x0804.
+  E7FE -> displacement -4,     target 0x1000.
+  E7FF -> displacement -2,     target 0x1002.
+
+In particular, the E7FF branch TARGET happens
+to equal the sequential successor A+2,
+but the native branch effect can still be taken.
+E000 with zero displacement selects A+4,
+NOT the ordinary two-byte successor A+2.
+
+SECOND COMPLETE FINITE DECODE: BE00..BEFF.
+
+A different temporary .s file listed all halfwords
+0xBE00 through 0xBEFF, exactly 256 encodings.
+The same clang target and LLVM objdump decoder
+were used on its independently produced object.
+
+SHA256 of assembler source:
+57fc7d19489ea00a6c736f664642dfadaee891f5a29939de9f4752d385050909
+
+SHA256 of produced ELF32 object:
+1978e93d5abce52e22175adf436c14663b5f3314081e123f2aeea2316a509077
+
+SHA256 of decoder text:
+ef7169b90bcff08ac21bf81e0fa597074ffac8c0f20228b6a77652d91e15caea
+
+A diagnostic parser checked the full output:
+  256 unique decoded 16-bit instruction records;
+  each offset was 2*(halfword - 0xBE00);
+  every decoded instruction was BKPT T1;
+  every displayed immediate equalled the
+  halfword's unsigned lowest eight bits;
+  no mismatch was observed.
+
+This is not 256 actual debugger events.
+The BKPT instruction is decoded but UNGRANTED
+as an English Major C executable operation.
+Its immediate is not a branch displacement.
+The debugger/halt/exception behavior depends on
+the real target processor and debug environment.
+
+Corresponding committed files:
+  fixtures/armv7-a-t32-breakpoint-halfwords.tsv
+  architecture/armv7-a/t32/
+  Every breakpoint halfword and its
+  conditional-execution exception.english
+
+The BKPT instruction is UNCONDITIONAL EVEN INSIDE
+an IT block. A false IT predicate must not be
+assumed to suppress its debug event.
+No BKPT was intentionally run on ARM hardware
+to test this; the rule comes from the pinned
+architectural reference.
+
+THIRD DIAGNOSTIC: THE SAME E000 BYTES IN AND OUT OF IT.
+
+Temporary assembly:
+   .syntax unified
+   .arch armv7-a
+   .thumb
+   .text
+   .global branch_inside_it
+   .thumb_func
+   branch_inside_it:
+   .hword 0x2800,0xBF08,0xE000,0x2103,0x2204,0xDF03
+
+SHA256 of source:
+9331e143b1814d5a6842c6d48ebada319fd9ecd5593a5bc5491f147a02b6c2bd
+
+SHA256 of object:
+892a24dec60a2f7367e4fc9adb24805d6f93dc059aa97e18cf6418a990799061
+
+SHA256 of decoded text:
+84e0b102bfb74ff6772e9b53f5b3874e4ef37190de5386e4a312376c2df36018
+
+The independent diagnostic decoded:
+ offset 0  2800  CMP R0,#0
+ offset 2  BF08  IT EQ, one following slot
+ offset 4  E000  B, displayed as BEQ under IT context
+ offset 6  2103  MOVS R1,#3
+ offset 8  2204  MOVS R2,#4
+ offset A  DF03  SVC #3
+
+In the all-E000..E7FF diagnostic, the exact halfword
+E000 is instead printed "B". Its raw encoding has
+NO condition-code field. The display "BEQ" in the
+short program results from surrounding ITSTATE,
+not mutation of E000 to a D0xx conditional branch.
+
+A temporary state calculation used only the
+specific observed halfwords and the source-level
+CMP, IT EQ, B T2, MOVS and ungranted-SVC semantics.
+
+Given R0=0, it visited:
+   0,2,4,8,A (stop before SVC)
+   R1 remains unknown; R2 becomes 4.
+
+Given R0=7, it visited:
+   0,2,4,6,8,A (stop before SVC)
+   R1 becomes 3; R2 becomes 4.
+
+In both cases the final known flags are
+N=0,Z=0,C=1,V=0; other unassigned registers
+remain unknown, not zero. The temporary
+state calculation matched these expectations.
+There was no actual CPU execution, OS exception
+handling or syscall execution.
+
+Corresponding committed machine-byte example:
+   examples/The same branch bytes acquire
+   a condition from If Then state.english
+
+KNOWN NEGATIVE CASES AND REMAINING OBLIGATIONS.
+
+Required future independent checking must reject:
+  - treating E000 as a four-byte Thumb instruction;
+  - treating E400's encoded displacement as positive;
+  - reading PC base A+2 instead of A+4;
+  - writing LR as though B were BL;
+  - treating E000 inside last IT slot as necessarily
+    unconditional despite a false IT predicate;
+  - using B T2 in an early (non-last) IT slot;
+  - replacing E000 by a T1 Dxxx conditional B inside IT;
+  - interpreting the disassembler spelling "BEQ"
+    as evidence that a condition field appeared in E000;
+  - interpreting E7FF as NO branch solely because
+    its branch target numerically equals A+2;
+  - claiming that a valid encoded target is necessarily
+    a mapped executable instruction entry;
+  - treating BKPT as an ordinary register write,
+    successful fall-through, UDF, or SVC;
+  - pretending a false IT predicate suppresses BKPT;
+  - manufacturing a guaranteed POSIX signal or
+    hardware debugger response without target state;
+  - claiming clang+LLVM agreement is independent
+    AICI acceptance or ARM physical execution.
+
+All test cases above are requirements or limited
+temporary diagnostic arithmetic checks, not
+accepted first-party executable language tests.
+
+CUMULATIVE DECODE COVERAGE.
+
+Before this slice the BA00..BAFF (256),
+BF00..BFFF (256) and D000..DFFF (4096)
+subtrees accounted for 4608 distinct
+numerical 16-bit halfword values.
+
+E000..E7FF adds 2048.
+BE00..BEFF adds 256.
+These ranges do NOT intersect.
+
+The cumulative five-subtree count is
+4608+2048+256=6912 distinct 16-bit
+halfword values classified at the
+instruction-decoding level, not a claim
+that those are the only ARMv7-A T32
+instructions or that every context is
+proved executable. The number of
+long-named, explicitly permitted
+English Major C operation families
+remains unchanged at 72.
+
+The complete ARM DDI 0406C.d instruction
+space, including most other sixteen-bit
+classes and four-byte T32 combinations,
+remains open. The separate AICI/Flexible Pipes
+merge gates remain required.
+
+END OF AUDIT RECEIPT.

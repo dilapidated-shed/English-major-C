@@ -1,0 +1,1173 @@
+Machine-level English reading of dqrls.x86-64.disasm.txt
+===================================================
+
+Source: ../dqrls.x86-64.disasm.txt
+Historical x86-64 ELF disassembly; instruction addresses in the standalone
+object are not absolute linked addresses. This is a first-pass annotated
+concordance of printed instruction starts and encodings; individual prose
+is NOT a verified state-transformer implementation.
+
+Every INSTRUCTION line is machine-byte evidence followed by a long English
+operation name and an operand-specific explanatory sentence. A relocation
+is included on the same record. In normal non-branching execution the next
+execution index is the byte address of the following instruction, not the
+number of the next displayed line. See accompanying machine-state document.
+
+No claim is made that all displayed branches were executed or that code
+inside external shared libraries is present here.
+
+INSTRUCTION 0001 | 0x0 | 41 57 | push   r15
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of r15, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x2 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0002 | 0x2 | 31 c0 | xor    eax,eax
+  Section or entry point: dqrls_.
+  Long operation: Write the bitwise exclusive-or result and update logic condition flags.
+  Detailed first-pass effect: The same register eax is both operands: write zero to the encoded-width destination (and zero-extend a 32-bit register write), while updating zero/sign/parity flags, clearing carry/overflow and leaving auxiliary-carry undefined.
+  Sequential successor if not otherwise redirected or faulting: 0x4 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0003 | 0x4 | 49 89 cf | mov    r15,rcx
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rcx at the width indicated by this encoding and write the resulting bit pattern to r15. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x7 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0004 | 0x7 | 48 89 d1 | mov    rcx,rdx
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rdx at the width indicated by this encoding and write the resulting bit pattern to rcx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xa (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0005 | 0xa | 41 56 | push   r14
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of r14, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0xc (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0006 | 0xc | 41 55 | push   r13
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of r13, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0xe (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0007 | 0xe | 4d 89 c5 | mov    r13,r8
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r8 at the width indicated by this encoding and write the resulting bit pattern to r13. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x11 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0008 | 0x11 | 41 54 | push   r12
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of r12, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x13 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0009 | 0x13 | 49 89 f4 | mov    r12,rsi
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rsi at the width indicated by this encoding and write the resulting bit pattern to r12. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x16 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0010 | 0x16 | 55 | push   rbp
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rbp, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x17 (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0011 | 0x17 | 53 | push   rbx
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rbx, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x18 (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0012 | 0x18 | 48 83 ec 60 | sub    rsp,0x60
+  Section or entry point: dqrls_.
+  Long operation: Subtract fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rsp and 0x60; subtract source from destination at the destination's encoded integer width and store the low-width result in rsp; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x1c (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0013 | 0x1c | 48 63 2e | movsxd rbp,DWORD PTR [rsi]
+  Section or entry point: dqrls_.
+  Long operation: Extend a signed four-byte integer into an eight-byte register.
+  Detailed first-pass effect: Read a signed 32-bit integer from DWORD PTR [rsi], copy its sign into the high bits, and write the 64-bit result to rbp; do not change arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x1f (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0014 | 0x1f | 48 63 32 | movsxd rsi,DWORD PTR [rdx]
+  Section or entry point: dqrls_.
+  Long operation: Extend a signed four-byte integer into an eight-byte register.
+  Detailed first-pass effect: Read a signed 32-bit integer from DWORD PTR [rdx], copy its sign into the high bits, and write the 64-bit result to rsi; do not change arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x22 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0015 | 0x22 | 48 89 54 24 38 | mov    QWORD PTR [rsp+0x38],rdx
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rdx at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x38]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x27 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0016 | 0x27 | 48 8b 9c 24 a0 00 00 00 | mov    rbx,QWORD PTR [rsp+0xa0]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xa0] at the width indicated by this encoding and write the resulting bit pattern to rbx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x2f (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0017 | 0x2f | 4c 89 e2 | mov    rdx,r12
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r12 at the width indicated by this encoding and write the resulting bit pattern to rdx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x32 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0018 | 0x32 | 48 85 ed | test   rbp,rbp
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of rbp with rbp only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x35 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0019 | 0x35 | 4c 89 44 24 30 | mov    QWORD PTR [rsp+0x30],r8
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r8 at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x30]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x3a (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0020 | 0x3a | 4d 89 c8 | mov    r8,r9
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r9 at the width indicated by this encoding and write the resulting bit pattern to r8. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x3d (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0021 | 0x3d | 48 0f 48 e8 | cmovs  rbp,rax
+  Section or entry point: dqrls_.
+  Long operation: Copy data only if sign flag is set (SF=1).
+  Detailed first-pass effect: Evaluate whether the sign flag is set (SF=1). The operand value from rax is made available; if the condition passes copy it to rbp, otherwise leave that destination unchanged. A memory source can be read (and fault) even when the condition is false. Arithmetic flags are not changed.
+  Sequential successor if not otherwise redirected or faulting: 0x41 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0022 | 0x41 | 48 85 f6 | test   rsi,rsi
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of rsi with rsi only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x44 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0023 | 0x44 | 48 89 7c 24 08 | mov    QWORD PTR [rsp+0x8],rdi
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rdi at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x8]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x49 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0024 | 0x49 | 48 0f 49 c6 | cmovns rax,rsi
+  Section or entry point: dqrls_.
+  Long operation: Copy data only if sign flag is clear (SF=0).
+  Detailed first-pass effect: Evaluate whether the sign flag is clear (SF=0). The operand value from rsi is made available; if the condition passes copy it to rax, otherwise leave that destination unchanged. A memory source can be read (and fault) even when the condition is false. Arithmetic flags are not changed.
+  Sequential successor if not otherwise redirected or faulting: 0x4d (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0025 | 0x4d | 4c 89 e6 | mov    rsi,r12
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r12 at the width indicated by this encoding and write the resulting bit pattern to rsi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x50 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0026 | 0x50 | 48 89 44 24 40 | mov    QWORD PTR [rsp+0x40],rax
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rax at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x40]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x55 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0027 | 0x55 | 49 89 c6 | mov    r14,rax
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rax at the width indicated by this encoding and write the resulting bit pattern to r14. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x58 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0028 | 0x58 | ff b4 24 c8 00 00 00 | push   QWORD PTR [rsp+0xc8]
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of QWORD PTR [rsp+0xc8], including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x5f (7 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0029 | 0x5f | ff b4 24 c0 00 00 00 | push   QWORD PTR [rsp+0xc0]
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of QWORD PTR [rsp+0xc0], including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x66 (7 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0030 | 0x66 | ff b4 24 d0 00 00 00 | push   QWORD PTR [rsp+0xd0]
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of QWORD PTR [rsp+0xd0], including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x6d (7 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0031 | 0x6d | 4c 8b 8c 24 c8 00 00 00 | mov    r9,QWORD PTR [rsp+0xc8]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xc8] at the width indicated by this encoding and write the resulting bit pattern to r9. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x75 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0032 | 0x75 | e8 00 00 00 00 | call   7a <dqrls_+0x7a>
+  Section or entry point: dqrls_.
+  Long operation: Save the return execution index and transfer to the called routine.
+  Detailed first-pass effect: Save byte address 0x7a as the machine return address by allocating a stack slot, then set the execution index to the call target 7a <dqrls_+0x7a>. A pending relocation may replace the printed object target; callee effects and external-library bodies are not supplied by this instruction alone.
+  Sequential successor if not otherwise redirected or faulting: 0x7a (5 bytes).
+  Link-time relocation: 76: R_X86_64_PLT32 dqrdc2_-0x4.
+
+INSTRUCTION 0033 | 0x7a | 48 8b 84 24 c8 00 00 00 | mov    rax,QWORD PTR [rsp+0xc8]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xc8] at the width indicated by this encoding and write the resulting bit pattern to rax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x82 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0034 | 0x82 | 48 83 c4 20 | add    rsp,0x20
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rsp and 0x20; add source to destination at the destination's encoded integer width and store the low-width result in rsp; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x86 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0035 | 0x86 | 8b 00 | mov    eax,DWORD PTR [rax]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [rax] at the width indicated by this encoding and write the resulting bit pattern to eax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x88 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0036 | 0x88 | 85 c0 | test   eax,eax
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of eax with eax only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x8a (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0037 | 0x8a | 0f 8e 3d 01 00 00 | jle    1cd <dqrls_+0x1cd>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is set or sign differs from overflow (signed less or equal).
+  Detailed first-pass effect: Evaluate zero flag is set or sign differs from overflow (signed less or equal) (ZF=1 or SF≠OF); if true replace the execution index with target 1cd <dqrls_+0x1cd>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x90 (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0038 | 0x90 | 41 8b 55 00 | mov    edx,DWORD PTR [r13+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [r13+0x0] at the width indicated by this encoding and write the resulting bit pattern to edx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x94 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0039 | 0x94 | 85 d2 | test   edx,edx
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of edx with edx only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x96 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0040 | 0x96 | 0f 8e b9 00 00 00 | jle    155 <dqrls_+0x155>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is set or sign differs from overflow (signed less or equal).
+  Detailed first-pass effect: Evaluate zero flag is set or sign differs from overflow (signed less or equal) (ZF=1 or SF≠OF); if true replace the execution index with target 155 <dqrls_+0x155>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x9c (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0041 | 0x9c | 4a 8d 04 f5 00 00 00 00 | lea    rax,[r14*8+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [r14*8+0x0] using the original register/address components and instruction-length-adjusted RIP if present; write that address to rax without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0xa4 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0042 | 0xa4 | 89 54 24 1c | mov    DWORD PTR [rsp+0x1c],edx
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read edx at the width indicated by this encoding and write the resulting bit pattern to DWORD PTR [rsp+0x1c]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xa8 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0043 | 0xa8 | 48 c1 e5 03 | shl    rbp,0x3
+  Section or entry point: dqrls_.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rbp left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rbp. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
+  Sequential successor if not otherwise redirected or faulting: 0xac (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0044 | 0xac | 4d 89 f9 | mov    r9,r15
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r15 at the width indicated by this encoding and write the resulting bit pattern to r9. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xaf (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0045 | 0xaf | 48 89 44 24 08 | mov    QWORD PTR [rsp+0x8],rax
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rax at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x8]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xb4 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0046 | 0xb4 | 48 8d 44 24 4c | lea    rax,[rsp+0x4c]
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [rsp+0x4c] using the original register/address components and instruction-length-adjusted RIP if present; write that address to rax without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0xb9 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0047 | 0xb9 | 4c 8b ac 24 a0 00 00 00 | mov    r13,QWORD PTR [rsp+0xa0]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xa0] at the width indicated by this encoding and write the resulting bit pattern to r13. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xc1 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0048 | 0xc1 | 41 bf 01 00 00 00 | mov    r15d,0x1
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read 0x1 at the width indicated by this encoding and write the resulting bit pattern to r15d. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xc7 (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0049 | 0xc7 | 4c 8b b4 24 90 00 00 00 | mov    r14,QWORD PTR [rsp+0x90]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x90] at the width indicated by this encoding and write the resulting bit pattern to r14. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xcf (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0050 | 0xcf | 48 89 44 24 10 | mov    QWORD PTR [rsp+0x10],rax
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rax at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x10]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xd4 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0051 | 0xd4 | 4c 89 64 24 20 | mov    QWORD PTR [rsp+0x20],r12
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r12 at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rsp+0x20]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xd9 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0052 | 0xd9 | 4d 89 f4 | mov    r12,r14
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r14 at the width indicated by this encoding and write the resulting bit pattern to r12. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xdc (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0053 | 0xdc | 49 89 ee | mov    r14,rbp
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rbp at the width indicated by this encoding and write the resulting bit pattern to r14. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xdf (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0054 | 0xdf | 4c 89 ed | mov    rbp,r13
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r13 at the width indicated by this encoding and write the resulting bit pattern to rbp. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xe2 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0055 | 0xe2 | 4d 89 cd | mov    r13,r9
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r9 at the width indicated by this encoding and write the resulting bit pattern to r13. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xe5 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0056 | 0xe5 | 66 66 2e 0f 1f 84 00 00 00 00 00 | data16 cs nop WORD PTR [rax+rax*1+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Advance past an instruction used for padding without useful computation.
+  Detailed first-pass effect: Consume this complete 11-byte instruction as a no-operation. Instruction prefixes used for alignment are not separate operations. No ordinary registers or data-memory values are changed on normal completion.
+  Sequential successor if not otherwise redirected or faulting: 0xf0 (11 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0057 | 0xf0 | 48 83 ec 08 | sub    rsp,0x8
+  Section or entry point: dqrls_.
+  Long operation: Subtract fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rsp and 0x8; subtract source from destination at the destination's encoded integer width and store the low-width result in rsp; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0xf4 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0058 | 0xf4 | 48 8d 05 00 00 00 00 | lea    rax,[rip+0x0]        # fb <dqrls_+0xfb>
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [rip+0x0]        # fb <dqrls_+0xfb> using the original register/address components and instruction-length-adjusted RIP if present; write that address to rax without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0xfb (7 bytes).
+  Link-time relocation: f7: R_X86_64_PC32 .rodata-0x4.
+
+INSTRUCTION 0059 | 0xfb | 4d 89 e9 | mov    r9,r13
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r13 at the width indicated by this encoding and write the resulting bit pattern to r9. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0xfe (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0060 | 0xfe | 41 83 c7 01 | add    r15d,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current r15d and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in r15d; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x102 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0061 | 0x102 | ff 74 24 18 | push   QWORD PTR [rsp+0x18]
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of QWORD PTR [rsp+0x18], including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x106 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0062 | 0x106 | 4d 01 f5 | add    r13,r14
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current r13 and r14; add source to destination at the destination's encoded integer width and store the low-width result in r13; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x109 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0063 | 0x109 | 50 | push   rax
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rax, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x10a (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0064 | 0x10a | 53 | push   rbx
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rbx, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x10b (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0065 | 0x10b | 53 | push   rbx
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rbx, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x10c (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0066 | 0x10c | 41 54 | push   r12
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of r12, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x10e (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0067 | 0x10e | 55 | push   rbp
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rbp, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x10f (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0068 | 0x10f | 4c 01 f5 | add    rbp,r14
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rbp and r14; add source to destination at the destination's encoded integer width and store the low-width result in rbp; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x112 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0069 | 0x112 | 53 | push   rbx
+  Section or entry point: dqrls_.
+  Long operation: Allocate an eight-byte stack slot and save a value.
+  Detailed first-pass effect: Evaluate the complete original value of rbx, including any source memory address using the pre-decrement stack pointer. Decrease RSP by 8; store that eight-byte value at memory address RSP. The instruction can fault. Flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x113 (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0070 | 0x113 | 48 8b 74 24 60 | mov    rsi,QWORD PTR [rsp+0x60]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x60] at the width indicated by this encoding and write the resulting bit pattern to rsi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x118 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0071 | 0x118 | 4c 01 f3 | add    rbx,r14
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rbx and r14; add source to destination at the destination's encoded integer width and store the low-width result in rbx; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x11b (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0072 | 0x11b | 4c 8b 84 24 f8 00 00 00 | mov    r8,QWORD PTR [rsp+0xf8]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xf8] at the width indicated by this encoding and write the resulting bit pattern to r8. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x123 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0073 | 0x123 | 48 8b 8c 24 e8 00 00 00 | mov    rcx,QWORD PTR [rsp+0xe8]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xe8] at the width indicated by this encoding and write the resulting bit pattern to rcx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x12b (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0074 | 0x12b | 48 8b 7c 24 40 | mov    rdi,QWORD PTR [rsp+0x40]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x40] at the width indicated by this encoding and write the resulting bit pattern to rdi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x130 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0075 | 0x130 | 48 89 f2 | mov    rdx,rsi
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rsi at the width indicated by this encoding and write the resulting bit pattern to rdx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x133 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0076 | 0x133 | e8 00 00 00 00 | call   138 <dqrls_+0x138>
+  Section or entry point: dqrls_.
+  Long operation: Save the return execution index and transfer to the called routine.
+  Detailed first-pass effect: Save byte address 0x138 as the machine return address by allocating a stack slot, then set the execution index to the call target 138 <dqrls_+0x138>. A pending relocation may replace the printed object target; callee effects and external-library bodies are not supplied by this instruction alone.
+  Sequential successor if not otherwise redirected or faulting: 0x138 (5 bytes).
+  Link-time relocation: 134: R_X86_64_PLT32 dqrsl_-0x4.
+
+INSTRUCTION 0077 | 0x138 | 48 8b 44 24 48 | mov    rax,QWORD PTR [rsp+0x48]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x48] at the width indicated by this encoding and write the resulting bit pattern to rax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x13d (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0078 | 0x13d | 48 83 c4 40 | add    rsp,0x40
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rsp and 0x40; add source to destination at the destination's encoded integer width and store the low-width result in rsp; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x141 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0079 | 0x141 | 49 01 c4 | add    r12,rax
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current r12 and rax; add source to destination at the destination's encoded integer width and store the low-width result in r12; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x144 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0080 | 0x144 | 44 39 7c 24 1c | cmp    DWORD PTR [rsp+0x1c],r15d
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of r15d from the value of DWORD PTR [rsp+0x1c] at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x149 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0081 | 0x149 | 7d a5 | jge    f0 <dqrls_+0xf0>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if sign equals overflow (signed greater or equal).
+  Detailed first-pass effect: Evaluate sign equals overflow (signed greater or equal) (SF=OF); if true replace the execution index with target f0 <dqrls_+0xf0>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x14b (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0082 | 0x14b | 48 8b 84 24 a8 00 00 00 | mov    rax,QWORD PTR [rsp+0xa8]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0xa8] at the width indicated by this encoding and write the resulting bit pattern to rax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x153 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0083 | 0x153 | 8b 00 | mov    eax,DWORD PTR [rax]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [rax] at the width indicated by this encoding and write the resulting bit pattern to eax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x155 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0084 | 0x155 | 48 8b 7c 24 30 | mov    rdi,QWORD PTR [rsp+0x30]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x30] at the width indicated by this encoding and write the resulting bit pattern to rdi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x15a (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0085 | 0x15a | 83 c0 01 | add    eax,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current eax and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in eax; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x15d (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0086 | 0x15d | 44 8b 0f | mov    r9d,DWORD PTR [rdi]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [rdi] at the width indicated by this encoding and write the resulting bit pattern to r9d. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x160 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0087 | 0x160 | 44 39 c8 | cmp    eax,r9d
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of r9d from the value of eax at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x163 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0088 | 0x163 | 7f 59 | jg     1be <dqrls_+0x1be>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is clear and sign equals overflow (signed greater).
+  Detailed first-pass effect: Evaluate zero flag is clear and sign equals overflow (signed greater) (ZF=0 and SF=OF); if true replace the execution index with target 1be <dqrls_+0x1be>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x165 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0089 | 0x165 | 48 8b 7c 24 28 | mov    rdi,QWORD PTR [rsp+0x28]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x28] at the width indicated by this encoding and write the resulting bit pattern to rdi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x16a (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0090 | 0x16a | 48 8b 4c 24 38 | mov    rcx,QWORD PTR [rsp+0x38]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x38] at the width indicated by this encoding and write the resulting bit pattern to rcx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x16f (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0091 | 0x16f | 8b 17 | mov    edx,DWORD PTR [rdi]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [rdi] at the width indicated by this encoding and write the resulting bit pattern to edx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x171 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0092 | 0x171 | 48 63 f8 | movsxd rdi,eax
+  Section or entry point: dqrls_.
+  Long operation: Extend a signed four-byte integer into an eight-byte register.
+  Detailed first-pass effect: Read a signed 32-bit integer from eax, copy its sign into the high bits, and write the 64-bit result to rdi; do not change arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x174 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0093 | 0x174 | 48 8b 84 24 90 00 00 00 | mov    rax,QWORD PTR [rsp+0x90]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x90] at the width indicated by this encoding and write the resulting bit pattern to rax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x17c (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0094 | 0x17c | 48 c1 e1 03 | shl    rcx,0x3
+  Section or entry point: dqrls_.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rcx left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rcx. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
+  Sequential successor if not otherwise redirected or faulting: 0x180 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0095 | 0x180 | 4c 8d 44 f8 f8 | lea    r8,[rax+rdi*8-0x8]
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [rax+rdi*8-0x8] using the original register/address components and instruction-length-adjusted RIP if present; write that address to r8 without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x185 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0096 | 0x185 | 8d 72 01 | lea    esi,[rdx+0x1]
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [rdx+0x1] using the original register/address components and instruction-length-adjusted RIP if present; write that address to esi without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x188 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0097 | 0x188 | 85 d2 | test   edx,edx
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of edx with edx only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x18a (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0098 | 0x18a | 0f 8e b9 00 00 00 | jle    249 <dqrls_+0x249>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is set or sign differs from overflow (signed less or equal).
+  Detailed first-pass effect: Evaluate zero flag is set or sign differs from overflow (signed less or equal) (ZF=1 or SF≠OF); if true replace the execution index with target 249 <dqrls_+0x249>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x190 (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0099 | 0x190 | 4c 89 c2 | mov    rdx,r8
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r8 at the width indicated by this encoding and write the resulting bit pattern to rdx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x193 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0100 | 0x193 | b8 01 00 00 00 | mov    eax,0x1
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read 0x1 at the width indicated by this encoding and write the resulting bit pattern to eax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x198 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0101 | 0x198 | 0f 1f 84 00 00 00 00 00 | nop    DWORD PTR [rax+rax*1+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Advance past an instruction used for padding without useful computation.
+  Detailed first-pass effect: Consume this complete 8-byte instruction as a no-operation. Instruction prefixes used for alignment are not separate operations. No ordinary registers or data-memory values are changed on normal completion.
+  Sequential successor if not otherwise redirected or faulting: 0x1a0 (8 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0102 | 0x1a0 | 83 c0 01 | add    eax,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current eax and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in eax; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x1a3 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0103 | 0x1a3 | 48 c7 02 00 00 00 00 | mov    QWORD PTR [rdx],0x0
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read 0x0 at the width indicated by this encoding and write the resulting bit pattern to QWORD PTR [rdx]. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x1aa (7 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0104 | 0x1aa | 48 01 ca | add    rdx,rcx
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdx and rcx; add source to destination at the destination's encoded integer width and store the low-width result in rdx; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x1ad (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0105 | 0x1ad | 39 f0 | cmp    eax,esi
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of esi from the value of eax at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x1af (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0106 | 0x1af | 75 ef | jne    1a0 <dqrls_+0x1a0>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is clear.
+  Detailed first-pass effect: Evaluate zero flag is clear (ZF=0); if true replace the execution index with target 1a0 <dqrls_+0x1a0>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x1b1 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0107 | 0x1b1 | 48 83 c7 01 | add    rdi,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdi and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in rdi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x1b5 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0108 | 0x1b5 | 49 83 c0 08 | add    r8,0x8
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current r8 and 0x8; add source to destination at the destination's encoded integer width and store the low-width result in r8; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x1b9 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0109 | 0x1b9 | 41 39 f9 | cmp    r9d,edi
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of edi from the value of r9d at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x1bc (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0110 | 0x1bc | 7d d2 | jge    190 <dqrls_+0x190>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if sign equals overflow (signed greater or equal).
+  Detailed first-pass effect: Evaluate sign equals overflow (signed greater or equal) (SF=OF); if true replace the execution index with target 190 <dqrls_+0x190>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x1be (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0111 | 0x1be | 48 83 c4 58 | add    rsp,0x58
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rsp and 0x58; add source to destination at the destination's encoded integer width and store the low-width result in rsp; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x1c2 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0112 | 0x1c2 | 5b | pop    rbx
+  Section or entry point: dqrls_.
+  Long operation: Restore a value from the top eight-byte stack slot.
+  Detailed first-pass effect: Read the eight-byte value stored at memory address RSP; advance RSP by 8; copy the saved value into rbx. This captured form uses a normal register destination; arithmetic flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x1c3 (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0113 | 0x1c3 | 5d | pop    rbp
+  Section or entry point: dqrls_.
+  Long operation: Restore a value from the top eight-byte stack slot.
+  Detailed first-pass effect: Read the eight-byte value stored at memory address RSP; advance RSP by 8; copy the saved value into rbp. This captured form uses a normal register destination; arithmetic flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x1c4 (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0114 | 0x1c4 | 41 5c | pop    r12
+  Section or entry point: dqrls_.
+  Long operation: Restore a value from the top eight-byte stack slot.
+  Detailed first-pass effect: Read the eight-byte value stored at memory address RSP; advance RSP by 8; copy the saved value into r12. This captured form uses a normal register destination; arithmetic flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x1c6 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0115 | 0x1c6 | 41 5d | pop    r13
+  Section or entry point: dqrls_.
+  Long operation: Restore a value from the top eight-byte stack slot.
+  Detailed first-pass effect: Read the eight-byte value stored at memory address RSP; advance RSP by 8; copy the saved value into r13. This captured form uses a normal register destination; arithmetic flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x1c8 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0116 | 0x1c8 | 41 5e | pop    r14
+  Section or entry point: dqrls_.
+  Long operation: Restore a value from the top eight-byte stack slot.
+  Detailed first-pass effect: Read the eight-byte value stored at memory address RSP; advance RSP by 8; copy the saved value into r14. This captured form uses a normal register destination; arithmetic flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x1ca (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0117 | 0x1ca | 41 5f | pop    r15
+  Section or entry point: dqrls_.
+  Long operation: Restore a value from the top eight-byte stack slot.
+  Detailed first-pass effect: Read the eight-byte value stored at memory address RSP; advance RSP by 8; copy the saved value into r15. This captured form uses a normal register destination; arithmetic flags are unchanged.
+  Sequential successor if not otherwise redirected or faulting: 0x1cc (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0118 | 0x1cc | c3 | ret
+  Section or entry point: dqrls_.
+  Long operation: Transfer execution back to the address stored on the call stack.
+  Detailed first-pass effect: Read an eight-byte return address from the stack, release the slot by advancing RSP, and replace the execution index with that address (subject to platform control-flow checks and faults). This is not sequential instruction advancement.
+  Sequential successor if not otherwise redirected or faulting: 0x1cd (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0119 | 0x1cd | 41 8b 0c 24 | mov    ecx,DWORD PTR [r12]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [r12] at the width indicated by this encoding and write the resulting bit pattern to ecx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x1d1 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0120 | 0x1d1 | 85 c9 | test   ecx,ecx
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of ecx with ecx only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x1d3 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0121 | 0x1d3 | 7e 80 | jle    155 <dqrls_+0x155>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is set or sign differs from overflow (signed less or equal).
+  Detailed first-pass effect: Evaluate zero flag is set or sign differs from overflow (signed less or equal) (ZF=1 or SF≠OF); if true replace the execution index with target 155 <dqrls_+0x155>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x1d5 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0122 | 0x1d5 | 48 8b 7c 24 28 | mov    rdi,QWORD PTR [rsp+0x28]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read QWORD PTR [rsp+0x28] at the width indicated by this encoding and write the resulting bit pattern to rdi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x1da (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0123 | 0x1da | 44 8d 41 01 | lea    r8d,[rcx+0x1]
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [rcx+0x1] using the original register/address components and instruction-length-adjusted RIP if present; write that address to r8d without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x1de (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0124 | 0x1de | 48 c1 e5 03 | shl    rbp,0x3
+  Section or entry point: dqrls_.
+  Long operation: Shift a 64-bit register left with zero fill and specify all defined and undefined flags.
+  Detailed first-pass effect: Mask the immediate count 0x3 with 0x3f; effective count is 3. From the pre-instruction register bits, shift the original 64-bit value of rbp left 3, discarding high bits and inserting low zero bits. Write the low 64-bit result to rbp. CF becomes original bit 61 (bit 0 is least significant), shifted out on the final step; SF is the result sign bit, ZF indicates zero result, PF is even parity of the low byte, AF is undefined and OF is undefined for this count greater than one. An effective count of zero would preserve the destination and all flags, but this instruction has nonzero effective count.
+  Sequential successor if not otherwise redirected or faulting: 0x1e2 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0125 | 0x1e2 | 31 f6 | xor    esi,esi
+  Section or entry point: dqrls_.
+  Long operation: Write the bitwise exclusive-or result and update logic condition flags.
+  Detailed first-pass effect: The same register esi is both operands: write zero to the encoded-width destination (and zero-extend a 32-bit register write), while updating zero/sign/parity flags, clearing carry/overflow and leaving auxiliary-carry undefined.
+  Sequential successor if not otherwise redirected or faulting: 0x1e4 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0126 | 0x1e4 | 8b 17 | mov    edx,DWORD PTR [rdi]
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read DWORD PTR [rdi] at the width indicated by this encoding and write the resulting bit pattern to edx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x1e6 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0127 | 0x1e6 | bf 01 00 00 00 | mov    edi,0x1
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read 0x1 at the width indicated by this encoding and write the resulting bit pattern to edi. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x1eb (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0128 | 0x1eb | 8d 4a 01 | lea    ecx,[rdx+0x1]
+  Section or entry point: dqrls_.
+  Long operation: Calculate a byte address without reading the memory at that address.
+  Detailed first-pass effect: Calculate the effective address expressed by [rdx+0x1] using the original register/address components and instruction-length-adjusted RIP if present; write that address to ecx without dereferencing memory or changing arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x1ee (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0129 | 0x1ee | 85 d2 | test   edx,edx
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of edx with edx only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x1f0 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0130 | 0x1f0 | 0f 8e 5f ff ff ff | jle    155 <dqrls_+0x155>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is set or sign differs from overflow (signed less or equal).
+  Detailed first-pass effect: Evaluate zero flag is set or sign differs from overflow (signed less or equal) (ZF=1 or SF≠OF); if true replace the execution index with target 155 <dqrls_+0x155>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x1f6 (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0131 | 0x1f6 | 66 2e 0f 1f 84 00 00 00 00 00 | cs nop WORD PTR [rax+rax*1+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Advance past an instruction used for padding without useful computation.
+  Detailed first-pass effect: Consume this complete 10-byte instruction as a no-operation. Instruction prefixes used for alignment are not separate operations. No ordinary registers or data-memory values are changed on normal completion.
+  Sequential successor if not otherwise redirected or faulting: 0x200 (10 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0132 | 0x200 | 48 89 f2 | mov    rdx,rsi
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read rsi at the width indicated by this encoding and write the resulting bit pattern to rdx. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x203 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0133 | 0x203 | 41 b9 01 00 00 00 | mov    r9d,0x1
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read 0x1 at the width indicated by this encoding and write the resulting bit pattern to r9d. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x209 (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0134 | 0x209 | 66 66 2e 0f 1f 84 00 00 00 00 00 | data16 cs nop WORD PTR [rax+rax*1+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Advance past an instruction used for padding without useful computation.
+  Detailed first-pass effect: Consume this complete 11-byte instruction as a no-operation. Instruction prefixes used for alignment are not separate operations. No ordinary registers or data-memory values are changed on normal completion.
+  Sequential successor if not otherwise redirected or faulting: 0x214 (11 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0135 | 0x214 | 66 66 2e 0f 1f 84 00 00 00 00 00 | data16 cs nop WORD PTR [rax+rax*1+0x0]
+  Section or entry point: dqrls_.
+  Long operation: Advance past an instruction used for padding without useful computation.
+  Detailed first-pass effect: Consume this complete 11-byte instruction as a no-operation. Instruction prefixes used for alignment are not separate operations. No ordinary registers or data-memory values are changed on normal completion.
+  Sequential successor if not otherwise redirected or faulting: 0x21f (11 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0136 | 0x21f | 90 | nop
+  Section or entry point: dqrls_.
+  Long operation: Advance past an instruction used for padding without useful computation.
+  Detailed first-pass effect: Consume this complete 1-byte instruction as a no-operation. Instruction prefixes used for alignment are not separate operations. No ordinary registers or data-memory values are changed on normal completion.
+  Sequential successor if not otherwise redirected or faulting: 0x220 (1 byte).
+  Link-time relocation: none.
+
+INSTRUCTION 0137 | 0x220 | f2 41 0f 10 04 17 | movsd  xmm0,QWORD PTR [r15+rdx*1]
+  Section or entry point: dqrls_.
+  Long operation: Transfer the low double-precision 64-bit payload.
+  Detailed first-pass effect: Transfer the low 64-bit scalar double-precision payload from QWORD PTR [r15+rdx*1] to xmm0. A register-to-register legacy form leaves the destination's high 64 bits alone; a memory-to-register form zeroes them; a memory destination stores eight bytes. This is not a floating calculation and does not update arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x226 (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0138 | 0x226 | 41 83 c1 01 | add    r9d,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current r9d and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in r9d; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x22a (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0139 | 0x22a | f2 0f 11 04 13 | movsd  QWORD PTR [rbx+rdx*1],xmm0
+  Section or entry point: dqrls_.
+  Long operation: Transfer the low double-precision 64-bit payload.
+  Detailed first-pass effect: Transfer the low 64-bit scalar double-precision payload from xmm0 to QWORD PTR [rbx+rdx*1]. A register-to-register legacy form leaves the destination's high 64 bits alone; a memory-to-register form zeroes them; a memory destination stores eight bytes. This is not a floating calculation and does not update arithmetic flags.
+  Sequential successor if not otherwise redirected or faulting: 0x22f (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0140 | 0x22f | 48 01 ea | add    rdx,rbp
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdx and rbp; add source to destination at the destination's encoded integer width and store the low-width result in rdx; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x232 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0141 | 0x232 | 41 39 c9 | cmp    r9d,ecx
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of ecx from the value of r9d at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x235 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0142 | 0x235 | 75 e9 | jne    220 <dqrls_+0x220>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is clear.
+  Detailed first-pass effect: Evaluate zero flag is clear (ZF=0); if true replace the execution index with target 220 <dqrls_+0x220>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x237 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0143 | 0x237 | 48 83 c7 01 | add    rdi,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdi and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in rdi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x23b (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0144 | 0x23b | 48 83 c6 08 | add    rsi,0x8
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rsi and 0x8; add source to destination at the destination's encoded integer width and store the low-width result in rsi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x23f (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0145 | 0x23f | 4c 39 c7 | cmp    rdi,r8
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of r8 from the value of rdi at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x242 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0146 | 0x242 | 75 bc | jne    200 <dqrls_+0x200>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is clear.
+  Detailed first-pass effect: Evaluate zero flag is clear (ZF=0); if true replace the execution index with target 200 <dqrls_+0x200>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x244 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0147 | 0x244 | e9 0c ff ff ff | jmp    155 <dqrls_+0x155>
+  Section or entry point: dqrls_.
+  Long operation: Replace the execution index with an unconditional branch target.
+  Detailed first-pass effect: Replace the execution index with branch target 155 <dqrls_+0x155>. Do not condition the branch on flags; do not use the sequential next instruction as a successor if this completes normally.
+  Sequential successor if not otherwise redirected or faulting: 0x249 (5 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0148 | 0x249 | 44 89 c8 | mov    eax,r9d
+  Section or entry point: dqrls_.
+  Long operation: Copy one operand's exact-width value without performing arithmetic.
+  Detailed first-pass effect: Read r9d at the width indicated by this encoding and write the resulting bit pattern to eax. If this writes a 32-bit general register, its encompassing 64-bit register has its upper 32 bits cleared. A memory read/write is observable; condition flags do not change.
+  Sequential successor if not otherwise redirected or faulting: 0x24c (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0149 | 0x24c | 29 f8 | sub    eax,edi
+  Section or entry point: dqrls_.
+  Long operation: Subtract fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current eax and edi; subtract source from destination at the destination's encoded integer width and store the low-width result in eax; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x24e (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0150 | 0x24e | 48 83 c7 01 | add    rdi,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdi and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in rdi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x252 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0151 | 0x252 | 83 e0 01 | and    eax,0x1
+  Section or entry point: dqrls_.
+  Long operation: Write the bitwise AND result and update logic condition flags.
+  Detailed first-pass effect: Write the bitwise AND of the old eax and 0x1 to eax; update zero/sign/parity flags, clear carry/overflow, leave auxiliary-carry undefined.
+  Sequential successor if not otherwise redirected or faulting: 0x255 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0152 | 0x255 | 41 39 f9 | cmp    r9d,edi
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of edi from the value of r9d at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x258 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0153 | 0x258 | 0f 8c 60 ff ff ff | jl     1be <dqrls_+0x1be>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if sign differs from overflow (signed less).
+  Detailed first-pass effect: Evaluate sign differs from overflow (signed less) (SF≠OF); if true replace the execution index with target 1be <dqrls_+0x1be>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x25e (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0154 | 0x25e | 85 c0 | test   eax,eax
+  Section or entry point: dqrls_.
+  Long operation: Compare bit patterns by computing AND flags without storing a result.
+  Detailed first-pass effect: Compute a bitwise AND of eax with eax only for condition flags. Set zero/sign/parity from the masked result; clear carry/overflow, leave auxiliary-carry undefined, and do not write either operand.
+  Sequential successor if not otherwise redirected or faulting: 0x260 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0155 | 0x260 | 74 0d | je     26f <dqrls_+0x26f>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if zero flag is set.
+  Detailed first-pass effect: Evaluate zero flag is set (ZF=1); if true replace the execution index with target 26f <dqrls_+0x26f>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x262 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0156 | 0x262 | 48 83 c7 01 | add    rdi,0x1
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdi and 0x1; add source to destination at the destination's encoded integer width and store the low-width result in rdi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x266 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0157 | 0x266 | 41 39 f9 | cmp    r9d,edi
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of edi from the value of r9d at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x269 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0158 | 0x269 | 0f 8c 4f ff ff ff | jl     1be <dqrls_+0x1be>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if sign differs from overflow (signed less).
+  Detailed first-pass effect: Evaluate sign differs from overflow (signed less) (SF≠OF); if true replace the execution index with target 1be <dqrls_+0x1be>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x26f (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0159 | 0x26f | 48 83 c7 02 | add    rdi,0x2
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdi and 0x2; add source to destination at the destination's encoded integer width and store the low-width result in rdi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x273 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0160 | 0x273 | 41 39 f9 | cmp    r9d,edi
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of edi from the value of r9d at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x276 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0161 | 0x276 | 0f 8c 42 ff ff ff | jl     1be <dqrls_+0x1be>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if sign differs from overflow (signed less).
+  Detailed first-pass effect: Evaluate sign differs from overflow (signed less) (SF≠OF); if true replace the execution index with target 1be <dqrls_+0x1be>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x27c (6 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0162 | 0x27c | 48 83 c7 02 | add    rdi,0x2
+  Section or entry point: dqrls_.
+  Long operation: Add fixed-width integers and update arithmetic condition flags.
+  Detailed first-pass effect: Read current rdi and 0x2; add source to destination at the destination's encoded integer width and store the low-width result in rdi; set the defined carry, overflow, sign, zero, parity and auxiliary flags (subject to exact width and operands).
+  Sequential successor if not otherwise redirected or faulting: 0x280 (4 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0163 | 0x280 | 41 39 f9 | cmp    r9d,edi
+  Section or entry point: dqrls_.
+  Long operation: Compare integers by computing subtraction flags without storing a result.
+  Detailed first-pass effect: Subtract the value of edi from the value of r9d at the encoded integer width solely to set the arithmetic condition flags. Do not change either operand. Both signed and unsigned branches may inspect different combinations of these flags.
+  Sequential successor if not otherwise redirected or faulting: 0x283 (3 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0164 | 0x283 | 7d ea | jge    26f <dqrls_+0x26f>
+  Section or entry point: dqrls_.
+  Long operation: Branch only if sign equals overflow (signed greater or equal).
+  Detailed first-pass effect: Evaluate sign equals overflow (signed greater or equal) (SF=OF); if true replace the execution index with target 26f <dqrls_+0x26f>; otherwise continue at the sequential next instruction. No general-purpose register or ordinary data memory is written by this branch.
+  Sequential successor if not otherwise redirected or faulting: 0x285 (2 bytes).
+  Link-time relocation: none.
+
+INSTRUCTION 0165 | 0x285 | e9 34 ff ff ff | jmp    1be <dqrls_+0x1be>
+  Section or entry point: dqrls_.
+  Long operation: Replace the execution index with an unconditional branch target.
+  Detailed first-pass effect: Replace the execution index with branch target 1be <dqrls_+0x1be>. Do not condition the branch on flags; do not use the sequential next instruction as a successor if this completes normally.
+  Sequential successor if not otherwise redirected or faulting: 0x28a (5 bytes).
+  Link-time relocation: none.
+

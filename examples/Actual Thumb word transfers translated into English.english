@@ -1,0 +1,248 @@
+ACTUAL THUMB WORD TRANSFERS TRANSLATED INTO ENGLISH.
+
+A bottom-up English Major C translation of machine encodings from
+a pinned external assembler expectation, preserving their original
+instruction identity rather than constructing a fictitious program.
+
+Source repository: Android Open Source Project, ART.
+Pinned source revision: 08490b84048a0267694268185441b70cfa090185.
+Pinned file:
+compiler/utils/assembler_thumb_test_expected.cc.inc
+https://android.googlesource.com/platform/art/+/08490b84048a0267694268185441b70cfa090185/compiler/utils/assembler_thumb_test_expected.cc.inc
+
+The original source includes THREE DIFFERENT arrays:
+  StoreMultipleResults,
+  LoadMultipleResults,
+  SpecialAddSubResults.
+
+These are separate expected-disassembly fragments. The byte sequences
+below come from separate source sections and were NOT observed as one
+combined function in an Android program. For this translation, their
+starting register and memory states are stated separately. No
+source-level R, C, or C++ routine is being reconstructed.
+
+Architecture: symbolic ARMv7-A processor executing the T32 instruction
+set in unprivileged user mode. These four selected instructions all
+occupy TWO BYTES. For physical execution, the memory mappings,
+endianness, permissions and exact CPU are still unspecified.
+
+PART ONE. THE FOUR ENCODINGS ACTUALLY RECORDED IN THE SOURCE.
+
+The AOSP expected assembly at StoreMultipleResults offset zero:
+    0xC409  :  STMIA R4!, {R0,R3}
+
+The expected assembly at LoadMultipleResults offset zero:
+    0xCC09  :  LDMIA R4!, {R0,R3}
+
+The expected assembly in SpecialAddSubResults:
+    offset 0x0002  0xB014  : ADD SP, #80
+    offset 0x0014  0xB094  : SUB SP, #80
+
+Their short assembly spellings are recorded as provenance.
+The actual executable-English operation names are the
+long names assigned in the initial grant:
+
+    operation 57 for this STMIA;
+    operation 58 for this LDMIA;
+    operation 59 for this stack-pointer addition;
+    operation 60 for this stack-pointer subtraction.
+
+The encoding 0xC409 in binary is 1100010000001001.
+Its first five bits, 11000, select the T1 STMIA class.
+Its next three bits, 100, select R4 as base.
+Its last eight bits, 00001001, select bit zero
+and bit three of the low-register mask, meaning
+R0 and R3. The number of transferred words is TWO.
+
+The encoding 0xCC09 in binary is 1100110000001001.
+Its first five bits, 11001, select the T1 LDMIA class.
+Its next three bits select R4, and its eight-bit
+mask again selects R0 and R3.
+
+Both 0xB014 and 0xB094 contain the low seven-bit
+field 0b0010100, unsigned value 20. The
+four-byte scaling of that immediate makes the
+operational displacement 80 bytes.
+The distinguishable subtract-selecting bit
+in 0xB094 changes the direction of the arithmetic;
+it does NOT change the size of the displacement.
+
+PART TWO. THE STORE-MULTIPLE SPECIMEN.
+
+Define the initial execution index to be OFFSET ZERO
+within StoreMultipleResults, NOT an actual process VA.
+
+Let the following machine state be explicitly given:
+    R4 = 0x00003000.
+    R0 = 0x11223344.
+    R3 = 0x55667788.
+    N, Z, C, V are unspecified but fixed.
+    The four-byte words at 0x3000 and 0x3004
+    belong to a mapped writable aligned memory region.
+
+At index zero, the 16-bit word 0xC409 is decoded as
+the permitted operation whose full name starts:
+"Store the original thirty-two-bit contents
+of each selected low general-purpose register
+to a consecutive aligned memory word ...".
+
+The instruction's writeback base register is R4.
+The selected register set is {R0,R3}.
+Its smallest member is R0.
+Its next member is R3.
+The base register R4 is NOT itself in the list.
+
+At address 0x3000 store the four-byte representation
+of the original value of R0, namely 0x11223344.
+
+At address 0x3004 store the four-byte representation
+of the original value of R3, namely 0x55667788.
+
+After both stores complete normally, replace R4
+with 0x3000 + 2*4 = 0x3008.
+
+Do not modify R0, R3, SP, LR or N/Z/C/V.
+There is no branch and the successor instruction
+would begin at offset 0x0002 within this source
+fragment, if such instruction bytes were supplied.
+No later instruction's effects are asserted here.
+
+For an ordinary little-endian DATA memory representation,
+the actual four memory bytes at 0x3000..0x3003
+would be 0x44,0x33,0x22,0x11.
+The bytes at 0x3004..0x3007 would be
+0x88,0x77,0x66,0x55.
+This endian-specific expansion is a model choice,
+not an observation of the example on actual hardware.
+
+PART THREE. THE LOAD-MULTIPLE SPECIMEN.
+
+Use a DIFFERENT starting state and different source array.
+
+Let the index be OFFSET ZERO in LoadMultipleResults.
+Assume R4=0x3000 and two valid readable aligned
+memory words:
+    memory[0x3000..0x3003] = 0x11223344;
+    memory[0x3004..0x3007] = 0x55667788.
+Let prior R0 and R3 be unspecified.
+Let N, Z, C, V be unknown but fixed.
+
+The halfword 0xCC09 maps to operation 58,
+whose full name begins:
+"Read consecutive aligned thirty-two-bit
+memory words beginning at the address
+in a separate low general-purpose base register ...".
+
+From the word at 0x3000 replace R0 with 0x11223344.
+From the word at 0x3004 replace R3 with 0x55667788.
+When both reads complete normally, advance R4
+by eight bytes, making R4=0x3008.
+
+Do not modify the condition flags. Do not
+change SP, LR, or the execution state.
+The successor index is offset 0x0002 in the
+LoadMultipleResults instruction stream.
+
+The absolute target machine addresses in
+both specimens are expressly chosen inputs;
+the AOSP source only pins the halfwords and
+registers named in the expected disassembly.
+
+PART FOUR. STACK POINTER ARITHMETIC WITHOUT MEMORY EFFECTS.
+
+Again use a SEPARATE starting machine state.
+Let the initial SP equal 0x00002000.
+
+At offset 0x0002 of SpecialAddSubResults,
+0xB014 performs the permitted stack-pointer
+addition. Its immediate field is 20 words,
+equivalent to eighty bytes. If executed with
+the given state, SP becomes 0x00002050.
+Memory is not read or written, and the flags
+N/Z/C/V do not change. Sequential index
+within the fragment would become 0x0004.
+
+At offset 0x0014 of SpecialAddSubResults,
+0xB094 performs the permitted stack-pointer
+subtraction. If executed FROM THE ORIGINAL
+SP=0x2000 rather than from the prior
+hypothetical ADD result, its result
+would be SP=0x00001FB0.
+
+A THIRD HYPOTHETICAL two-instruction sequence
+could execute 0xB014 followed by 0xB094
+with no intervening stack change, giving
+SP=0x2000 again. That sequence is not
+the original assembler fixture's adjacent
+instruction stream. Label it a synthetic
+semantic composition, not source disassembly.
+
+PART FIVE. WHAT IS NOT DERIVED FROM THE ENCODINGS.
+
+None of these four halfwords performs a function call,
+allocates DRAM, maps virtual memory, changes process
+privilege, or produces a floating-point number.
+
+The stored words are data. Executing the instruction
+0xC409 does NOT make either stored word executable
+ARM machine code. Loading data from 0x3000 does
+not transfer control there.
+
+The actual AOSP fixture includes more instruction
+forms not translated IN THIS PARTICULAR DOCUMENT,
+including 32-bit load/store multiple encodings with
+high registers. The fact that those forms are next
+in the source array does not permit 57/58 to
+silently broaden into them. A separate document,
+"Actual wide Thumb multiple-word operations in long
+English.english", now translates four of those forms
+using operations 61 through 64, with distinct
+writeback semantics. Neither document grants
+the full ARMv7-A T32 instruction set.
+
+Do not claim that the four samples were executed
+on a real processor, combined into a compiled
+function, or translated with a working
+English Major C implementation.
+
+PART SIX. REQUESTED POSITIVE AND NEGATIVE TESTS.
+
+Positive test: decode first five bits of 0xC409
+to T1 store-multiple, base to R4, mask to {R0,R3},
+write back base by eight bytes.
+
+Positive test: decode 0xCC09 to T1 load-multiple
+with the same base and set, and load values in
+ascending register order from ascending addresses.
+
+Positive test: 0xB014 and 0xB094 must correspond
+to opposite stack-pointer arithmetic with equal
+magnitude eighty bytes and no data-memory access.
+
+Negative test: swap R0 and R3 address assignments.
+The test must reject this because register
+list text order does not determine transfer order.
+
+Negative test: count two selected registers
+as sixteen bytes rather than eight; reject.
+
+Negative test: interpret 0xB014's immediate as
+twenty bytes; reject, because the encoding
+scales it by four.
+
+Negative test: infer a store to address 0x2050
+from ADD SP,#80; reject, because the operation
+only changes the register.
+
+Negative test: treat the R4 writeback from LDMIA
+as a write to the memory word at address 0x3008;
+reject, because writeback changes the BASE REGISTER.
+
+Negative test: claim that the AOSP fragments
+show an actual consecutive program executing
+all four operations; reject, because the
+original records are independent arrays.
+
+This text records the tests to be implemented.
+It does not report a compiler, emulator, device,
+or semantic-language implementation pass.

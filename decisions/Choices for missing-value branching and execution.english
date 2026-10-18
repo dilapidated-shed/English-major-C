@@ -1,0 +1,401 @@
+CHOICES FOR MISSING-VALUE BRANCHING AND EXECUTION.
+
+An English Major C decision record.
+Status: competing designs RETAINED; no optimized sequence selected.
+This document records the earlier R-specific comparison question.
+It does NOT prescribe the semantics of the first English Major C
+unknown-entry example, nor impose an R type system, R NA/NaN,
+or an ICK compiler stage upon it. The later human correction
+is recorded in "Why the first compiler emits assembly directly.english".
+Example: R's sum(..., na.rm=TRUE), notably the integer path called
+"isum" in the previously discussed R implementation.
+Architecture: symbolic ARMv7-A T32, unless another architecture is
+explicitly named. Full ARM source and the initial permitted operation
+grant are under ../architecture/armv7-a/t32/.
+
+PURPOSE OF THIS RECORD.
+
+The purpose of this document is not to show a beginner how to write a
+loop. The purpose is to preserve, with lawyer-like precision, every
+identified design alternative, all relevant constraints and effects,
+the evidence that would distinguish them, and whether a selection has
+actually been justified. Rejected options must remain visible.
+
+This is the reconstructed set of alternatives identified in the
+October 10-11, 2026 discussions. It is not presented as an exhaustive
+transcript of every unrecorded idea anyone might have considered.
+The actual disassembled compiled R routine and its machine-level
+execution evidence must be examined before declaring one method
+superior. Invented assembly is not evidence.
+
+PART ONE. THE REQUIRED BEHAVIOR AND ITS OPEN BOUNDARIES.
+
+The example has a sequence of elements and an option named "na.rm".
+A correct specialized "remove missing values" path skips precisely
+those elements that R specifies as missing for the relevant vector
+type, while preserving R's observable sum behavior. "Missing" and
+"equal to zero" are not synonyms.
+
+For R integer vectors, the representation of NA_INTEGER and the rules
+for arithmetic overflow matter. For real vectors, distinguish R NA,
+ordinary NaN, infinities, signed zero and any floating-point
+environment effects that prove observable. Integer and floating
+cases must NOT be conflated. Empty vectors, long vectors, ALTREP,
+dispatch to a different implementation, and argument evaluation
+must not silently disappear from the correctness contract.
+
+Before writing an optimization, bind the exact R version, routine,
+vector type, accumulator width, missing-value predicate,
+overflow policy, return type and observable conditions. A
+syntactically similar small C function is not the R implementation.
+
+PART TWO. THE DESIGN ALTERNATIVES.
+
+Candidate A: Check missingness and branch around the accumulation.
+
+Description: after loading an element, determine whether it is
+missing; take a conditional branch when the element should not
+contribute. Otherwise add it. The ordinary loop branch remains.
+
+Possible advantage: no accumulator arithmetic for a skipped
+element; straightforward match to high-level conditions; no
+extra data conversion before addition.
+
+Possible disadvantage: an additional data-dependent branch per
+tested element. Its effect depends on probability and correlation
+of missingness, code arrangement, and the exact predictor.
+
+Conditions: preserve the flags produced by the comparison until
+the branch consumes them. A branch on equal after CMP depends
+on Z; writing flags in between can change behavior.
+
+Status: an explicit baseline candidate, not proven fastest.
+
+Candidate B: Test "na.rm" repeatedly inside the loop.
+
+Description: on encountering missing input, check whether the
+caller requested removal or propagation of the missing result.
+
+Possible advantage: one shared routine can handle both policies;
+less duplicated source or generated code.
+
+Possible disadvantage: repeatedly performs work based on an option
+that often remains fixed throughout the entire call. This can
+add comparisons, loads or branches even if they are predictable.
+
+Conditions: the option must in fact be invariant for the duration
+of the loop. Any side effects or externally mutable policy must
+be accounted for before moving its test.
+
+Status: available baseline candidate; actual R call graph
+and assembly must establish whether, where, and how it appears.
+
+Candidate C: Select a specialized loop once before processing the data.
+
+Description: inspect "na.rm" once and enter one of two distinct
+loops, one where missing values are ignored and one where they
+cause the required non-removal behavior. Do not re-test the
+unchanging option on every iteration.
+
+Possible advantage: moves a condition out of the hot loop; can
+permit simpler inner-loop code and improve scheduling.
+
+Possible disadvantage: two loop bodies take more instruction-cache
+space and add a one-time dispatch. It may reduce opportunities
+for other optimizations or benefit only sufficiently large inputs.
+
+Conditions: exact equivalence for long-vector and overflow paths;
+correct treatment of values and ALTREP iteration. Source-level
+specialization is not instruction prefetch and does not direct
+the branch predictor to "preload" another target.
+
+Status: candidate, not accepted without verified call traces
+and target benchmarks.
+
+Candidate D: Arrange the common path as sequential fall-through.
+
+Description: choose branch direction so common data follows
+the adjacent instruction stream and uncommon cases transfer
+control. This may mean a branch over the add, or its inverse,
+depending on distributions and encoded instruction constraints.
+
+Possible advantage: can reduce taken branches for a known
+distribution; may affect locality and processor fetching.
+
+Possible disadvantage: distributions differ. Static branch
+layout does not ensure a particular processor predicts it
+correctly. The resulting code may grow or need more instructions.
+
+Conditions: hold the same input/output, flags and memory effects;
+include branch reach, two/four-byte encodings, alignment and
+instruction-cache behavior in actual comparisons.
+
+Status: candidate; distribution-dependent, unmeasured here.
+
+Candidate E: Branchless conditional contribution of zero.
+
+Description: derive a value equal to the original input when
+it counts and zero when it should be omitted; add that value
+unconditionally. The selection might be a mask constructed from
+the predicate, a conditional select where supported, or another
+verified sequence.
+
+Possible advantage: removes an unpredictable data-dependent
+branch from an inner loop.
+
+Possible disadvantage: comparison, mask construction,
+selection and addition still execute. On predictable inputs
+they can be slower than a branch. A wrong mask can mishandle
+missing-value encodings; conditionalizing a result does not
+necessarily suppress faulting memory accesses or other effects.
+
+Conditions: mask widths and signedness, arithmetic overflow,
+flag preservation, constant-time properties if relevant, and
+architecture-specific instruction selection must be demonstrated.
+
+Status: candidate; not presumed faster and not an existing
+single native T32 CMOV instruction.
+
+Candidate F: T32 If-Then conditional execution.
+
+Description: on a legal T32 target, use an IT instruction to
+condition the permitted following operation or operations,
+rather than selecting an explicit separate branch in some cases.
+
+Possible advantage: can avoid an explicit branch around one or
+a few operations. The construction is especially interesting
+for the "add if not missing" case.
+
+Possible disadvantage: IT has at most four following slots,
+strict condition and branch placement rules, and restrictions
+on flag-setting and other instructions. Added IT instructions
+are themselves work; behavior and timing remain target-specific.
+For another ISA revision, these forms may be more restricted.
+
+Conditions: use a legal IT encoding and a permitted conditional
+instruction, with matching condition flags and no illegal block
+composition. Do not mistake T32 IT semantics for unrestricted
+A32 predication.
+
+Status: candidate with architectural legality to be verified
+for the exact emitted instruction pair.
+
+Candidate G: A32 predicated arithmetic.
+
+Description: in ARM A32 state, a conditional arithmetic
+instruction may express "add when condition holds" without
+a preceding explicit control-transfer instruction.
+
+Possible advantage: instruction predication may fit a compact
+scalar case.
+
+Possible disadvantage: this changes the instruction-state
+contract and cannot be silently emitted by the current
+T32-only English Major C profile. It is not necessarily faster.
+
+Conditions: explicit A32 machine grant, instruction mapping,
+interworking permissions and independent result verification.
+
+Status: excluded from THIS permitted operation profile, but
+retained as a cross-architecture option.
+
+Candidate H: T32 compare-and-branch-on-zero / nonzero.
+
+Description: use CBZ or CBNZ to directly test a general register
+and conditionally jump, without a separate flag-setting CMP.
+
+Possible advantage: short instruction and no dependence on
+APSR comparison flags for the test itself.
+
+Possible disadvantage: R's missing integer sentinel is not
+generically zero. Testing for missingness would first require
+a correctly formed zero/nonzero predicate, and that conversion
+can consume instructions. The encoded branches are forward and
+range-constrained, and are not permitted inside an IT block.
+
+Conditions: enforce the exact legal register and target ranges.
+Never directly replace an NA_INTEGER equality test with
+a zero test unless the conversion is explicitly implemented.
+
+Status: candidate for suitable predicates, not a general
+replacement for comparing against R's missing marker.
+
+Candidate I: T32 table branches using byte or halfword entries.
+
+Description: use TBB or TBH to read a small data table and
+choose a halfword-scaled branch target, possibly for several
+cases instead of repeated comparisons.
+
+Possible advantage: useful for finite-state dispatch with
+several possible destinations; tables make the difference
+between code and control-flow data explicit.
+
+Possible disadvantage: additional data access, table storage,
+bounds discipline and indirect control flow are usually
+unattractive for a simple yes/no NA decision. A table entry
+is DATA used to calculate an execution address, not itself an
+instruction being executed.
+
+Conditions: table base, index, entry width, branch base, legal
+destinations and the exact target processor must be specified.
+The mere presence of TBB/TBH in the ISA is not justification.
+
+Status: considered and not selected for a two-way branch
+without comparative evidence.
+
+Candidate J: Branch threading, early exit, and skip patterns.
+
+Description: alter the layout to transfer directly to a
+known eventual destination, exit the loop once the semantics
+permit, or avoid an intermediate jump. Historical processors
+also offered skip-the-next-instruction idioms such as the
+PDP-8 skip mechanisms.
+
+Possible advantage: can avoid redundant work or shorten
+certain control paths; early exits can save processing when
+the result has become predetermined.
+
+Possible disadvantage: semantic early exit for integer NA
+propagation is different from the case where na.rm=TRUE and
+later values still matter. Historical skip-next mechanisms
+are NOT generic T32 facilities and cannot be emitted by
+naming them. Branch threading can increase code size.
+
+Conditions: exact R result for every remaining input class;
+no skipped observable side effects, errors or iterator effects.
+No unsupported native "skip next" instruction may be invented.
+
+Status: separately retained family of candidates.
+
+Candidate K: SIMD/vector processing.
+
+Description: on explicitly verified optional vector hardware,
+process several elements together, form valid masks for missing
+values, and combine results according to the required R
+semantics and overflow handling.
+
+Possible advantage: more elements processed per instruction.
+
+Possible disadvantage: mask and reduction overhead, remainder
+handling, alignment, different association order for floating
+point, and presence/absence of NEON or another extension.
+A vector instruction set is NOT granted by the current scalar
+English Major C profile.
+
+Conditions: exact target extension feature, floating-point
+semantics, integer overflow rule and independent vector/scalar
+comparison over hostile inputs.
+
+Status: out of current scope but recorded as an option.
+
+Candidate L: x86-64 conditional move and other foreign-ISA forms.
+
+Description: a CMOV-like instruction may replace a conditional
+control transfer with a conditional register update on an
+appropriate x86-64 target.
+
+Possible advantage: different prediction-versus-extra-work
+tradeoff on that architecture.
+
+Possible disadvantage: it is not an ARMv7-A T32 instruction;
+cannot be treated as the ARM assembly produced by this project's
+independent English-to-assembly compiler.
+Even on x86 it can be inferior to a predictable branch.
+
+Conditions: a distinct, versioned x86-64 machine profile.
+
+Status: foreign-target candidate, not in this ARM grant.
+
+Candidate M: Processor branch prediction, fetch and speculation.
+
+Description: the physical core may predict branch direction
+and target, fetch upcoming instruction bytes before they are
+architecturally required, and later discard work if prediction
+was wrong.
+
+Possible advantage: predicted branches may have lower visible
+latency; layout and repeated patterns can matter.
+
+Possible disadvantage: a misprediction costs work, and behavior
+is implementation-specific. Architectural fetch and PC operand
+semantics cannot be substituted with guessed pipeline depths.
+
+Conditions: actual processor identification and reproducible
+measurements. The language-level execution index remains the
+architectural next address, not an enumeration of prefetched
+instructions. This is not an independently programmable
+"preload the branch" operation in the first profile.
+
+Status: hardware consideration, not a chosen source strategy.
+
+PART THREE. IMPORTANT NON-EQUIVALENCES.
+
+1. One-time dispatch on "na.rm" does not equal branch prediction.
+2. Bitwise selection does not equal permission to fetch from a
+   protected address and suppress the fault after the fact.
+3. ARM's T32 IT mechanism is not full A32 predication.
+4. A TBB/TBH entry is data controlling a later instruction address;
+   it is not automatically executable data.
+5. A signed R NA sentinel is not the integer zero; predicates
+   must use the correct representation and type.
+6. Fewer branches is not automatically fewer cycles, less energy,
+   lower latency, or better cache behavior.
+7. A change to missing-value handling cannot be accepted merely
+   because the result matches a simple non-NA example.
+8. A generated assembly listing is not itself a measured execution
+   trace; a compiled artifact is not proof of actual CPU execution.
+
+PART FOUR. EVIDENCE THAT MUST PRECEDE A PERFORMANCE DECISION.
+
+The previously specified x86-64 artifact investigation targeted:
+- Debian R 4.5.0-3, r-base-core_4.5.0-3_amd64.deb
+  SHA256 6c529a906d2a26cf78e6c24eaa96e0bbd061b032e6c824f9a61e5f313353b155
+- matching r-base-core-dbgsym_4.5.0-3_amd64.deb
+  SHA256 46ed2eb150470d1b8ae413aa0b6171cf827787644d
+
+Those identifiers belong to an earlier examination request. This new
+architecture document has NOT fetched, disassembled, checked symbols
+against, compiled, or executed either artifact; it may not borrow an
+unsupported "verified optimal" result from that request.
+
+For any proposed equivalence or speed advantage, the test SHALL bind:
+  A. actual implementation source, compiled routine and symbol/IR identity;
+  B. exact instruction bytes, boundaries, ISA state and disassembly;
+  C. comparison oracle for R integer/real NA, NaN, infinities, overflow,
+     empty/long inputs and other relevant observable behavior;
+  D. exact English Major C compiler revision and emitted assembly,
+     plus independently declared ARM assembler/linker provenance;
+     ICK is not an English Major C compiler stage;
+  E. complete actual-target CPU/SoC and instruction-feature manifest;
+  F. test sets with zero missingness, all missingness, rare missingness,
+     approximately balanced missingness, random versus clustered missing
+     values, and short versus long inputs;
+  G. instruction count, conditional/taken-branch counts, misprediction
+     evidence where counters are supported, execution time and variations;
+  H. separate flags/IT legality, memory fault and branch-range checks;
+  I. tests where a known-wrong missing-value predicate, flag clobber,
+     incorrect dispatch, illegal IT block and faulty table target
+     MUST be rejected by the verifier.
+
+A measured claim can only be made at the verified target and input
+distribution. Results on one microarchitecture do not prove an
+universal ARM or x86 rule.
+
+PART FIVE. CURRENT DECISION.
+
+The choice remains OPEN.
+
+The initial architecture profile permits CMP, conditional B, CBZ,
+CBNZ and IT, among other operations, to allow candidate
+implementations to be expressed. The presence of those
+operations does NOT select among them.
+
+The formal machine model and long operation names are settled
+only as draft source vocabulary. The optimized R loop, its
+compiler lowering, the original compiled R routine and the
+required benchmark acceptance remain independent tasks.
+
+Related original motivation and design:
+https://github.com/dilapidated-shed/English-major-C/issues/1
+Workflow origin and current write scope:
+https://github.com/isomorphisms/flexible-pipes/issues/91

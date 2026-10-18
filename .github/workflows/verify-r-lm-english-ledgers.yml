@@ -1,0 +1,46 @@
+name: Verify R lm x86-64 English instruction ledgers
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-source-to-english-instruction-coverage:
+    name: Exact-head original bytes and English coverage only
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the exact candidate head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Do not substitute a synthetic PR merge revision
+        shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual=$(git rev-parse HEAD)
+          if [ "$actual" != "$EXPECTED_HEAD" ]; then
+            printf 'FAIL: expected exact head %s but checked out %s\n' "$EXPECTED_HEAD" "$actual" >&2
+            exit 1
+          fi
+          printf 'exact_head=%s\n' "$actual"
+      - name: Select Node 22 without compiling target code
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify every recorded instruction and corrupted-ledger rejection
+        run: |
+          node examples/r-lm-native-x86-64/english-translation/verify-english-ledgers.mjs --self-test
+      - name: Reject prior incorrect x86 instruction effects and mutations
+        run: |
+          node examples/r-lm-native-x86-64/english-translation/verify-repaired-qr-english.mjs --self-test
+
+# Source alignment and repaired-effect regression only. Does NOT confirm full semantic correctness,
+# numerical behavior, floating-point exceptions, x86 CPU execution, ARM lowering,
+# non-bypassable Flexible Pipes, or independent ai-ci acceptance.

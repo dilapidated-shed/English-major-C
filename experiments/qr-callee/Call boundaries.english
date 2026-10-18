@@ -1,0 +1,2 @@
+For ARM, at caller byte offset 0x5c, save the following instruction address in register r14 and enter procedure dqrdc2 in ARM state.
+For x86, at caller byte offset 0x75, save the following eight-byte instruction address on the descending stack and enter procedure dqrdc2.

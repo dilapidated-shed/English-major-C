@@ -1,0 +1,228 @@
+Following the first actual QR call one memory operation at a time
+================================================================
+
+This note begins at the machine-address zero entry of the recorded
+dqrls.o x86-64 object, NOT at an abstract QR formula. The raw
+instructions and encodings are in ../dqrls.x86-64.disasm.txt and
+the complete first-pass machine crosswalk is in
+dqrls.x86-64.instructions.english.
+
+This is an instruction-driven SYMBOLIC reconstruction checked by
+reading the printed machine instructions. It is not an observed
+register/memory trace, does not demonstrate physical x86 execution,
+and does not describe the dynamically linked BLAS library.
+
+Declaring the starting memory and calling boundary
+--------------------------------------------------
+Let Original stack pointer denote the eight-byte address in RSP as
+the called routine begins. The address [Original stack pointer] holds
+the saved caller return address. This value is not assigned a fake
+literal number.
+
+Under the System V AMD64 calling convention used by this historical
+Debian x86-64 GFortran/C build, the first six pointer arguments arrive
+in these 64-bit registers:
+  RDI contains a pointer to the first double of matrix x.
+  RSI contains a pointer to the four-byte integer n.
+  RDX contains a pointer to the four-byte integer p.
+  RCX contains a pointer to the first double of array y.
+  R8 contains a pointer to the four-byte integer ny.
+  R9 contains a pointer to the double tol.
+
+The seven remaining pointer arguments are in eight-byte stack slots,
+relative to Original stack pointer:
+  +0x08: pointer to b
+  +0x10: pointer to rsd
+  +0x18: pointer to qty
+  +0x20: pointer to k
+  +0x28: pointer to jpvt
+  +0x30: pointer to qraux
+  +0x38: pointer to work
+
+Each of these Fortran arguments is passed BY ADDRESS in this case;
+loading a pointer is not the same operation as loading the value
+referred to by that pointer. These statements describe the observed
+ordinary ABI/caller contract, not all possible calling conventions.
+
+Beginning at execution-index offset 0x0
+--------------------------------------
+The instruction beginning at 0x0 is the two-byte encoding 41 57.
+Its original spelling is "push r15".
+Read the old value of R15, decrease RSP by eight, and store the old
+R15 at the newly addressed stack slot. Provided no fault occurs,
+the execution index becomes 0x2. This is one instruction, not a
+higher-level "save registers" operation.
+
+At 0x2, bytes 31 c0, "xor eax,eax" store zero in EAX and thus clear
+the high 32 bits of RAX. They set the logical-result flags;
+this is NOT identical to flag-preserving assignment of zero.
+
+At 0x4, bytes 49 89 cf, "mov r15,rcx" copy the Y-array pointer to R15.
+
+At 0x7, bytes 48 89 d1, "mov rcx,rdx" copy the P-integer pointer
+to RCX, freeing RDX to take another argument later.
+
+At offsets 0xa, 0xc, 0x11, 0x16 and 0x17, push R14, R13, R12,
+RBP and RBX in that exact order. Together with the first push,
+the six pushes allocate 48 bytes and preserve six old register
+values. The stack pointer now equals Original stack pointer
+minus 48 bytes; the order of saved values is not interchangeable.
+
+At 0xe, copy the NY-integer pointer from R8 into R13.
+At 0x13, copy the N-integer pointer from RSI into R12.
+These copies happen between the stack pushes and do not affect
+the already saved old values of R13 or R12.
+
+At 0x18, subtract hexadecimal 0x60 (96 decimal) from RSP.
+The stack pointer now equals Original stack pointer minus
+144 bytes, denoted Current frame pointer for this note.
+No arithmetic has yet been done on the contents of matrix x.
+
+At 0x1c, read the four bytes addressed by RSI, interpret them
+as a signed 32-bit integer, sign-extend to 64 bits and store
+in RBP. This is the dereferencing of *n*, NOT another pointer copy.
+
+At 0x1f, read the four bytes addressed by RDX, interpret them
+as a signed 32-bit integer, sign-extend to 64 bits and store
+in RSI. This is the dereferencing of *p*.
+
+At 0x22, save the pointer to p at memory address
+Current frame pointer + 0x38. That pointer is distinct from
+the integer value of p already copied to RSI.
+
+At 0x27, read an eight-byte pointer from memory address
+Current frame pointer + 0xa0. Algebraically this address is
+Original stack pointer + 0x10, and the loaded value is the
+rsd-array pointer; place it in RBX. A change in RSP changes the
+meaning of a fixed [rsp+...] notation, which is why simply
+transcribing operand names is not a sufficient explanation.
+
+At 0x2f, copy R12 to RDX so that RDX now holds the pointer to n.
+At 0x32, test signed n stored in RBP against itself to establish
+condition flags. At 0x35, save the NY pointer to
+Current frame pointer + 0x30. At 0x3a, copy the tolerance
+pointer from R9 into R8.
+
+At 0x3d, "cmovs rbp,rax" conditionally copies zero from RAX
+into RBP when the sign flag from the n test is set.
+This is the machine's chosen computation of a nonnegative
+loop bound from n. Even when no copy occurs, it is not a branch.
+
+At 0x41, test signed p in RSI against itself. At 0x44,
+save the original x-array pointer to the local stack address
+Current frame pointer + 0x08. At 0x49, "cmovns rax,rsi"
+copies p to RAX only if p was nonnegative, otherwise RAX
+remains zero. Again: conditional MOVE, not a branch.
+
+At 0x4d, restore the N-integer POINTER from R12 into RSI.
+At 0x50, write the nonnegative p bound from RAX into
+Current frame pointer + 0x40. At 0x55, copy that bound to R14.
+
+Preparing all nine arguments for the next machine call
+------------------------------------------------------
+Before the next pushes:
+  RDI is the x pointer.
+  RSI is the n pointer.
+  RDX is the n pointer, intentionally repeated.
+  RCX is the p pointer.
+  R8 is the tolerance pointer.
+  The sixth argument register R9 is not yet populated for the call.
+
+At 0x58, evaluate [rsp+0xc8] BEFORE changing RSP.
+RSP still equals Original stack pointer minus 144.
+Consequently, the effective address equals Original stack
+pointer plus 56 bytes: it holds the pointer to work.
+Push this work pointer. RSP decreases by eight bytes.
+
+At 0x5f, evaluate [rsp+0xc0] using the NEW RSP.
+The effective address is Original stack pointer plus 40:
+read and push the pointer to jpvt.
+
+At 0x66, evaluate [rsp+0xd0] using RSP after the SECOND push.
+The effective address is Original stack pointer plus 48:
+read and push the pointer to qraux.
+
+The three new stack slots, as observed by the CALLED
+procedure, now hold qraux, jpvt and work in argument order.
+Reading all three source expressions against the same old RSP
+would have produced the wrong answer.
+
+At 0x6d, read [rsp+0xc8] with RSP now 168 bytes below the
+original. The effective address is Original stack pointer
+plus 32, which holds the pointer to k; copy that pointer to R9.
+
+At 0x75, bytes e8 00 00 00 00 form a relative CALL whose
+encoded displacement has not been resolved in the object.
+The associated relocation is
+  76: R_X86_64_PLT32 dqrdc2_-0x4
+so the printed apparent destination "0x7a" is merely an
+unlinked placeholder. The linked call targets dqrdc2_.
+The CALL saves 0x7a as its return byte address on the stack
+and transfers execution to the linker-resolved routine,
+not to the 0x7a continuation itself.
+
+The actual call argument values are therefore:
+  Argument 1: x pointer, through RDI
+  Argument 2: n pointer, through RSI
+  Argument 3: n pointer again, through RDX
+  Argument 4: p pointer, through RCX
+  Argument 5: tolerance pointer, through R8
+  Argument 6: k pointer, through R9
+  Argument 7: qraux pointer, at first stack argument address
+  Argument 8: jpvt pointer, at second stack argument address
+  Argument 9: work pointer, at third stack argument address
+
+Only AFTER deriving this from the machine operations can
+we cross-check the exact call in ../dqrls.f:
+  call dqrdc2(x,n,n,p,tol,k,qraux,jpvt,work)
+This agreement is a source/assembly correspondence, not
+a substitute for inspecting the encoded machine operations.
+
+Returning to dqrls after the unknown machine work of the call
+-------------------------------------------------------------
+If the called dqrdc2_ eventually returns normally, execution
+resumes at 0x7a. Without actually following the callee, its
+effects on x, k, qraux, jpvt and work remain unresolved here.
+The instruction at 0x7a reads [rsp+0xc8], now naming the
+pointer to k, into RAX.
+
+At 0x82, add 32 bytes to RSP: this discards the three
+eight-byte stack arguments plus eight bytes of frame padding.
+RSP is now Original stack pointer minus 136.
+
+At 0x86, read the four-byte signed or unsigned bit pattern
+addressed by RAX, the k pointer; store it in EAX, which zeroes
+RAX's upper 32 bits. At 0x88, test EAX against itself.
+At 0x8a, branch to 0x1cd when the signed interpretation
+of that rank is less than or equal to zero (ZF=1 or SF != OF).
+Otherwise continue at 0x90.
+
+At 0x90, read the four-byte ny value through R13 into EDX.
+At 0x94, establish its zero/sign flags. At 0x96, branch
+to 0x155 if that signed integer is less than or equal to zero.
+Only otherwise does execution continue into the later
+solution loop. The loop's longer machine path is preserved
+instruction-by-instruction in the full ledger; it is not
+claimed to be semantically validated by this shorter note.
+
+What this demonstrates and what remains
+---------------------------------------
+The machine code explicitly constructs a by-reference Fortran
+call by moving pointer values among register and stack slots.
+Some short mnemonics hide real dependencies on changes to RSP;
+some "conditional" instructions do not transfer control;
+a nominal immediate call destination can be a relocation
+placeholder. These facts can be recovered bottom-up.
+
+This note does NOT yet:
+  - prove the exact behavior inside dqrdc2_ or dqrsl_;
+  - explain the full floating-point and branch state paths;
+  - supply dynamic BLAS instruction bodies or memory maps;
+  - derive the observed least-squares coefficients by executing
+    these symbolic steps;
+  - validate equivalence to the Fortran source for all inputs;
+  - translate the routine into a distinct ARM architecture.
+
+Those are separate acceptance requirements. Actual R lm()
+uses squared VERTICAL residuals, not the proposed unsquared
+perpendicular-distance fit.

@@ -1,0 +1,269 @@
+A CONDITIONAL BRANCH CHOOSES WHICH EXCEPTIONAL INSTRUCTION IS NEXT.
+
+Status: bottom-up English Major C example based on an inspected seven-halfword
+ARMv7-A T32 diagnostic. The effects of the two encountered exception
+instructions have NOT been granted by the current source language profile.
+A correct translation stops at an ungranted instruction rather than
+inventing a system call, process exit, successful return, or exception
+handler. Nothing in this example is a compilation of R, C, or another
+high-level function.
+
+ORIGINAL MACHINE BYTES AND THEIR PROVENANCE.
+
+For this diagnostic, the following Thumb assembly source was constructed
+by explicitly recording instruction halfwords:
+
+  .syntax unified
+  .arch armv7-a
+  .thumb
+  .text
+  .global conditions_fixture
+  .thumb_func
+  conditions_fixture:
+  .hword 0x2000,0xd100,0xd000,0xdefe,0x2103,0xd000,0xdf01
+
+Foreign diagnostic build: clang version 17.0.0, target
+armv7a-none-eabi with Thumb state selected; ELF32 little-endian
+ARM object. Foreign decode: llvm-objdump version 17.0.0,
+--triple=thumbv7-none-eabi. This is evidence of a diagnostic
+assembler/disassembler operation and is NOT a maintained
+first-party build with ICK or the Android NDK.
+
+The observed external decoder listing, in increasing offset order:
+
+  offset 0x0000, halfword 2000, MOVS R0,#0
+  offset 0x0002, halfword D100, BNE with displacement zero
+  offset 0x0004, halfword D000, BEQ with displacement zero
+  offset 0x0006, halfword DEFE, foreign decoder displays "trap"
+  offset 0x0008, halfword 2103, MOVS R1,#3
+  offset 0x000A, halfword D000, BEQ with displacement zero
+  offset 0x000C, halfword DF01, SVC #1
+
+Each original instruction is TWO BYTES long. A zero-encoded branch
+displacement is not the same as a branch to the next two-byte
+instruction: its PC operand base is the instruction address plus four.
+The mnemonic "trap" at 0x0006 is LLVM's alias for the architecture's
+permanently undefined UDF T1 encoding 0xDEFE.
+
+The source evidence is separate from the starting register and flag
+values defined in each translation below. The diagnostic decoder did
+not run this program under an ARMv7-A CPU with a real OS.
+
+PART ONE. FIRST ENGLISH TRANSLATION STARTING AT OFFSET ZERO.
+
+Given this instruction stream as a hypothetical permitted executable
+mapping in T32 instruction state, begin at relative execution index zero.
+The initial values of N, Z, C, V and all general registers are unknown.
+No asynchronous interrupt or unrelated exception is introduced.
+A later instruction must not be said to have executed until a permitted
+machine-state transition actually reaches it.
+
+STEP ONE.
+
+At offset 0x0000 the instruction bytes are 0x2000.
+This is the T1 MOVS-immediate whose full long English operation name
+begins "Write the unsigned eight-bit immediate value explicitly
+encoded in this instruction into the selected low general-purpose
+register ...". It is currently numbered operation 53.
+
+Write zero to R0. Set N to zero and Z to one. Preserve the previously
+unknown C and V. Do not read or write data memory or change LR.
+Ordinary execution advances the execution index by TWO BYTES to 0x0002.
+
+After this step:
+  R0=0x00000000;
+  N=0; Z=1; C and V remain unknown;
+  execution index=0x0002.
+
+STEP TWO.
+
+At offset 0x0002 the halfword is 0xD100.
+Decode the four-bit sub-opcode as NE, meaning the zero flag is zero.
+Decode the imm8 as zero. Its branch displacement is zero bytes.
+The architectural PC operand base is offset 0x0006.
+If taken, this instruction would choose offset 0x0006.
+
+But Z is one. The NE condition is FALSE.
+Do not take the branch. Do not overwrite any general-purpose register
+or flags merely by testing the condition. The current instruction is
+two bytes, so ordinary sequential execution proceeds to 0x0004.
+
+At this point:
+  execution index=0x0004;
+  N=0, Z=1, C/V unknown.
+
+STEP THREE.
+
+At offset 0x0004 the halfword is 0xD000.
+Its encoded condition is EQ, true when Z is one.
+Its immediate is zero, so its encoded displacement is zero.
+The architectural PC operand base is the instruction's offset
+plus four: 0x0008.
+
+Because Z is one, the branch IS TAKEN, and the new execution
+index is 0x0008. The halfword at offset 0x0006
+is NOT architecturally executed in this trace.
+It remains present in the code bytes and still decodes as UDF
+if some other permitted entry path selects it.
+
+Do not claim that the processor "preloaded" the instruction
+at 0x0006 as the selected architectural successor.
+Any speculative fetch is a distinct hardware matter that
+does not constitute a successfully executed UDF instruction.
+
+STEP FOUR.
+
+At offset 0x0008 the halfword 0x2103 is MOVS R1,#3.
+It writes the unsigned literal three to R1.
+Set N=0 and Z=0. Preserve C and V.
+R0 remains zero. R1 becomes 0x00000003.
+The next execution index is 0x000A.
+
+STEP FIVE.
+
+At offset 0x000A the halfword 0xD000 again encodes BEQ.
+The encoded branch displacement is zero, and its taken
+target would be offset 0x000E.
+
+However, Z is zero following MOVS R1,#3.
+The branch condition is FALSE.
+Ordinary sequential execution goes to 0x000C, not 0x000E.
+R0, R1 and all four condition flags are unchanged by the branch.
+
+STEP SIX. STOP AT A KNOWN BUT UNGRANTED INSTRUCTION.
+
+At offset 0x000C the halfword is 0xDF01.
+Its high four-bit sub-opcode is hexadecimal F.
+This is SVC T1 with encoded immediate byte one.
+It is NOT a conditional branch, and it is NOT a
+plain English operation authorized by the initial grant.
+
+Stop the checked English Major C trace at 0x000C with:
+    status: BLOCKED — native instruction is outside
+            the explicit permitted operation set;
+    native instruction: SVC T1;
+    encoded immediate byte: 1;
+    architecture consequence if natively executed:
+            supervisor-call exception;
+    unverified boundary: OS/ABI exception handling and return.
+
+Do not invent a syscall number, supervisor handler, return address,
+process output or arithmetic result. SVC is not simply "invalid user
+instruction": an ARM user process can issue it as an architectural
+exception request, but this English source profile has not granted
+that effect or identified the OS-specific service.
+
+At the blocked boundary the known data state is:
+  R0=0;
+  R1=3;
+  N=0; Z=0;
+  C and V remain whatever they were upon entry;
+  no data-memory reads or writes have been performed.
+
+The ordered architectural instruction addresses visited in this trace:
+    0x0000
+    0x0002
+    0x0004
+    0x0008
+    0x000A
+    0x000C (decoded but NOT executed by English Major C).
+
+PART TWO. SECOND ENTRY, DIFFERENT FLAGS, SAME MACHINE BYTES.
+
+Choose another declared execution entry at offset 0x0002.
+Let Z=0 on entry and leave all other registers and flags unknown.
+This is a DIFFERENT model state, not a new version of the bytes.
+
+At offset 0x0002, the same D100 condition NE is now TRUE.
+The encoded displacement remains zero.
+The architectural PC operand base is offset 0x0006,
+so the branch takes the target offset 0x0006.
+
+At offset 0x0006, the halfword DEFE belongs to UDF T1.
+The independent diagnostic displays this as "trap",
+but the ARM architecture class is permanently undefined.
+The initial English Major C operation grant excludes UDF.
+Therefore stop, reporting an ungranted undefined-instruction
+exception boundary rather than saying the instruction
+successfully advanced to 0x0008.
+
+This second path's visited offsets are:
+    0x0002
+    0x0006 (decoded UDF, English translation blocked).
+
+There is no reason to assert R0=0 in this path:
+the MOVS instruction at offset zero was never executed.
+There is no reason to assert R1=3:
+the instruction at offset 0x0008 was also never executed.
+
+PART THREE. WHAT THE EXAMPLE ESTABLISHES AND DOES NOT ESTABLISH.
+
+The example establishes how specific bytes yield specific branch
+target calculations and register/flag state changes under assumed
+machine inputs. It demonstrates that the same encoded conditional
+branch can select different successors without changing its bytes.
+
+It does not establish a real OS exception return, a privilege
+transition actually observed on silicon, a working English Major C
+parser, or an optimally scheduled implementation. The conditional
+branch operations are T1 and do NOT belong inside an IT block.
+
+The two non-branch machine instructions at 0x0006 and 0x000C are
+still understood by an ARM decoder. Their exclusion reflects the
+language's presently versioned permission contract rather than a
+defect in the physical CPU's ability to decode their bit patterns.
+
+The first trace never executes UDF. The second trace never executes
+SVC. A true machine-level trace has a causal successor relation;
+it is not the same thing as a linear listing of all bytes in memory.
+
+PART FOUR. RETAINED ALTERNATIVES.
+
+Option A: invert the preceding condition and place the ordinary
+nontrapping path adjacent to the conditional branch.
+Potential advantage: change branch direction and locality.
+Cost: requires relocating the actual instructions and recompiling;
+the new bytes would not be the original fixture.
+
+Option B: remove or replace the UDF encoding with an ordinary data
+operation. This could make a different executable behave differently,
+but it is NOT a valid translation of the original machine bytes.
+Decision: do not silently substitute.
+
+Option C: model UDF as an explicit typed exception instruction in a
+future expanded English Major C ISA grant. Benefit: can translate a
+larger portion of real binaries. Cost: must model the exception state
+rather than claiming a normal state transition.
+
+Option D: admit SVC with a pinned OS/ABI and explicit capability to
+request a supervisor exception. Benefit: can translate actual kernel
+service entry from a real executable. Cost: not portable across OSes
+without an environment-specific semantics file.
+
+Option E: keep both UDF and SVC as decoded, but ungranted, stopping
+points. This is the current profile's choice and permits meaningful
+bottom-up progress without inventing missing infrastructure.
+
+No option above justifies declaring a branch-prediction speedup.
+No option above should suppress the original assembly bytes or
+the reasons a choice was made.
+
+PART FIVE. REJECTION EXAMPLES FOR INDEPENDENT ACCEPTANCE.
+
+A verifier of these intended source semantics must reject any trace
+which:
+  * takes the BNE at offset 0x0002 after MOVS zero set Z=1;
+  * refuses to take the BEQ at offset 0x0004 with Z=1;
+  * treats the branch's zero displacement as an A+2 target;
+  * executes the skipped DEFE on the first trace;
+  * treats LLVM's "trap" spelling as a new permitted operation;
+  * leaves Z=1 after executing MOVS R1,#3;
+  * takes the BEQ at offset 0x000A after Z becomes zero;
+  * pretends DF01 is a signed-byte displacement;
+  * claims that an OS service was performed at DF01;
+  * substitutes a successful NOP for either SVC or UDF;
+  * labels absent register values as zeros;
+  * treats a branch predicted by hardware as proof it executed;
+  * claims this diagnostic was executed on an ARM process.
+
+END OF THE SOURCE-DERIVED TRACE.

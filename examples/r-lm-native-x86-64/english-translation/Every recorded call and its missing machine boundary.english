@@ -1,0 +1,366 @@
+Every recorded call and the machine-code boundary it crosses
+=============================================================
+
+This inventory follows the actual CALL instructions in the source archive.
+Every call is included whether or not the sample data executed it.
+A direct address visible in the linked executable is distinguished from
+an object-file relocation, a linker trampoline and an unknown indirect
+target. A symbol name is not a machine-state proof of the called body.
+
+External routines: dnrm2_, dscal_, ddot_, daxpy_, dcopy_ are BLAS
+numerical-library entry points; memmove/memset are C memory-library
+entries. The archived linked executable does not include their shared
+library implementations. Those uninspected instructions cannot be
+invented in English. PLT stubs also require dynamic linker state.
+
+Known source-based call purposes are supplied only as annotations
+after the machine boundary, not used to fabricate execution traces.
+
+Source file: ../dqrls.x86-64.disasm.txt
+----------------------------------
+At byte address 0x75, original CALL operand: 7a <dqrls_+0x7a>
+  Classification: OBJECT RELOCATION TO CAPTURED INTERNAL ROUTINE.
+  Resolved evidence: R_X86_64_PLT32	dqrdc2_-0x4.
+  External/internal effect boundary: Internal Fortran QR-factorization procedure; recorded body is in both its object listing and linked executable.
+
+At byte address 0x133, original CALL operand: 138 <dqrls_+0x138>
+  Classification: OBJECT RELOCATION TO CAPTURED INTERNAL ROUTINE.
+  Resolved evidence: R_X86_64_PLT32	dqrsl_-0x4.
+  External/internal effect boundary: Internal Fortran QR-solution procedure; recorded body is in both its object listing and linked executable.
+
+This listing contains 2 printed CALL instructions.
+
+Source file: ../dqrdc2.x86-64.disasm.txt
+----------------------------------
+At byte address 0xdb, original CALL operand: e0 <dqrdc2_+0xe0>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dnrm2_-0x4.
+  External/internal effect boundary: Compute a scaled Euclidean vector norm under the linked BLAS contract; exact external machine instructions and exceptional FP behavior are not captured.
+
+At byte address 0x45d, original CALL operand: 462 <dqrdc2_+0x462>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	memmove-0x4.
+  External/internal effect boundary: Copy overlapping-safe bytes under libc contract; external instructions are not captured.
+
+At byte address 0x47f, original CALL operand: 484 <dqrdc2_+0x484>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	memmove-0x4.
+  External/internal effect boundary: Copy overlapping-safe bytes under libc contract; external instructions are not captured.
+
+At byte address 0x5a1, original CALL operand: 5a6 <dqrdc2_+0x5a6>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dnrm2_-0x4.
+  External/internal effect boundary: Compute a scaled Euclidean vector norm under the linked BLAS contract; exact external machine instructions and exceptional FP behavior are not captured.
+
+At byte address 0x64e, original CALL operand: 653 <dqrdc2_+0x653>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dscal_-0x4.
+  External/internal effect boundary: Scale a vector by a scalar through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x7f1, original CALL operand: 7f6 <dqrdc2_+0x7f6>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	ddot_-0x4.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x83b, original CALL operand: 840 <dqrdc2_+0x840>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	daxpy_-0x4.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x8cd, original CALL operand: 8d2 <dqrdc2_+0x8d2>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dnrm2_-0x4.
+  External/internal effect boundary: Compute a scaled Euclidean vector norm under the linked BLAS contract; exact external machine instructions and exceptional FP behavior are not captured.
+
+This listing contains 8 printed CALL instructions.
+
+Source file: ../dqrsl.x86-64.disasm.txt
+----------------------------------
+At byte address 0x201, original CALL operand: 206 <dqrsl_+0x206>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	memset-0x4.
+  External/internal effect boundary: Fill a memory range under libc contract; external instructions are not captured.
+
+At byte address 0x2ab, original CALL operand: 2b0 <dqrsl_+0x2b0>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	daxpy_-0x4.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x416, original CALL operand: 41b <dqrsl_+0x41b>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	ddot_-0x4.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x45b, original CALL operand: 460 <dqrsl_+0x460>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	daxpy_-0x4.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x4ae, original CALL operand: 4b3 <dqrsl_+0x4b3>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	ddot_-0x4.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x4f3, original CALL operand: 4f8 <dqrsl_+0x4f8>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	daxpy_-0x4.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x53a, original CALL operand: 53f <dqrsl_+0x53f>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x633, original CALL operand: 638 <dqrsl_+0x638>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	ddot_-0x4.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x679, original CALL operand: 67e <dqrsl_+0x67e>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	daxpy_-0x4.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x786, original CALL operand: 78b <dqrsl_+0x78b>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	ddot_-0x4.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x7d1, original CALL operand: 7d6 <dqrsl_+0x7d6>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	daxpy_-0x4.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x848, original CALL operand: 84d <dqrsl_+0x84d>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x8bd, original CALL operand: 8c2 <dqrsl_+0x8c2>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x91f, original CALL operand: 924 <dqrsl_+0x924>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	memset-0x4.
+  External/internal effect boundary: Fill a memory range under libc contract; external instructions are not captured.
+
+At byte address 0x994, original CALL operand: 999 <dqrsl_+0x999>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0xa16, original CALL operand: a1b <dqrsl_+0xa1b>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0xace, original CALL operand: ad3 <dqrsl_+0xad3>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0xb22, original CALL operand: b27 <dqrsl_+0xb27>
+  Classification: OBJECT RELOCATION TO UNCAPTURED LIBRARY BODY.
+  Resolved evidence: R_X86_64_PLT32	dcopy_-0x4.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+This listing contains 18 printed CALL instructions.
+
+Source file: ../linked-executable.x86-64.disasm.txt
+----------------------------------
+At byte address 0x1010, original CALL operand: rax
+  Classification: INDIRECT CALL: RUNTIME TARGET VALUE NEEDED.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: The live register/memory pointer is required to know which routine executes; a static label alone does not establish destination.
+
+At byte address 0x126f, original CALL operand: 1500 <dqrls_>
+  Classification: LINKED DIRECT CALL INTO CAPTURED EXECUTABLE CODE.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Internal Fortran QR least-squares wrapper; recorded body is in both its object listing and linked executable.
+
+At byte address 0x12b1, original CALL operand: 1050 <puts@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: String output through libc; library's instructions not captured.
+
+At byte address 0x12e1, original CALL operand: 1030 <printf@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Formatted output through libc; library's instructions not captured.
+
+At byte address 0x1385, original CALL operand: 1030 <printf@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Formatted output through libc; library's instructions not captured.
+
+At byte address 0x142b, original CALL operand: QWORD PTR [rip+0x3baf]        # 4fe0 <__libc_start_main@GLIBC_2.34>
+  Classification: INDIRECT READ OF A DYNAMIC RUNTIME FUNCTION POINTER.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: The actual target is obtained from the GOT at runtime; the library's body is not present.
+
+At byte address 0x14d2, original CALL operand: 10c0 <__cxa_finalize@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Runtime finalization outside this compiled Fortran numerical path.
+
+At byte address 0x14d7, original CALL operand: 1440 <deregister_tm_clones>
+  Classification: LINKED DIRECT CALL INTO CAPTURED EXECUTABLE CODE.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Machine instructions for this internal linked target should be sought by its symbol/byte address in the linked executable.
+
+At byte address 0x1575, original CALL operand: 17a0 <dqrdc2_>
+  Classification: LINKED DIRECT CALL INTO CAPTURED EXECUTABLE CODE.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Internal Fortran QR-factorization procedure; recorded body is in both its object listing and linked executable.
+
+At byte address 0x1633, original CALL operand: 20d0 <dqrsl_>
+  Classification: LINKED DIRECT CALL INTO CAPTURED EXECUTABLE CODE.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Internal Fortran QR-solution procedure; recorded body is in both its object listing and linked executable.
+
+At byte address 0x187b, original CALL operand: 1070 <dnrm2_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a scaled Euclidean vector norm under the linked BLAS contract; exact external machine instructions and exceptional FP behavior are not captured.
+
+At byte address 0x1bfd, original CALL operand: 10b0 <memmove@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy overlapping-safe bytes under libc contract; external instructions are not captured.
+
+At byte address 0x1c1f, original CALL operand: 10b0 <memmove@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy overlapping-safe bytes under libc contract; external instructions are not captured.
+
+At byte address 0x1d41, original CALL operand: 1070 <dnrm2_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a scaled Euclidean vector norm under the linked BLAS contract; exact external machine instructions and exceptional FP behavior are not captured.
+
+At byte address 0x1dee, original CALL operand: 1090 <dscal_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Scale a vector by a scalar through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x1f91, original CALL operand: 10a0 <ddot_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x1fdb, original CALL operand: 1060 <daxpy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x206d, original CALL operand: 1070 <dnrm2_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a scaled Euclidean vector norm under the linked BLAS contract; exact external machine instructions and exceptional FP behavior are not captured.
+
+At byte address 0x22d1, original CALL operand: 1040 <memset@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Fill a memory range under libc contract; external instructions are not captured.
+
+At byte address 0x237b, original CALL operand: 1060 <daxpy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x24e6, original CALL operand: 10a0 <ddot_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x252b, original CALL operand: 1060 <daxpy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x257e, original CALL operand: 10a0 <ddot_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x25c3, original CALL operand: 1060 <daxpy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x260a, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x2703, original CALL operand: 10a0 <ddot_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x2749, original CALL operand: 1060 <daxpy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x2856, original CALL operand: 10a0 <ddot_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Compute a vector dot product through linked BLAS; external machine instructions and accumulation order are not captured.
+
+At byte address 0x28a1, original CALL operand: 1060 <daxpy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Add a scaled vector to another vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x2918, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x298d, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x29ef, original CALL operand: 1040 <memset@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Fill a memory range under libc contract; external instructions are not captured.
+
+At byte address 0x2a64, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x2ae6, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x2b9e, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+At byte address 0x2bf2, original CALL operand: 1080 <dcopy_@plt>
+  Classification: LINKED CALL THROUGH PLT TO EXTERNAL BODY.
+  Resolved evidence: no object relocation line for this linked instruction.
+  External/internal effect boundary: Copy a vector through linked BLAS; external machine instructions are not captured.
+
+This listing contains 36 printed CALL instructions.
+
+Coverage and qualification
+--------------------------
+CALL records across four overlapping source listings: 64.
+Classified calls to visible internal code: 6.
+Classified calls to library procedures whose instruction bodies are absent: 56.
+Calls whose effective runtime target cannot be fully proven statically: 2.
+
+Call count is a count of static CALL instructions, NOT calls actually
+performed during the numerical test. It also repeats some calls once
+in an object listing and once in the linked executable.
+No arithmetic result, error behavior, BLAS kernel instructions or
+call-by-call execution frequency is inferred from this static inventory.

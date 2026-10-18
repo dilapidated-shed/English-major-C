@@ -1,0 +1,142 @@
+name: Execute English Major C ARM and x86 with QEMU
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qemu-dual-target:
+    name: Exact-head NDK static ARM and x86 binaries under QEMU
+    runs-on: ubuntu-24.04
+    env:
+      NDK_VERSION: 27.2.12479018
+    steps:
+      - name: Check out exact source head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Check source SHA
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual=$(git rev-parse HEAD)
+          test "$actual" = "$EXPECTED_HEAD"
+          echo "candidate_head=$actual"
+      - name: Provision ARM and x86 QEMU user emulators
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y qemu-user
+          qemu-arm --version
+          qemu-x86_64 --version
+      - name: Install Android command-line tools only, not retired tools package
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+          log-accepted-android-sdk-licenses: 'false'
+      - name: Pin and inspect the actual cross-toolchain
+        run: |
+          set -euo pipefail
+          sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          ndk="$sdk_root/ndk/${NDK_VERSION}"
+          if [ ! -x "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" ]; then
+            sdk_manager="$sdk_root/cmdline-tools/16.0/bin/sdkmanager"
+            test -x "$sdk_manager" || { echo "No verified NDK installation path" >&2; exit 1; }
+            "$sdk_manager" --sdk_root="$sdk_root" --install "ndk;${NDK_VERSION}"
+          fi
+          test -x "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+          echo "NDK_ROOT=$ndk" >> "$GITHUB_ENV"
+          "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
+          echo "build_toolchain=ndk version=$NDK_VERSION"
+      - name: Assemble and link freestanding static ELF binaries through NDK
+        run: |
+          set -euo pipefail
+          c="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+          "$c" --target=armv7a-linux-androideabi21 -march=armv7-a -marm \
+            -nostdlib -static -fno-pie -no-pie -Wl,-e,_start \
+            examples/unknown-entry-sum/generated-thumb.s \
+            tests/emulation/armv7-a32-linux-entry.s \
+            -o "$RUNNER_TEMP/armv7.elf"
+          "$c" --target=x86_64-linux-android21 \
+            -nostdlib -static -fno-pie -no-pie -Wl,-e,_start \
+            examples/unknown-entry-sum-x86-64/generated-x86-64.s \
+            tests/emulation/x86-64-linux-entry.s \
+            -o "$RUNNER_TEMP/x86-64.elf"
+          file "$RUNNER_TEMP/armv7.elf" "$RUNNER_TEMP/x86-64.elf"
+          sha256sum "$RUNNER_TEMP/armv7.elf" "$RUNNER_TEMP/x86-64.elf"
+          readelf -h "$RUNNER_TEMP/armv7.elf" | grep -E 'Class:|Machine:|Entry point|Flags:'
+          readelf -h "$RUNNER_TEMP/x86-64.elf" | grep -E 'Class:|Machine:|Entry point'
+          if readelf -l "$RUNNER_TEMP/armv7.elf" | grep -q INTERP; then
+            echo 'FAIL: ARM execution needs an unavailable Android runtime loader' >&2
+            exit 1
+          fi
+          if readelf -l "$RUNNER_TEMP/x86-64.elf" | grep -q INTERP; then
+            echo 'FAIL: x86 execution needs an unavailable Android runtime loader' >&2
+            exit 1
+          fi
+          o="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-objdump"
+          "$o" -d "$RUNNER_TEMP/armv7.elf" > "$RUNNER_TEMP/armv7.disassembly.txt"
+          "$o" -d "$RUNNER_TEMP/x86-64.elf" > "$RUNNER_TEMP/x86-64.disassembly.txt"
+      - name: Actually execute all six examples in both CPU emulators
+        run: |
+          set -euo pipefail
+          qemu-arm -cpu cortex-a9 -d in_asm,exec -D "$RUNNER_TEMP/armv7.trace" \
+            "$RUNNER_TEMP/armv7.elf"
+          echo 'PASS ARM emulation: six explicit oracle cases'
+          qemu-x86_64 -cpu qemu64 -d in_asm,exec -D "$RUNNER_TEMP/x86-64.trace" \
+            "$RUNNER_TEMP/x86-64.elf"
+          echo 'PASS x86 emulation: six explicit oracle cases'
+          test -s "$RUNNER_TEMP/armv7.trace"
+          test -s "$RUNNER_TEMP/x86-64.trace"
+          head -30 "$RUNNER_TEMP/armv7.trace"
+          head -30 "$RUNNER_TEMP/x86-64.trace"
+      - name: Require machine execution to reject deliberately wrong arithmetic
+        run: |
+          set -euo pipefail
+          c="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+          sed 's/add.w r2, r2, r3/sub.w r2, r2, r3/' \
+            examples/unknown-entry-sum/generated-thumb.s > "$RUNNER_TEMP/arm-wrong.s"
+          ! cmp -s "$RUNNER_TEMP/arm-wrong.s" examples/unknown-entry-sum/generated-thumb.s
+          "$c" --target=armv7a-linux-androideabi21 -march=armv7-a -marm \
+            -nostdlib -static -fno-pie -no-pie -Wl,-e,_start \
+            "$RUNNER_TEMP/arm-wrong.s" tests/emulation/armv7-a32-linux-entry.s \
+            -o "$RUNNER_TEMP/arm-wrong.elf"
+          if qemu-arm -cpu cortex-a9 "$RUNNER_TEMP/arm-wrong.elf"; then
+            echo 'FAIL: mutated ARM arithmetic returned success' >&2
+            exit 1
+          fi
+          sed 's/lea edx, \[rdx + rcx\]/lea edx, [rdx + rcx + 1]/' \
+            examples/unknown-entry-sum-x86-64/generated-x86-64.s > "$RUNNER_TEMP/x86-wrong.s"
+          ! cmp -s "$RUNNER_TEMP/x86-wrong.s" examples/unknown-entry-sum-x86-64/generated-x86-64.s
+          "$c" --target=x86_64-linux-android21 \
+            -nostdlib -static -fno-pie -no-pie -Wl,-e,_start \
+            "$RUNNER_TEMP/x86-wrong.s" tests/emulation/x86-64-linux-entry.s \
+            -o "$RUNNER_TEMP/x86-wrong.elf"
+          if qemu-x86_64 -cpu qemu64 "$RUNNER_TEMP/x86-wrong.elf"; then
+            echo 'FAIL: mutated x86 arithmetic returned success' >&2
+            exit 1
+          fi
+          echo 'PASS: both emulators rejected deliberately wrong arithmetic'
+      - name: Retain binaries and machine-instruction traces
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-armv7-x86-64-emulation
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/armv7.elf
+            ${{ runner.temp }}/x86-64.elf
+            ${{ runner.temp }}/armv7.disassembly.txt
+            ${{ runner.temp }}/x86-64.disassembly.txt
+            ${{ runner.temp }}/armv7.trace
+            ${{ runner.temp }}/x86-64.trace
+
+# These freestanding binaries issue only Linux exit syscalls; no Bionic,
+# libc, Android APK or shared runtime is claimed. ARM harness is A32, while
+# the English-generated routine stays Thumb (T32). This workflow does not
+# run R's QR decomposition or prove independent ai-ci acceptance.

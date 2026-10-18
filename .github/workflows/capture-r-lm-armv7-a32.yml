@@ -1,0 +1,97 @@
+name: Capture R QR actual ARMv7-A A32 instruction bytes
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-armv7-a32:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout the exact source revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Record the exact checkout identity
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "source_commit=$EXPECTED_SHA"
+
+      - name: Install GNU Fortran 14 ARM32 cross-compiler and ARM binutils
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends             gfortran-14-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+
+      - name: Compile actual R Fortran routines for ARMv7-A A32 softfp and capture instructions
+        run: |
+          set -euo pipefail
+          arm-linux-gnueabihf-gfortran-14 --version | head -n 1
+          arm-linux-gnueabihf-objdump --version | head -n 1
+          mkdir -p /tmp/r-qr-arm-capture
+          cd examples/r-lm-native-x86-64
+          for routine in dqrls dqrdc2 dqrsl; do
+            arm-linux-gnueabihf-gfortran-14 \
+              -O2 -g -fno-inline -fPIC \
+              -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=softfp \
+              -c "$routine.f" -o "/tmp/r-qr-arm-capture/$routine.armv7-a32.o"
+            arm-linux-gnueabihf-objdump -dr \
+              --disassemble="${routine}_" \
+              "/tmp/r-qr-arm-capture/$routine.armv7-a32.o" \
+              > "/tmp/r-qr-arm-capture/$routine.armv7-a32.disasm.txt"
+            test -s "/tmp/r-qr-arm-capture/$routine.armv7-a32.disasm.txt"
+            arm-linux-gnueabihf-readelf -s "/tmp/r-qr-arm-capture/$routine.armv7-a32.o" \
+              | grep -Eq "[[:space:]]${routine}_$"
+            arm-linux-gnueabihf-readelf -h "/tmp/r-qr-arm-capture/$routine.armv7-a32.o" \
+              | grep -q 'Machine:[[:space:]]*ARM'
+          done
+          {
+            echo "R QR ARMv7-A A32 object capture"
+            echo "Exact checked out revision: $(git rev-parse HEAD)"
+            echo "Runner: $(uname -a)"
+            arm-linux-gnueabihf-gfortran-14 --version | head -n 1
+            arm-linux-gnueabihf-objdump --version | head -n 1
+            echo 'Compilation flags: -O2 -g -fno-inline -fPIC -march=armv7-a -marm -mfpu=vfpv3-d16 -mfloat-abi=softfp'
+            for routine in dqrls dqrdc2 dqrsl; do
+              echo "=== $routine ELF header ==="
+              arm-linux-gnueabihf-readelf -h "/tmp/r-qr-arm-capture/$routine.armv7-a32.o"
+              echo "=== $routine ARM attributes ==="
+              arm-linux-gnueabihf-readelf -A "/tmp/r-qr-arm-capture/$routine.armv7-a32.o"
+            done
+          } > /tmp/r-qr-arm-capture/capture-environment.txt
+          ( cd /tmp/r-qr-arm-capture && sha256sum *.o *.txt > SHA256SUMS )
+          echo '=== CAPTURE CHECKSUMS ==='
+          cat /tmp/r-qr-arm-capture/SHA256SUMS
+          echo '=== CAPTURE ENVIRONMENT ==='
+          cat /tmp/r-qr-arm-capture/capture-environment.txt
+          # Mark sections unambiguously for transferring exact bytes to Git.
+          for file in /tmp/r-qr-arm-capture/dqrls.armv7-a32.disasm.txt                       /tmp/r-qr-arm-capture/dqrdc2.armv7-a32.disasm.txt                       /tmp/r-qr-arm-capture/dqrsl.armv7-a32.disasm.txt                       /tmp/r-qr-arm-capture/capture-environment.txt                       /tmp/r-qr-arm-capture/SHA256SUMS; do
+            name="$(basename "$file")"
+            echo "<<<BEGIN_TEXT_CAPTURE:$name>>>"
+            cat "$file"
+            echo "<<<END_TEXT_CAPTURE:$name>>>"
+          done
+          for file in /tmp/r-qr-arm-capture/*.o; do
+            name="$(basename "$file")"
+            echo "<<<BEGIN_BASE64_CAPTURE:$name>>>"
+            base64 -w 0 "$file"
+            printf '\n'
+            echo "<<<END_BASE64_CAPTURE:$name>>>"
+          done
+
+      - name: Upload originals with their exact object bytes
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r-qr-armv7-a32-softfp-${{ github.sha }}
+          path: /tmp/r-qr-arm-capture/
+          if-no-files-found: error
+          retention-days: 30

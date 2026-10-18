@@ -1,0 +1,38 @@
+module EnglishMajorC.SourceCategories
+
+import Data.Text
+
+-- Source roles, not a universal numerical type system. These are the existing
+-- thirteen operation families from the unknown-entry example. The low/high
+-- sixteen-bit forms construct the fixed 65535 marker, not arbitrary immediates.
+-- Declare the payload choice before the source-item choice, and export both
+-- because the independent scanner/parser now imports this actual module.
+
+public export
+choice permitted_machine_operation one_of
+  put_zero_into_register_without_changing_flags Text
+  put_low_sixteen_bits_in_register Text
+  put_high_sixteen_bits_in_register Text
+  compare_register_with_zero_and_update_flags Text
+  compare_two_registers_and_update_flags Text Text
+  load_four_bytes_from_named_address_into_register Text Text
+  advance_named_address_by_four_without_changing_flags Text
+  decrease_named_count_by_one_without_changing_flags Text
+  add_named_register_contents_without_changing_flags Text Text
+  replace_execution_index_when_zero_flag_is_one Text
+  replace_execution_index_unconditionally Text
+  copy_register_contents_without_changing_flags Text Text
+  return_to_link_register_instruction_address
+
+public export
+choice english_source_item one_of
+  machine_target_declaration Text
+  executable_operation permitted_machine_operation
+  nonexecuting_comment Text
+  nonexecuting_explanation Text
+  register_name_declaration Text Text
+  following_instruction_name Text
+
+-- Text operands are unresolved syntax, not permission to emit assembly.
+-- The parser checks declared register and instruction names separately.
+-- A successful parse is neither English semantic proof nor target execution.
