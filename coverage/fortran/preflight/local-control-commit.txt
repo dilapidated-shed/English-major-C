@@ -1,0 +1,6 @@
+tree 93c1df89d0062a79f8fb68e576656adb1cfda65d
+parent 181c6011956a39454fd8b018380c2ea54f0ab8e7
+author Codex <codex@openai.com> 1792324934 +0000
+committer Codex <codex@openai.com> 1792324934 +0000
+
+Record EMC Fortran envelope and fail-closed owner preflight

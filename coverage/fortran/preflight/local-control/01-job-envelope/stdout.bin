@@ -1,0 +1,3 @@
+tasks/emc-fortran-cover-01/assignment.txt: OK
+tasks/emc-fortran-cover-01/source-heads.tsv: OK
+tasks/emc-fortran-cover-01/control-heads.tsv: OK

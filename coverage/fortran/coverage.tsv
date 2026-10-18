@@ -1,0 +1,8 @@
+dimension	numerator	denominator	status	evidence_or_reason
+source_commits_available	6	6	PASS_SOURCE_AVAILABILITY	FP receipt at control 646957bcdf0fbce3492553f84bc67b818dca643f
+source_to_machine_mapping	UNKNOWN	UNKNOWN	NOT_AUDITED	No admitted Kitchen/Ike inventory run
+instruction_accounting	UNKNOWN	UNKNOWN	NOT_AUDITED	Historical overlapping listing totals have not been recomputed
+verified_semantic_coverage	UNKNOWN	UNKNOWN	NOT_AUDITED	Historical audit evidence has not been independently adjudicated
+library_implementation_closure	UNKNOWN	UNKNOWN	NOT_AUDITED	Softfp reference BLAS objects exist; closure has not been determined
+fortran_language_features	UNKNOWN	UNKNOWN	PROFILE_UNDEFINED	No supported standard/profile is established by these pins
+independent_ai_ci_acceptance	UNKNOWN	UNKNOWN	NOT_RUN	No matching owner checker found at observed ai-ci pin

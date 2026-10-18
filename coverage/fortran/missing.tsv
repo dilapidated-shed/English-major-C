@@ -1,0 +1,13 @@
+priority	item	state	evidence	recovery
+P0	Kitchen inventory recipe	MISSING_IMPLEMENTATION	No emc/fortran inventory task in Kitchen a91df2ef2bf0d37fb32c10be0a2f8208648220e0; proposed tasks/emc-fortran-coverage/1.grease absent	Implement and qualify owner recipe; publish reviewed immutable pin; new FP candidate/run
+P0	Grease runtime	UNAVAILABLE_ON_HOST	command -v grease exited 1 on Ubuntu 24.04.3 Linux x86_64	Resolve exact target through Cat Food or a verified published runtime; do not substitute Bash
+P0	Ike runtime	UNAVAILABLE_ON_HOST	command -v ike exited 1; scoped scratch executable search found none	Resolve verified executable/source/artifact identity and host qualification; do not substitute make
+P0	Independent acceptance checker	MISSING_IMPLEMENTATION	No emc/fortran coverage checker found in ai-ci 2843a804fea1bbc4e3e40b6c236064bb1d41f316	Implement independent raw-source/ELF oracle and adversarial fixtures in ai-ci; publish pin
+P1	Declared archived corpus and overlap relation	NOT_AUDITED	Six different source trees pinned; all complete tree metadata retained	Materialize all pins; define corpus by artifact digest, specimen, ISA mode, ABI and section; retain competing versions
+P1	Byte ranges instructions data relocations gaps	NOT_AUDITED	Machine inventory not run	Derive bytes from pinned originals; ledger every interval with missing/unknown entries; test damaged examples
+P1	Observed instruction-form effects	NOT_AUDITED	Existing prose and prior semantic audit remain separate evidence	Read normative ISA/ABI evidence; adjudicate every required effect and preserve contradictions
+P1	External call and library closure	NOT_AUDITED	Softfp reference-blas source/object entries exist in provenance/pr-10-tree.tsv	Identify captured bodies by digest and missing bodies explicitly; do not claim all BLAS absent or all covered
+P1	Fortran versions and feature denominator	UNDEFINED	Three QR routines do not define language-wide support	Choose and document exact standard/profile with primary references; distinguish exercised/documented/absent/outside-profile
+P1	Adversarial corruption suite	NOT_IMPLEMENTED	No checker or damaged-fixture execution recorded	Reject each required corruption class with positive twins through Kitchen/Ike and ai-ci
+P2	Source or upstream reference unavailable	CONDITIONAL	All six pinned commit objects were available in this run	Retain pin and missing row; recover exact Git object/archive and compare digest; new evidence never overwrites failure
+P2	Unverifiable dependency bytes or semantics	CONDITIONAL	Closure and semantic audit not yet performed	Keep UNKNOWN/NOT_CAPTURED/CONTRADICTED with exact cause; obtain original artifact or authoritative evidence without invented implementation
