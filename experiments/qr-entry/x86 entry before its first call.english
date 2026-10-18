@@ -1,0 +1,34 @@
+(NOTE: This specimen follows the actual x86-64 dqrls object and stops before its unresolved call at byte offset 0x75.)
+(NOTE: Four-byte register writes clear the upper half of the containing eight-byte register. Memory is little-endian. The sequential execution index uses each original instruction's byte length.)
+At byte offset 0x0, save the eight-byte value in register r15 on the stack.
+At byte offset 0x2, write zero into the four-byte view of register rax and update logic flags.
+At byte offset 0x4, copy the eight-byte value in register rcx into register r15.
+At byte offset 0x7, copy the eight-byte value in register rdx into register rcx.
+At byte offset 0xa, save the eight-byte value in register r14 on the stack.
+At byte offset 0xc, save the eight-byte value in register r13 on the stack.
+At byte offset 0xe, copy the eight-byte value in register r8 into register r13.
+At byte offset 0x11, save the eight-byte value in register r12 on the stack.
+At byte offset 0x13, copy the eight-byte value in register rsi into register r12.
+At byte offset 0x16, save the eight-byte value in register rbp on the stack.
+At byte offset 0x17, save the eight-byte value in register rbx on the stack.
+At byte offset 0x18, subtract 0x60 from stack register rsp and update arithmetic flags.
+At byte offset 0x1c, sign-extend the four-byte integer at register rsi plus 0x0 into the eight-byte register rbp.
+At byte offset 0x1f, sign-extend the four-byte integer at register rdx plus 0x0 into the eight-byte register rsi.
+At byte offset 0x22, store the eight-byte value in register rdx at register rsp plus 0x38.
+At byte offset 0x27, read an eight-byte word at register rsp plus 0xa0 into register rbx.
+At byte offset 0x2f, copy the eight-byte value in register r12 into register rdx.
+At byte offset 0x32, test the eight-byte value in register rbp against itself and update logic flags.
+At byte offset 0x35, store the eight-byte value in register r8 at register rsp plus 0x30.
+At byte offset 0x3a, copy the eight-byte value in register r9 into register r8.
+At byte offset 0x3d, copy the eight-byte value in register rax into register rbp only when the sign flag is set.
+At byte offset 0x41, test the eight-byte value in register rsi against itself and update logic flags.
+At byte offset 0x44, store the eight-byte value in register rdi at register rsp plus 0x8.
+At byte offset 0x49, copy the eight-byte value in register rsi into register rax only when the sign flag is clear.
+At byte offset 0x4d, copy the eight-byte value in register r12 into register rsi.
+At byte offset 0x50, store the eight-byte value in register rax at register rsp plus 0x40.
+At byte offset 0x55, copy the eight-byte value in register rax into register r14.
+At byte offset 0x58, read the eight-byte value at stack register rsp plus 0xc8 before decrementing the stack pointer, then save that value on the stack.
+At byte offset 0x5f, read the eight-byte value at stack register rsp plus 0xc0 before decrementing the stack pointer, then save that value on the stack.
+At byte offset 0x66, read the eight-byte value at stack register rsp plus 0xd0 before decrementing the stack pointer, then save that value on the stack.
+At byte offset 0x6d, read an eight-byte word at register rsp plus 0xc8 into register r9.
+(NOTE: A conditionally copied value does not branch. The three memory-source pushes each evaluate their address against their own pre-decrement RSP, not a single original RSP.)

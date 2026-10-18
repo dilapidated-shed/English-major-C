@@ -1,0 +1,53 @@
+(NOTE: Executable English for the original x86-64 dqrdc2 object through offset 0xd5. Stop before the external dnrm2 call at 0xdb; do not supply a fabricated norm.)
+(NOTE: Four-byte register writes clear the enclosing register's upper half. The XMM2 stack save transfers raw bits, even when those bits represent a NaN.)
+At byte offset 0x0, save the eight-byte value in register r15 on the stack.
+At byte offset 0x2, save the eight-byte value in register r14 on the stack.
+At byte offset 0x4, save the eight-byte value in register r13 on the stack.
+At byte offset 0x6, save the eight-byte value in register r12 on the stack.
+At byte offset 0x8, save the eight-byte value in register rbp on the stack.
+At byte offset 0x9, save the eight-byte value in register rbx on the stack.
+At byte offset 0xa, subtract 0x138 from stack register rsp and update arithmetic flags.
+At byte offset 0x11, sign-extend the four-byte integer at register rsi plus 0x0 into the eight-byte register rsi.
+At byte offset 0x14, read a four-byte word at register rcx plus 0x0 into register r11.
+At byte offset 0x17, store the eight-byte value in register rdi at register rsp plus 0x68.
+At byte offset 0x1c, copy the eight-byte value in register rdx into register rdi.
+At byte offset 0x1f, read an eight-byte word at register rsp plus 0x180 into register rbp.
+At byte offset 0x27, store the eight-byte value in register rdx at register rsp plus 0xd8.
+At byte offset 0x2f, write zero into the four-byte view of register rdx and update logic flags.
+At byte offset 0x31, test the eight-byte value in register rsi against itself and update logic flags.
+At byte offset 0x34, copy the eight-byte value in register rdx into register rax.
+At byte offset 0x37, read a four-byte word at register rdi plus 0x0 into register rdx.
+At byte offset 0x39, store the eight-byte value in register rcx at register rsp plus 0x78.
+At byte offset 0x3e, copy the eight-byte value in register rsi into register rax only when the sign flag is clear.
+At byte offset 0x42, store the eight-byte value in register r8 at register rsp plus 0xf8.
+At byte offset 0x4a, store the eight-byte value in register r9 at register rsp plus 0x70.
+At byte offset 0x4f, store the eight-byte value in register rax at register rsp plus 0x60.
+At byte offset 0x54, complement the eight-byte value in register rax into register rax without changing flags.
+At byte offset 0x57, store the eight-byte value in register rax at register rsp plus 0x90.
+At byte offset 0x5f, test the four-byte value in register rdx against itself and update logic flags.
+At byte offset 0x61, branch to procedure byte offset 0x91e only when the signed comparison is less than or equal to zero.
+At byte offset 0x67, test the four-byte value in register r11 against itself and update logic flags.
+At byte offset 0x6a, branch to procedure byte offset 0x702 only when the signed comparison is less than or equal to zero.
+At byte offset 0x70, sign-extend the four-byte view of register r11 into the eight-byte register rdx.
+At byte offset 0x73, write zero into the four-byte view of register rcx and update logic flags.
+At byte offset 0x75, read an eight-byte word at register rsp plus 0x68 into register r12.
+At byte offset 0x7a, read an eight-byte word at register rsp plus 0x60 into register rdi.
+At byte offset 0x7f, test the eight-byte value in register rdx against itself and update logic flags.
+At byte offset 0x82, write 0x1 into the four-byte view of register rbx without changing flags.
+At byte offset 0x87, copy the eight-byte value in register rcx into register rdx only when the sign flag is set.
+At byte offset 0x8b, store the eight-byte value in register r12 at register rsp plus 0xd0.
+At byte offset 0x93, multiply the eight-byte value in register rdi by 0x8 into register r15 without changing flags.
+At byte offset 0x9b, copy the eight-byte value in register rdx into register r14.
+At byte offset 0x9e, add the eight-byte values in registers rdx and rdx into register rax without changing flags.
+At byte offset 0xa2, complement the eight-byte value in register r14 into register r14 without changing flags.
+At byte offset 0xa5, add the eight-byte values in registers rax and r14 into register r10 without changing flags.
+At byte offset 0xa9, store the eight-byte value in register r14 at register rsp plus 0x8.
+At byte offset 0xae, copy the eight-byte value in register rbp into register r14.
+At byte offset 0xb1, add the eight-byte value in register rbp to register r10 multiplied by 0x8 into register r13 without changing flags.
+At byte offset 0xb6, copy the four-byte value in register r11 into register rbp.
+At byte offset 0xb9, read an eight-byte word at register rsp plus 0xd8 into register rdi.
+At byte offset 0xc1, write the relocated read-only section address into the eight-byte register rdx without changing flags.
+At byte offset 0xc8, copy the eight-byte value in register r12 into register rsi.
+At byte offset 0xcb, store the eight-byte value in register rax at register rsp plus 0x30.
+At byte offset 0xd0, store the eight-byte value in register r10 at register rsp plus 0x18.
+At byte offset 0xd5, store the low eight-byte payload of vector register xmm2 at stack register rsp plus 0x10 without changing registers or floating status.
