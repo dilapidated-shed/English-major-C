@@ -1,0 +1,28 @@
+This program uses x86-64 instructions.
+
+Name register rdi "address of the next entry".
+Name register rsi "number of entries remaining".
+Name register rdx "running total".
+Name register rcx "current entry".
+Name register r8 "unknown marker".
+Name register rax "return value".
+
+Name the following instruction "prepare the total".
+Put zero into "running total" without changing the condition flags.
+Put 65535 into the low sixteen bits of "unknown marker" and zero into its high sixteen bits.
+Set the high sixteen bits of "unknown marker" to one by a bitwise inclusive OR and update the condition flags.
+
+Name the following instruction "check whether any entries remain".
+Compare "number of entries remaining" with zero and update the condition flags.
+If the zero flag is one, replace the execution index with the instruction named "return the result".
+Load exactly four bytes from the address in "address of the next entry" into "current entry".
+Increase "address of the next entry" by four without changing the condition flags.
+Decrease "number of entries remaining" by one without changing the condition flags.
+Compare "current entry" with "unknown marker" and update the condition flags.
+If the zero flag is one, replace the execution index with the instruction named "check whether any entries remain".
+Add "current entry" to "running total" and keep only the lowest thirty-two result bits without changing the condition flags.
+Replace the execution index with the instruction named "check whether any entries remain".
+
+Name the following instruction "return the result".
+Copy "running total" into "return value" without changing the condition flags.
+Return to the address saved by the machine call operation.
