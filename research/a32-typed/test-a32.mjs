@@ -130,3 +130,22 @@ test('unknown rows and malformed noninstruction records cannot hide machine byte
   rejected('64: z0000000 .word 0x00000000\n','Malformed');
   rejected('4: e1a06003 mov r6, r3\nnot-a-listing-record\n','line: 2');
 });
+
+test('each saved prefix word independently decodes to the same typed form without assembly text',()=>{
+  for(const line of expected) {
+    const fields=line.split('|');
+    const result=spawnSync(executable,['--word',fields[1]],{encoding:'utf8',timeout:15000});
+    assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
+    assert.equal(result.stdout.trim(),fields.slice(2).join('|'));
+  }
+});
+
+test('word-only decoder rejects changed conditions flags writeback roles and shift fields',()=>{
+  const invalid=['e1b06003','01a06003','e5b2c000','e592f000','e59fc000',
+    'e1a06023','e1cc804c','e92d2000','e92d8000','e92d0000','e24dd14c','ebfffffe'];
+  for(const word of invalid) {
+    const result=spawnSync(executable,['--word',word],{encoding:'utf8',timeout:15000});
+    assert.equal(result.status,1,'Invalid raw encoding was admitted: '+word);
+    assert.match(result.stdout,/Unsupported/);
+  }
+});

@@ -5,6 +5,7 @@ import Data.Text
 import System
 import System.File
 import EnglishMajorC.A32Atoms
+import EnglishMajorC.A32Decode
 
 -- Dedicated A32 machine-listing parser. Never infer source instructions from
 -- English sentences, and never accept an assembler's mnemonic as evidence that
@@ -212,13 +213,21 @@ is_symbol_heading symbol =
     ('<' :: _, '>' :: _) ⇒ True
     _ ⇒ False
 
+-- File paths may contain spaces. Match the fixed header suffix, retaining
+-- the entire untouched source row rather than treating the path as one token.
+is_object_file_header : List Text → Bool
+is_object_file_header parts =
+  case reverse parts of
+    "elf32-littlearm" :: "format" :: "file" :: ":" :: (_ :: _) ⇒ True
+    _ ⇒ False
+
 parse_listing_line : Number → Text → Either Text parsed_listing_record
 parse_listing_line line_number source =
   let parts = scan_listing (remove_annotation (unpack source)) [] [] in
-  case parts of
+  if is_object_file_header parts
+    then Right (nonexecuting_object_header line_number source)
+  else case parts of
     [] ⇒ Right (nonexecuting_blank_line line_number source)
-    path :: ":" :: "file" :: "format" :: ["elf32-littlearm"] ⇒
-      Right (nonexecuting_object_header line_number source)
     ["Disassembly", "of", "section", section, ":"] ⇒
       Right (nonexecuting_section_heading line_number source)
     [address, symbol, ":"] ⇒
@@ -248,8 +257,10 @@ parse_listing_line line_number source =
         (_, _, Nothing) ⇒ Left ("Unsupported A32 instruction or operands at " ++ address)
         (Just byte_address, Just word, Just operation) ⇒
           if expected_machine_word operation ≟ word
-             then Right (checked_instruction
-               (parsed_a32_instruction byte_address original_word line_number source operation))
+             then case decode_saved_machine_word word of
+               Nothing ⇒ Left ("Unsupported saved instruction bit fields at " ++ address)
+               Just decoded ⇒ Right (checked_instruction
+                 (parsed_a32_instruction byte_address original_word line_number source decoded))
              else Left ("ARM word disagrees with parsed operands at " ++ address)
     _ ⇒ Left "Unsupported listing record"
 
@@ -318,6 +329,22 @@ main = do
   case arguments of
     [_, source_path] ⇒ run_parser False source_path
     [_, "--with-source", source_path] ⇒ run_parser True source_path
+    [_, "--word", hexadecimal_word] ⇒
+      case read_machine_word hexadecimal_word of
+        Nothing ⇒ do
+          putStrLn "Malformed eight-digit A32 machine word"
+          exitFailure
+        Just word ⇒
+          case decode_saved_machine_word word of
+            Nothing ⇒ do
+              putStrLn "Unsupported saved instruction bit fields"
+              exitFailure
+            Just operation ⇒
+              if expected_machine_word operation ≟ word
+                then putStrLn (describe_instruction operation)
+                else do
+                  putStrLn "Decoded operands disagree with saved machine word"
+                  exitFailure
     _ ⇒ do
       putStrLn "Usage: english-a32 [--with-source] FILE_WITH_GNU_OBJDUMP_A32_LISTING"
       exitFailure

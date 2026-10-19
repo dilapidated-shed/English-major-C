@@ -84,6 +84,16 @@ it does not execute ARM code or provide independent AICI acceptance.
 
 ## Next slices
 
+The word-only decoder in `A32Decode.idric` extracts fixed fields and typed
+register operands directly from a saved word, before any printed assembly is
+considered. The listing parser also reconstructs the word from printed operands.
+This additional check is limited to the same six forms. `--word HEXWORD`
+exercises the raw decoder; it does not execute the decoded instruction.
+
+`profile.tsv` pins the actual architectural PDF and archived target facts.
+Optional features remain unqualified until their eligibility and semantics are
+checked. No complete ISA denominator or whole-language acceptance is claimed.
+
 1. Parse conditional A32 branches and the exact branch-and-save-return relocation at
    `0x5c`, without treating unlinked placeholder destinations as executable
    absolute addresses.

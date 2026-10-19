@@ -1,0 +1,134 @@
+module EnglishMajorC.A32Decode
+
+import EnglishMajorC.A32Atoms
+
+-- Decode only the six admitted forms, directly from saved bits. Printed
+-- assembler spelling is not an input to any function in this module.
+exact_integer_from_nonnegative_number : Number → Integer
+exact_integer_from_nonnegative_number number = cast number
+
+public export
+encoded_field : Number → Number → Number → Number
+encoded_field word lowest_bit width =
+  -- Exact integer arithmetic is confined to this raw bit-field boundary.
+  -- Both divisors are positive powers of two; no rounding or narrowing occurs.
+  cast ((exact_integer_from_nonnegative_number word `div`
+         exact_integer_from_nonnegative_number (power_of_two lowest_bit))
+        `mod` exact_integer_from_nonnegative_number (power_of_two width))
+
+physical_register_from_encoding : Number → Maybe a32_register
+physical_register_from_encoding 0 = Just (register_r0 physical_r0)
+physical_register_from_encoding 1 = Just (register_r1 physical_r1)
+physical_register_from_encoding 2 = Just (register_r2 physical_r2)
+physical_register_from_encoding 3 = Just (register_r3 physical_r3)
+physical_register_from_encoding 4 = Just (register_r4 physical_r4)
+physical_register_from_encoding 5 = Just (register_r5 physical_r5)
+physical_register_from_encoding 6 = Just (register_r6 physical_r6)
+physical_register_from_encoding 7 = Just (register_r7 physical_r7)
+physical_register_from_encoding 8 = Just (register_r8 physical_r8)
+physical_register_from_encoding 9 = Just (register_r9 physical_r9)
+physical_register_from_encoding 10 = Just (register_r10 physical_r10)
+physical_register_from_encoding 11 = Just (register_r11 physical_r11)
+physical_register_from_encoding 12 = Just (register_r12 physical_r12)
+physical_register_from_encoding 13 = Just (register_r13 physical_r13)
+physical_register_from_encoding 14 = Just (register_r14 physical_r14)
+physical_register_from_encoding 15 = Just (register_r15 physical_r15)
+physical_register_from_encoding _ = Nothing
+
+data_register_field : Number → Number → Maybe a32_data_register
+data_register_field word lowest_bit =
+  case physical_register_from_encoding (encoded_field word lowest_bit 4) of
+    Just register ⇒ as_a32_data_register register
+    Nothing ⇒ Nothing
+
+register_other_than_architectural_program_counter_from_field : Number → Number → Maybe a32_non_pc_register
+register_other_than_architectural_program_counter_from_field word lowest_bit =
+  case physical_register_from_encoding (encoded_field word lowest_bit 4) of
+    Just register ⇒ as_a32_non_pc_register register
+    Nothing ⇒ Nothing
+
+stack_registers_in_transfer_order : List a32_stack_member
+stack_registers_in_transfer_order =
+  [stack_r0 physical_r0, stack_r1 physical_r1, stack_r2 physical_r2,
+   stack_r3 physical_r3, stack_r4 physical_r4, stack_r5 physical_r5,
+   stack_r6 physical_r6, stack_r7 physical_r7, stack_r8 physical_r8,
+   stack_r9 physical_r9, stack_r10 physical_r10, stack_r11 physical_r11,
+   stack_r12 physical_r12, stack_r14 physical_r14]
+
+decode_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback : Number → Maybe a32_instruction
+decode_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback word =
+  if encoded_field word 13 1 ≟ 0 && encoded_field word 15 1 ≟ 0
+    then case filter
+      (\register ⇒ encoded_field word (a32_stack_member_number register) 1 ≟ 1)
+      stack_registers_in_transfer_order of
+        [] ⇒ Nothing
+        first :: remaining ⇒ Just
+          (store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags
+           encoding_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback
+           first remaining)
+    else Nothing
+
+decode_copying_register_contents_without_changing_condition_flags : Number → Maybe a32_instruction
+decode_copying_register_contents_without_changing_condition_flags word =
+  if encoded_field word 4 8 ≟ 0
+    then case (data_register_field word 12, data_register_field word 0) of
+      (Just destination, Just source) ⇒ Just
+        (copy_thirty_two_bit_register_contents_without_changing_condition_flags
+         encoding_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags
+         destination source)
+      _ ⇒ Nothing
+    else Nothing
+
+decode_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_writeback : Number → Maybe a32_instruction
+decode_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_writeback word =
+  case (data_register_field word 12, register_other_than_architectural_program_counter_from_field word 16) of
+    (Just destination, Just base) ⇒ Just
+      (load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes
+       encoding_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback
+       destination base (encoded_field word 0 12))
+    _ ⇒ Nothing
+
+decode_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_writeback : Number → Maybe a32_instruction
+decode_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_writeback word =
+  case (data_register_field word 12, register_other_than_architectural_program_counter_from_field word 16) of
+    (Just source, Just base) ⇒ Just
+      (store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes
+       encoding_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback
+       source base (encoded_field word 0 12))
+    _ ⇒ Nothing
+
+decode_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags : Number → Maybe a32_instruction
+decode_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags word =
+  if encoded_field word 8 4 ≟ 0
+    then case (register_other_than_architectural_program_counter_from_field word 12,
+               register_other_than_architectural_program_counter_from_field word 16) of
+      (Just destination, Just source) ⇒ Just
+        (subtract_unrotated_eight_bit_immediate_without_changing_condition_flags
+         encoding_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags
+         destination source (encoded_field word 0 8))
+      _ ⇒ Nothing
+    else Nothing
+
+decode_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags : Number → Maybe a32_instruction
+decode_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags word =
+  if encoded_field word 4 3 ≟ 4 && encoded_field word 7 5 >= 1
+    then case (data_register_field word 12, data_register_field word 16,
+               data_register_field word 0) of
+      (Just destination, Just source, Just mask) ⇒ Just
+        (clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags
+         encoding_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags
+         destination source mask (encoded_field word 7 5))
+      _ ⇒ Nothing
+    else Nothing
+
+public export
+decode_saved_machine_word : Number → Maybe a32_instruction
+decode_saved_machine_word word =
+  if word >= power_of_two 32 then Nothing
+  else if encoded_field word 16 16 ≟ 0xe92d then decode_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback word
+  else if encoded_field word 16 16 ≟ 0xe1a0 then decode_copying_register_contents_without_changing_condition_flags word
+  else if encoded_field word 20 12 ≟ 0xe59 then decode_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_writeback word
+  else if encoded_field word 20 12 ≟ 0xe58 then decode_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_writeback word
+  else if encoded_field word 20 12 ≟ 0xe24 then decode_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags word
+  else if encoded_field word 20 12 ≟ 0xe1c then decode_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags word
+  else Nothing
