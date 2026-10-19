@@ -1,0 +1,386 @@
+module EnglishMajorC.A32Atoms
+
+import Data.Text
+
+-- Register identities are singleton TYPES. No Number or Text is substituted
+-- for a physical register after parsing. Abbreviations (sl/ip/sp/lr/pc) point
+-- to existing physical types rather than introducing extra registers.
+public export
+choice r0 one_of
+  physical_r0
+
+public export
+choice r1 one_of
+  physical_r1
+
+public export
+choice r2 one_of
+  physical_r2
+
+public export
+choice r3 one_of
+  physical_r3
+
+public export
+choice r4 one_of
+  physical_r4
+
+public export
+choice r5 one_of
+  physical_r5
+
+public export
+choice r6 one_of
+  physical_r6
+
+public export
+choice r7 one_of
+  physical_r7
+
+public export
+choice r8 one_of
+  physical_r8
+
+public export
+choice r9 one_of
+  physical_r9
+
+public export
+choice r10 one_of
+  physical_r10
+
+public export
+choice r11 one_of
+  physical_r11
+
+public export
+choice r12 one_of
+  physical_r12
+
+public export
+choice r13 one_of
+  physical_r13
+
+public export
+choice r14 one_of
+  physical_r14
+
+public export
+choice r15 one_of
+  physical_r15
+
+public export
+choice a32_register one_of
+  register_r0 r0
+  register_r1 r1
+  register_r2 r2
+  register_r3 r3
+  register_r4 r4
+  register_r5 r5
+  register_r6 r6
+  register_r7 r7
+  register_r8 r8
+  register_r9 r9
+  register_r10 r10
+  register_r11 r11
+  register_r12 r12
+  register_r13 r13
+  register_r14 r14
+  register_r15 r15
+
+public export
+choice a32_data_register one_of
+  data_r0 r0
+  data_r1 r1
+  data_r2 r2
+  data_r3 r3
+  data_r4 r4
+  data_r5 r5
+  data_r6 r6
+  data_r7 r7
+  data_r8 r8
+  data_r9 r9
+  data_r10 r10
+  data_r11 r11
+  data_r12 r12
+  data_r14 r14
+
+public export
+choice a32_non_pc_register one_of
+  non_pc_r0 r0
+  non_pc_r1 r1
+  non_pc_r2 r2
+  non_pc_r3 r3
+  non_pc_r4 r4
+  non_pc_r5 r5
+  non_pc_r6 r6
+  non_pc_r7 r7
+  non_pc_r8 r8
+  non_pc_r9 r9
+  non_pc_r10 r10
+  non_pc_r11 r11
+  non_pc_r12 r12
+  non_pc_r13 r13
+  non_pc_r14 r14
+
+public export
+choice a32_stack_member one_of
+  stack_r0 r0
+  stack_r1 r1
+  stack_r2 r2
+  stack_r3 r3
+  stack_r4 r4
+  stack_r5 r5
+  stack_r6 r6
+  stack_r7 r7
+  stack_r8 r8
+  stack_r9 r9
+  stack_r10 r10
+  stack_r11 r11
+  stack_r12 r12
+  stack_r14 r14
+
+public export
+register_from_text : Text → Maybe a32_register
+register_from_text "r0" = Just (register_r0 physical_r0)
+register_from_text "r1" = Just (register_r1 physical_r1)
+register_from_text "r2" = Just (register_r2 physical_r2)
+register_from_text "r3" = Just (register_r3 physical_r3)
+register_from_text "r4" = Just (register_r4 physical_r4)
+register_from_text "r5" = Just (register_r5 physical_r5)
+register_from_text "r6" = Just (register_r6 physical_r6)
+register_from_text "r7" = Just (register_r7 physical_r7)
+register_from_text "r8" = Just (register_r8 physical_r8)
+register_from_text "r9" = Just (register_r9 physical_r9)
+register_from_text "r10" = Just (register_r10 physical_r10)
+register_from_text "r11" = Just (register_r11 physical_r11)
+register_from_text "r12" = Just (register_r12 physical_r12)
+register_from_text "r13" = Just (register_r13 physical_r13)
+register_from_text "r14" = Just (register_r14 physical_r14)
+register_from_text "r15" = Just (register_r15 physical_r15)
+register_from_text "sb" = Just (register_r9 physical_r9)
+register_from_text "sl" = Just (register_r10 physical_r10)
+register_from_text "fp" = Just (register_r11 physical_r11)
+register_from_text "ip" = Just (register_r12 physical_r12)
+register_from_text "sp" = Just (register_r13 physical_r13)
+register_from_text "lr" = Just (register_r14 physical_r14)
+register_from_text "pc" = Just (register_r15 physical_r15)
+register_from_text _ = Nothing
+
+public export
+a32_register_number : a32_register → Number
+a32_register_number (register_r0 _) = 0
+a32_register_number (register_r1 _) = 1
+a32_register_number (register_r2 _) = 2
+a32_register_number (register_r3 _) = 3
+a32_register_number (register_r4 _) = 4
+a32_register_number (register_r5 _) = 5
+a32_register_number (register_r6 _) = 6
+a32_register_number (register_r7 _) = 7
+a32_register_number (register_r8 _) = 8
+a32_register_number (register_r9 _) = 9
+a32_register_number (register_r10 _) = 10
+a32_register_number (register_r11 _) = 11
+a32_register_number (register_r12 _) = 12
+a32_register_number (register_r13 _) = 13
+a32_register_number (register_r14 _) = 14
+a32_register_number (register_r15 _) = 15
+
+public export
+a32_data_register_number : a32_data_register → Number
+a32_data_register_number (data_r0 _) = 0
+a32_data_register_number (data_r1 _) = 1
+a32_data_register_number (data_r2 _) = 2
+a32_data_register_number (data_r3 _) = 3
+a32_data_register_number (data_r4 _) = 4
+a32_data_register_number (data_r5 _) = 5
+a32_data_register_number (data_r6 _) = 6
+a32_data_register_number (data_r7 _) = 7
+a32_data_register_number (data_r8 _) = 8
+a32_data_register_number (data_r9 _) = 9
+a32_data_register_number (data_r10 _) = 10
+a32_data_register_number (data_r11 _) = 11
+a32_data_register_number (data_r12 _) = 12
+a32_data_register_number (data_r14 _) = 14
+
+public export
+a32_non_pc_register_number : a32_non_pc_register → Number
+a32_non_pc_register_number (non_pc_r0 _) = 0
+a32_non_pc_register_number (non_pc_r1 _) = 1
+a32_non_pc_register_number (non_pc_r2 _) = 2
+a32_non_pc_register_number (non_pc_r3 _) = 3
+a32_non_pc_register_number (non_pc_r4 _) = 4
+a32_non_pc_register_number (non_pc_r5 _) = 5
+a32_non_pc_register_number (non_pc_r6 _) = 6
+a32_non_pc_register_number (non_pc_r7 _) = 7
+a32_non_pc_register_number (non_pc_r8 _) = 8
+a32_non_pc_register_number (non_pc_r9 _) = 9
+a32_non_pc_register_number (non_pc_r10 _) = 10
+a32_non_pc_register_number (non_pc_r11 _) = 11
+a32_non_pc_register_number (non_pc_r12 _) = 12
+a32_non_pc_register_number (non_pc_r13 _) = 13
+a32_non_pc_register_number (non_pc_r14 _) = 14
+
+public export
+a32_stack_member_number : a32_stack_member → Number
+a32_stack_member_number (stack_r0 _) = 0
+a32_stack_member_number (stack_r1 _) = 1
+a32_stack_member_number (stack_r2 _) = 2
+a32_stack_member_number (stack_r3 _) = 3
+a32_stack_member_number (stack_r4 _) = 4
+a32_stack_member_number (stack_r5 _) = 5
+a32_stack_member_number (stack_r6 _) = 6
+a32_stack_member_number (stack_r7 _) = 7
+a32_stack_member_number (stack_r8 _) = 8
+a32_stack_member_number (stack_r9 _) = 9
+a32_stack_member_number (stack_r10 _) = 10
+a32_stack_member_number (stack_r11 _) = 11
+a32_stack_member_number (stack_r12 _) = 12
+a32_stack_member_number (stack_r14 _) = 14
+
+public export
+as_a32_data_register : a32_register → Maybe a32_data_register
+as_a32_data_register (register_r0 value) = Just (data_r0 value)
+as_a32_data_register (register_r1 value) = Just (data_r1 value)
+as_a32_data_register (register_r2 value) = Just (data_r2 value)
+as_a32_data_register (register_r3 value) = Just (data_r3 value)
+as_a32_data_register (register_r4 value) = Just (data_r4 value)
+as_a32_data_register (register_r5 value) = Just (data_r5 value)
+as_a32_data_register (register_r6 value) = Just (data_r6 value)
+as_a32_data_register (register_r7 value) = Just (data_r7 value)
+as_a32_data_register (register_r8 value) = Just (data_r8 value)
+as_a32_data_register (register_r9 value) = Just (data_r9 value)
+as_a32_data_register (register_r10 value) = Just (data_r10 value)
+as_a32_data_register (register_r11 value) = Just (data_r11 value)
+as_a32_data_register (register_r12 value) = Just (data_r12 value)
+as_a32_data_register (register_r14 value) = Just (data_r14 value)
+as_a32_data_register _ = Nothing
+
+public export
+as_a32_non_pc_register : a32_register → Maybe a32_non_pc_register
+as_a32_non_pc_register (register_r0 value) = Just (non_pc_r0 value)
+as_a32_non_pc_register (register_r1 value) = Just (non_pc_r1 value)
+as_a32_non_pc_register (register_r2 value) = Just (non_pc_r2 value)
+as_a32_non_pc_register (register_r3 value) = Just (non_pc_r3 value)
+as_a32_non_pc_register (register_r4 value) = Just (non_pc_r4 value)
+as_a32_non_pc_register (register_r5 value) = Just (non_pc_r5 value)
+as_a32_non_pc_register (register_r6 value) = Just (non_pc_r6 value)
+as_a32_non_pc_register (register_r7 value) = Just (non_pc_r7 value)
+as_a32_non_pc_register (register_r8 value) = Just (non_pc_r8 value)
+as_a32_non_pc_register (register_r9 value) = Just (non_pc_r9 value)
+as_a32_non_pc_register (register_r10 value) = Just (non_pc_r10 value)
+as_a32_non_pc_register (register_r11 value) = Just (non_pc_r11 value)
+as_a32_non_pc_register (register_r12 value) = Just (non_pc_r12 value)
+as_a32_non_pc_register (register_r13 value) = Just (non_pc_r13 value)
+as_a32_non_pc_register (register_r14 value) = Just (non_pc_r14 value)
+as_a32_non_pc_register _ = Nothing
+
+public export
+as_a32_stack_member : a32_register → Maybe a32_stack_member
+as_a32_stack_member (register_r0 value) = Just (stack_r0 value)
+as_a32_stack_member (register_r1 value) = Just (stack_r1 value)
+as_a32_stack_member (register_r2 value) = Just (stack_r2 value)
+as_a32_stack_member (register_r3 value) = Just (stack_r3 value)
+as_a32_stack_member (register_r4 value) = Just (stack_r4 value)
+as_a32_stack_member (register_r5 value) = Just (stack_r5 value)
+as_a32_stack_member (register_r6 value) = Just (stack_r6 value)
+as_a32_stack_member (register_r7 value) = Just (stack_r7 value)
+as_a32_stack_member (register_r8 value) = Just (stack_r8 value)
+as_a32_stack_member (register_r9 value) = Just (stack_r9 value)
+as_a32_stack_member (register_r10 value) = Just (stack_r10 value)
+as_a32_stack_member (register_r11 value) = Just (stack_r11 value)
+as_a32_stack_member (register_r12 value) = Just (stack_r12 value)
+as_a32_stack_member (register_r14 value) = Just (stack_r14 value)
+as_a32_stack_member _ = Nothing
+
+public export
+choice opcode_push_a1 one_of
+  encoded_push_a1
+
+public export
+choice opcode_mov_register_a1 one_of
+  encoded_mov_register_a1
+
+public export
+choice opcode_ldr_immediate_a1 one_of
+  encoded_ldr_immediate_a1
+
+public export
+choice opcode_str_immediate_a1 one_of
+  encoded_str_immediate_a1
+
+public export
+choice opcode_sub_immediate_a1 one_of
+  encoded_sub_immediate_a1
+
+public export
+choice opcode_bic_asr_a1 one_of
+  encoded_bic_asr_a1
+
+-- These are precisely the A32 operand forms admitted by the first parser.
+-- The A1 suffix identifies the ARM encoding, not a family of assembler aliases.
+-- No PC write, literal load, conditional execution, rotated immediate, or
+-- arbitrary shifted operand is silently assimilated into these forms.
+public export
+choice a32_instruction one_of
+  push_registers opcode_push_a1 a32_stack_member (List a32_stack_member)
+  move_register opcode_mov_register_a1 a32_data_register a32_data_register
+  load_word opcode_ldr_immediate_a1 a32_data_register a32_non_pc_register Number
+  store_word opcode_str_immediate_a1 a32_data_register a32_non_pc_register Number
+  subtract_immediate opcode_sub_immediate_a1 a32_non_pc_register a32_non_pc_register Number
+  clear_bits_asr opcode_bic_asr_a1 a32_data_register a32_data_register a32_data_register Number
+
+-- This uses arbitrary precision Number; input range checks happen in the parser.
+-- The result is an independent encoding check, not an ARM execution proof.
+public export
+power_of_two : Number → Number
+power_of_two 0 = 1
+power_of_two (S count) = 2 × power_of_two count
+
+public export
+push_register_mask : a32_stack_member → List a32_stack_member → Number
+push_register_mask first rest =
+  foldl (\sum, reg ⇒ sum + power_of_two (a32_stack_member_number reg))
+        0 (first :: rest)
+
+public export
+expected_machine_word : a32_instruction → Number
+expected_machine_word (push_registers _ first rest) =
+  0xe92d0000 + push_register_mask first rest
+expected_machine_word (move_register _ destination source) =
+  0xe1a00000 + 4096 × a32_data_register_number destination +
+    a32_data_register_number source
+expected_machine_word (load_word _ destination base offset) =
+  0xe5900000 + 65536 × a32_non_pc_register_number base +
+    4096 × a32_data_register_number destination + offset
+expected_machine_word (store_word _ source base offset) =
+  0xe5800000 + 65536 × a32_non_pc_register_number base +
+    4096 × a32_data_register_number source + offset
+expected_machine_word (subtract_immediate _ destination source immediate) =
+  0xe2400000 + 65536 × a32_non_pc_register_number source +
+    4096 × a32_non_pc_register_number destination + immediate
+expected_machine_word (clear_bits_asr _ destination source mask amount) =
+  0xe1c00040 + 65536 × a32_data_register_number source +
+    4096 × a32_data_register_number destination +
+    128 × amount + a32_data_register_number mask
+
+public export
+describe_instruction : a32_instruction → Text
+describe_instruction (push_registers _ first rest) =
+  "push_a1|register_mask=" ++ show (push_register_mask first rest)
+describe_instruction (move_register _ destination source) =
+  "mov_register_a1|r" ++ show (a32_data_register_number destination) ++
+    "|r" ++ show (a32_data_register_number source)
+describe_instruction (load_word _ destination base offset) =
+  "ldr_immediate_a1|r" ++ show (a32_data_register_number destination) ++
+    "|r" ++ show (a32_non_pc_register_number base) ++ "|" ++ show offset
+describe_instruction (store_word _ source base offset) =
+  "str_immediate_a1|r" ++ show (a32_data_register_number source) ++
+    "|r" ++ show (a32_non_pc_register_number base) ++ "|" ++ show offset
+describe_instruction (subtract_immediate _ destination source immediate) =
+  "sub_immediate_a1|r" ++ show (a32_non_pc_register_number destination) ++
+    "|r" ++ show (a32_non_pc_register_number source) ++ "|" ++ show immediate
+describe_instruction (clear_bits_asr _ destination source mask amount) =
+  "bic_asr_a1|r" ++ show (a32_data_register_number destination) ++
+    "|r" ++ show (a32_data_register_number source) ++
+    "|r" ++ show (a32_data_register_number mask) ++ "|asr|" ++ show amount
