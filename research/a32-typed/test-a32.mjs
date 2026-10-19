@@ -149,3 +149,89 @@ test('word-only decoder rejects changed conditions flags writeback roles and shi
     assert.match(result.stdout,/Unsupported/);
   }
 });
+
+
+const englishSource=readFileSync(
+  'experiments/qr-entry/ARM entry before its first call.english','utf8');
+
+function actualEnglish(source) {
+  const dir=mkdtempSync(join(tmpdir(),'emc-english-qr-'));
+  try {
+    const input=join(dir,'entry.english'); writeFileSync(input,source);
+    return spawnSync(executable,['--english',input],{encoding:'utf8',timeout:15000,
+      maxBuffer:1024*1024,shell:false});
+  } finally {rmSync(dir,{recursive:true,force:true});}
+}
+
+function checkedEnglish(source) {
+  const result=actualEnglish(source);
+  assert.equal(result.error,undefined,String(result.error));
+  assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
+  return result.stdout.trim().split('\n');
+}
+
+test('all 23 original English sentences compile independently to the original A32 words',()=>{
+  const lines=checkedEnglish(englishSource);
+  const originals=englishSource.split('\n').filter(line=>line.startsWith('At byte offset '));
+  const echoed=lines.filter(line=>line.startsWith('ENGLISH|'));
+  const emitted=lines.filter(line=>line.startsWith('WORD|'));
+  assert.equal(originals.length,23);
+  assert.equal(echoed.length,23);
+  assert.equal(emitted.length,23);
+  assert.equal(lines.at(-1),'A32_ENGLISH_INSTRUCTIONS=23');
+  assert.deepEqual(echoed.map(line=>line.split('|').slice(2).join('|')),originals);
+  const originalWordPairs=prefix.map(line=>{
+    const fields=line.match(/^\s*([0-9a-f]+):\s+([0-9a-f]{8})\s+/i);
+    assert.ok(fields);
+    return [parseInt(fields[1],16).toString(10),fields[2].toLowerCase()];
+  });
+  const generatedWordPairs=emitted.map(line=>{
+    const fields=line.split('|');
+    assert.equal(fields[0],'WORD');
+    assert.match(fields[2],/^[0-9a-f]{8}$/);
+    return fields.slice(1,3);
+  });
+  assert.deepEqual(generatedWordPairs,originalWordPairs,
+    'English-to-word emission differs from the preserved original QR object');
+  // A separately written machine-word decoder must recognize every emission.
+  for(const line of emitted) {
+    const [_,address,word,...englishOperation]=line.split('|');
+    const decoded=spawnSync(executable,['--word',word],{encoding:'utf8',timeout:15000});
+    assert.equal(decoded.status,0,decoded.stdout+'\n'+decoded.stderr);
+    assert.equal(decoded.stdout.trim(),englishOperation.join('|'),'Mismatched form at '+address);
+  }
+});
+
+test('valid English operand change produces a different machine word rather than looking up an archived word',()=>{
+  const modified=englishSource.replace(
+    'At byte offset 0x0004, copy the four-byte value in register r3 into register r6.',
+    'At byte offset 0x0004, copy the four-byte value in register r2 into register r6.');
+  assert.notEqual(modified,englishSource);
+  const emitted=checkedEnglish(modified).filter(line=>line.startsWith('WORD|'));
+  assert.equal(emitted.length,23);
+  assert.match(emitted[1],/^WORD\|4\|e1a06002\|/);
+  assert.notEqual(emitted[1].split('|')[2],originalWordPairsForFirstMove());
+});
+function originalWordPairsForFirstMove() {
+  return 'e1a06003';
+}
+
+test('English grammar rejects invalid registers, operand bounds, words and altered semantics',()=>{
+  const mutations=[
+    englishSource.replace('into register r6.','into register r16.'),
+    englishSource.replace('plus 0x90 into register r12.','plus 0x1000 into register r12.'),
+    englishSource.replace('subtract 0x4c from','subtract 0x100 from'),
+    englishSource.replace('r4, r5, r6, r7','r4, r6, r5, r7'),
+    englishSource.replace('its signed four-byte value is nonnegative','its signed four-byte value is negative'),
+    englishSource.replace('into register r6.','inside register r6.'),
+    englishSource.replace('at register r2 plus 0x0','at register r15 plus 0x0'),
+    englishSource+'\nAt byte offset 0x005c, call an unresolved target.\n'
+  ];
+  for(const altered of mutations) {
+    assert.notEqual(altered,englishSource);
+    const result=actualEnglish(altered);
+    assert.equal(result.error,undefined,String(result.error));
+    assert.notEqual(result.status,0,'Invalid English sentence was accepted');
+    assert.match(result.stdout,/Unsupported English machine sentence/);
+  }
+});
