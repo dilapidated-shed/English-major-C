@@ -1,6 +1,5 @@
 module EnglishMajorC.A32Parser
 
-import Data.Char
 import Data.List
 import Data.Text
 import System
