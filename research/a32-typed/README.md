@@ -7,44 +7,44 @@ an instruction address, eight hexadecimal machine-word digits and a printed
 assembly operation. It accepts an operation only when Idriç can construct
 typed operands **and independently re-encode the same 32-bit word**.
 
-## QR-only machine-word target (human correction, 2026-10-19)
+## Complete target: the original 23 English QR entry sentences
 
-English Major ARM targets **only the original machine instructions used by the
-selected QR translation**. This is an evidence-bounded translation project,
-**not** an effort to enumerate or implement the ARM instruction set.
+The experiment's **entire accepted target** is the original 23 English
+sentences in `experiments/qr-entry/ARM entry before its first call.english`,
+corresponding to actual A32 words at byte offsets `0x0000`–`0x0058`
+in `dqrls.armv7-a32.disasm.txt`.
 
-The primary sources are the preserved original QR ARMv7-A A32 object words,
-their relocation-bearing disassemblies, and the selected linked/recorded
-execution path. For every in-scope instruction occurrence, retain its exact
-address, 32-bit word, architectural encoding variant, operands, condition,
-provenance and English state effects. A relocation and a literal/data word
-must not be mistaken for an instruction. A missing external callee is recorded
-as a boundary rather than supplied by invention.
+The maintained `A32English.idric` parses each *English sentence*, constructs
+one of the six existing typed full-English instructions and generates the
+32-bit A32 machine word using `expected_machine_word`. It **does not** read
+the original object words, disassembly mnemonics, or a lookup table to decide
+which word to emit.
 
-A typed instruction form is eligible **only if at least one saved QR machine
-word requires that form**. Each form retains its full descriptive English name,
-typed operands and exact checked encoding. Admission of a form permits the
-checked operand values that its definition allows; **it does not imply support
-for the rest of that mnemonic, unrelated encodings, or any whole-ISA profile**.
-No instruction form is added merely because it appears in an ARM reference.
-Only use T32/Thumb, VFP/NEON, or other state families if the selected QR machine
-words or their recorded execution actually require them.
+Run after building the canonical Idriç package:
 
-The first accepted portion is exactly 23 A32 words at offsets 0x0000–0x0058
-of the original `dqrls` entry, representing six forms with occurrence counts:
-stack register save **1**, register copy **4**, word load **7**, immediate
-subtraction **1**, shifted-bit clearing **2**, word store **8**. The call at
-0x005c remains outside this accepted prefix because its target is relocated.
-This is a **prefix**, not the whole QR routine; subsequent expansion is driven
-by the saved QR words, never a universal ISA checklist.
+```sh
+build/exec/english-a32 --english 'experiments/qr-entry/ARM entry before its first call.english'
+```
 
-For acceptance, report four separate counts: original QR word/byte accounting,
-decoded typed forms, mechanically checked English effects, and matched
-observed execution transitions. Reject unknown instructions explicitly.
-Preserve the complete-original-listing rejection test until that whole
-selected listing genuinely has implemented word-by-word semantics.
-The controlling work scope is
-[Flexible Pipes #228](https://github.com/isomorphisms/flexible-pipes/issues/228).
+For each sentence it emits `ENGLISH|source-line|original sentence` and
+`WORD|decimal-byte-offset|eight-digit-hexadecimal-word|long-English-operation`.
+It ends with `A32_ENGLISH_INSTRUCTIONS=23`. This makes the complete
+English-to-machine mapping inspectable.
+
+Acceptance is exactly **23 out of 23 byte-for-byte matches** against the
+independently preserved original QR object words at the matching offsets;
+the same emitted words must also pass the existing independent raw-word
+Idriç decoder. A valid changed operand must change the emitted machine
+word (not yield an archived constant). Invalid register roles, out-of-range
+immediates, reordered stack registers, altered operation meaning, and
+unrecognized English sentences must be rejected. All checks must execute
+the compiled Idriç binary at the exact PR head.
+
+**Stop here when accepted.** The next relocated call at `0x005c`, the
+remaining QR instructions, the full ARM architecture, runtime execution of
+newly emitted words, and general language support are **out of scope**.
+Existing broader ARM/Fortran work is separate and is not a prerequisite for
+this bounded English-to-machine experiment.
 
 ## Atomic register and instruction identities
 
@@ -121,27 +121,13 @@ workflow completes, the Idriç parser **must not be described as compiled or
 executed**. Even a passing host run establishes only parsing/encoding checks;
 it does not execute ARM code or provide independent AICI acceptance.
 
-## Next QR-driven slices
+## Completion boundary
 
-1. Resolve and type the saved relocation-backed call at `dqrls` offset
-   `0x5c`; use the linked target, never the unlinked placeholder as a
-   literal runtime destination.
-2. Enumerate each original machine word in the **selected QR translation**
-   beyond the first 23, including the relevant `dqrls`, `dqrdc2`,
-   `dqrsl` routines and captured linked execution only where selected.
-   Distinguish code bytes, literal data, relocation sites, and unavailable
-   external bodies. Build a finite, evidence-derived coverage denominator.
-3. Add separate full-English Idriç atomic forms only for **new encoding forms
-   present in that QR inventory** (for example, comparisons, addition, shifts,
-   paired storage, returns or floating-point operations when encountered).
-   Independently check saved words against typed operands; retain hostile
-   mutation and unsupported-form rejection tests.
-4. Implement exact English machine-state effects for those QR-attested forms:
-   reads/writes, flags, execution index, memory, faults, stack, calls, return
-   and ABI effects as relevant. Compare saved machine-state traces and
-   numerical results under explicit floating-point assumptions.
+The 23 original sentences and six attested A32 encoding forms are sufficient
+for this experiment. Do **not** extend parsing, encoding or interpretation
+to the relocated call or further QR/ARM instructions merely to increase
+instruction coverage. Preserve the real original words and all rejection tests.
 
-**Out of scope:** a complete ARMv7-A A32 or T32 instruction catalogue,
-instruction families absent from the selected QR translation, generic
-full-language acceptance, and unrelated compiler backends. Other projects
-can add broader ISA coverage under separate assignments.
+A correctly encoded word is not automatically an independently executed
+instruction. Report direct English→word exact matches, compiled Idriç binary
+tests and machine execution as **distinct** evidence levels.
