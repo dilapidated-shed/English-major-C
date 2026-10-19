@@ -1,0 +1,6 @@
+package english_a32
+sourcedir = "research"
+modules = EnglishMajorC.A32Atoms,
+          EnglishMajorC.A32Parser
+main = EnglishMajorC.A32Parser
+executable = english-a32
