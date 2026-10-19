@@ -9,12 +9,12 @@ import EnglishMajorC.A32Atoms
 -- Dedicated A32 machine-listing parser. Never infer source instructions from
 -- English sentences, and never accept an assembler's mnemonic as evidence that
 -- the saved raw word has that meaning.
--- The initial profile covers the first 23 dqrls_ instructions, up to its BL
+-- The initial profile covers the first 23 dqrls_ instructions, up to its external-call
 -- relocation. Unsupported instructions fail closed; other disassembly headers
 -- and symbol headings are not misclassified as machine instructions.
 
 choice parsed_listing_instruction one_of
-  parsed_a32_instruction Number Text a32_instruction
+  parsed_a32_instruction Number Text Number Text a32_instruction
 
 flush_token : List Char → List Text → List Text
 flush_token [] found = found
@@ -158,30 +158,30 @@ parse_assembly ("push" :: "{" :: first :: rest) =
     (Just first_register, Just other_registers) ⇒
       if no_duplicate_registers
          (map a32_stack_member_number (first_register :: other_registers))
-         then Just (push_registers encoded_push_a1 first_register other_registers)
+         then Just (store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags encoding_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback first_register other_registers)
          else Nothing
     _ ⇒ Nothing
 parse_assembly ["mov", destination, ",", source] =
   case (read_data_register destination, read_data_register source) of
     (Just dest, Just src) ⇒
-      Just (move_register encoded_mov_register_a1 dest src)
+      Just (copy_thirty_two_bit_register_contents_without_changing_condition_flags encoding_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags dest src)
     _ ⇒ Nothing
 parse_assembly ("ldr" :: destination :: "," :: address) =
   case (read_data_register destination, read_memory_address address) of
     (Just dest, Just (base, offset)) ⇒
-      Just (load_word encoded_ldr_immediate_a1 dest base offset)
+      Just (load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes encoding_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback dest base offset)
     _ ⇒ Nothing
 parse_assembly ("str" :: source :: "," :: address) =
   case (read_data_register source, read_memory_address address) of
     (Just src, Just (base, offset)) ⇒
-      Just (store_word encoded_str_immediate_a1 src base offset)
+      Just (store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes encoding_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback src base offset)
     _ ⇒ Nothing
 parse_assembly ["sub", destination, ",", source, ",", "#", immediate] =
   case (read_non_pc_register destination, read_non_pc_register source,
         read_decimal immediate) of
     (Just dest, Just src, Just amount) ⇒
       if amount <= 255
-         then Just (subtract_immediate encoded_sub_immediate_a1 dest src amount)
+         then Just (subtract_unrotated_eight_bit_immediate_without_changing_condition_flags encoding_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags dest src amount)
          else Nothing
     _ ⇒ Nothing
 parse_assembly ["bic", destination, ",", source, ",", mask, ",",
@@ -190,21 +190,56 @@ parse_assembly ["bic", destination, ",", source, ",", mask, ",",
         read_data_register mask, read_decimal amount) of
     (Just dest, Just src, Just masked, Just shift) ⇒
       if shift >= 1 && shift <= 31
-         then Just (clear_bits_asr encoded_bic_asr_a1 dest src masked shift)
+         then Just (clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags encoding_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags dest src masked shift)
          else Nothing
     _ ⇒ Nothing
 parse_assembly _ = Nothing
 
--- An explicit relocation annotation or literal pool word is nonexecutable.
--- This initial parser does not claim a byte-for-byte inventory of all section
--- headers or data regions. That requires the wider ELF/section inventory.
-parse_listing_line : Text → Either Text (Maybe parsed_listing_instruction)
-parse_listing_line source =
+-- Classification precedes instruction parsing. Every accepted source row retains
+-- its original line number and text, including nonexecuting records.
+choice parsed_listing_record one_of
+  checked_instruction parsed_listing_instruction
+  nonexecuting_object_header Number Text
+  nonexecuting_section_heading Number Text
+  nonexecuting_symbol_heading Number Text
+  nonexecuting_relocation_annotation Number Text
+  nonexecuting_literal_data Number Text
+  nonexecuting_blank_line Number Text
+
+is_symbol_heading : Text → Bool
+is_symbol_heading symbol =
+  case (unpack symbol, reverse (unpack symbol)) of
+    ('<' :: _, '>' :: _) ⇒ True
+    _ ⇒ False
+
+parse_listing_line : Number → Text → Either Text parsed_listing_record
+parse_listing_line line_number source =
   let parts = scan_listing (remove_annotation (unpack source)) [] [] in
   case parts of
-    address :: ":" :: "R_ARM_CALL" :: _ ⇒ Right Nothing
-    address :: ":" :: "R_ARM_JUMP24" :: _ ⇒ Right Nothing
-    address :: ":" :: original_word :: ".word" :: _ ⇒ Right Nothing
+    [] ⇒ Right (nonexecuting_blank_line line_number source)
+    path :: ":" :: "file" :: "format" :: ["elf32-littlearm"] ⇒
+      Right (nonexecuting_object_header line_number source)
+    ["Disassembly", "of", "section", section, ":"] ⇒
+      Right (nonexecuting_section_heading line_number source)
+    [address, symbol, ":"] ⇒
+      case read_hex_address address of
+        Just _ ⇒
+          if is_symbol_heading symbol
+             then Right (nonexecuting_symbol_heading line_number source)
+             else Left "Malformed symbol heading"
+        Nothing ⇒ Left "Malformed hexadecimal symbol address"
+    address :: ":" :: "R_ARM_CALL" :: [target] ⇒
+      case read_hex_address address of
+        Just _ ⇒ Right (nonexecuting_relocation_annotation line_number source)
+        Nothing ⇒ Left "Malformed hexadecimal relocation address"
+    address :: ":" :: "R_ARM_JUMP24" :: [target] ⇒
+      case read_hex_address address of
+        Just _ ⇒ Right (nonexecuting_relocation_annotation line_number source)
+        Nothing ⇒ Left "Malformed hexadecimal relocation address"
+    address :: ":" :: original_word :: ".word" :: [value] ⇒
+      case (read_hex_address address, read_machine_word original_word) of
+        (Just _, Just _) ⇒ Right (nonexecuting_literal_data line_number source)
+        _ ⇒ Left "Malformed literal data address or word"
     address :: ":" :: original_word :: assembly ⇒
       case (read_hex_address address, read_machine_word original_word,
             parse_assembly assembly) of
@@ -213,50 +248,76 @@ parse_listing_line source =
         (_, _, Nothing) ⇒ Left ("Unsupported A32 instruction or operands at " ++ address)
         (Just byte_address, Just word, Just operation) ⇒
           if expected_machine_word operation ≟ word
-             then Right (Just (parsed_a32_instruction byte_address original_word operation))
+             then Right (checked_instruction
+               (parsed_a32_instruction byte_address original_word line_number source operation))
              else Left ("ARM word disagrees with parsed operands at " ++ address)
-    _ ⇒ Right Nothing
+    _ ⇒ Left "Unsupported listing record"
 
-parse_listing : List Text → Either Text (List parsed_listing_instruction)
-parse_listing [] = Right []
-parse_listing (source :: remaining) =
-  case parse_listing_line source of
-    Left message ⇒ Left (message ++ " | source: " ++ source)
-    Right Nothing ⇒ parse_listing remaining
-    Right (Just operation) ⇒
-      case parse_listing remaining of
+parse_listing_from_line : Number → List Text → Either Text (List parsed_listing_record)
+parse_listing_from_line line_number [] = Right []
+parse_listing_from_line line_number (source :: remaining) =
+  case parse_listing_line line_number source of
+    Left message ⇒ Left (message ++ " | line: " ++ show line_number ++ " | source: " ++ source)
+    Right source_record ⇒
+      case parse_listing_from_line (line_number + 1) remaining of
         Left message ⇒ Left message
-        Right other_operations ⇒ Right (operation :: other_operations)
+        Right other_records ⇒ Right (source_record :: other_records)
 
 render_instruction : parsed_listing_instruction → Text
-render_instruction (parsed_a32_instruction address word operation) =
+render_instruction (parsed_a32_instruction address word line_number source operation) =
   show address ++ "|" ++ word ++ "|" ++ describe_instruction operation
 
-print_instructions : List parsed_listing_instruction → IO ()
-print_instructions [] = pure ()
-print_instructions (instruction :: remaining) = do
-  putStrLn (render_instruction instruction)
-  print_instructions remaining
+record_source : parsed_listing_record → (Number, Text)
+record_source (checked_instruction
+  (parsed_a32_instruction _ _ line_number source _)) = (line_number, source)
+record_source (nonexecuting_object_header line_number source) = (line_number, source)
+record_source (nonexecuting_section_heading line_number source) = (line_number, source)
+record_source (nonexecuting_symbol_heading line_number source) = (line_number, source)
+record_source (nonexecuting_relocation_annotation line_number source) = (line_number, source)
+record_source (nonexecuting_literal_data line_number source) = (line_number, source)
+record_source (nonexecuting_blank_line line_number source) = (line_number, source)
+
+instruction_count : List parsed_listing_record → Number
+instruction_count [] = 0
+instruction_count (checked_instruction _ :: remaining) = 1 + instruction_count remaining
+instruction_count (_ :: remaining) = instruction_count remaining
+
+print_records : Bool → List parsed_listing_record → IO ()
+print_records with_source [] = pure ()
+print_records with_source (source_record :: remaining) = do
+  if with_source
+    then let (line_number, source) = record_source source_record in
+         putStrLn ("SOURCE|" ++ show line_number ++ "|" ++ source)
+    else pure ()
+  case source_record of
+    checked_instruction instruction ⇒ putStrLn (render_instruction instruction)
+    _ ⇒ pure ()
+  print_records with_source remaining
+
+covering
+run_parser : Bool → Text → IO ()
+run_parser with_source source_path = do
+  contents ← readFile source_path
+  case contents of
+    Left _ ⇒ do
+      putStrLn "Cannot read A32 listing input."
+      exitFailure
+    Right source ⇒
+      case parse_listing_from_line 1 (lines source) of
+        Left message ⇒ do
+          putStrLn message
+          exitFailure
+        Right records ⇒ do
+          print_records with_source records
+          putStrLn ("A32_CHECKED_INSTRUCTIONS=" ++ show (instruction_count records))
 
 covering
 main : IO ()
 main = do
   arguments ← getArgs
   case arguments of
-    [_, source_path] ⇒ do
-      contents ← readFile source_path
-      case contents of
-        Left _ ⇒ do
-          putStrLn "Cannot read A32 listing input."
-          exitFailure
-        Right source ⇒
-          case parse_listing (lines source) of
-            Left message ⇒ do
-              putStrLn message
-              exitFailure
-            Right operations ⇒ do
-              print_instructions operations
-              putStrLn ("A32_CHECKED_INSTRUCTIONS=" ++ show (length operations))
+    [_, source_path] ⇒ run_parser False source_path
+    [_, "--with-source", source_path] ⇒ run_parser True source_path
     _ ⇒ do
-      putStrLn "Usage: english-a32 FILE_WITH_GNU_OBJDUMP_A32_LISTING"
+      putStrLn "Usage: english-a32 [--with-source] FILE_WITH_GNU_OBJDUMP_A32_LISTING"
       exitFailure

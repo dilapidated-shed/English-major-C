@@ -24,8 +24,8 @@ another physical register type.
 Each permitted operation form also has its **own singleton opcode type**.
 `a32_instruction` then constructs only the operand shapes associated with
 those opcodes: registers, base register and unsigned immediate offset, a
-nonempty push-register list, or an immediate shift. The raw `Text` input is
-discarded at the typed instruction boundary. The machine word and address are
+nonempty push-register list, or an immediate shift. The original source text and one-based line number are
+retained separately from the typed instruction. The machine word and address are
 retained as separate listing evidence, not an executable value.
 
 A production type-indexed instruction family can later replace the closed
@@ -36,12 +36,12 @@ constructing one instruction form with another form's opcode type.
 
 | Opcode atom | Printed GNU mnemonic | Exact admitted encoding form |
 | --- | --- | --- |
-| `opcode_push_a1` | `push {…}` | A32 STMDB SP!, nonempty distinct register list, excludes SP/PC |
-| `opcode_mov_register_a1` | `mov Rd, Rm` | A32 register, no shift, no flag update |
-| `opcode_ldr_immediate_a1` | `ldr Rt, [Rn, #imm]` | A32 positive unsigned 12-bit offset, preindexed, no writeback, word transfer |
-| `opcode_str_immediate_a1` | `str Rt, [Rn, #imm]` | Same immediate/addressing form; store word |
-| `opcode_sub_immediate_a1` | `sub Rd, Rn, #imm` | A32 immediate, unrotated 0–255, no flag update |
-| `opcode_bic_asr_a1` | `bic Rd, Rn, Rm, asr #shift` | A32 register mask, arithmetic right shift 1–31, no flag update |
+| `form_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback` | `push {…}` | A32 STMDB SP!, nonempty distinct register list, excludes SP/PC |
+| `form_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags` | `mov Rd, Rm` | A32 register, no shift, no flag update |
+| `form_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback` | `ldr Rt, [Rn, #imm]` | A32 positive unsigned 12-bit offset, preindexed, no writeback, word transfer |
+| `form_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback` | `str Rt, [Rn, #imm]` | Same immediate/addressing form; store word |
+| `form_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags` | `sub Rd, Rn, #imm` | A32 immediate, unrotated 0–255, no flag update |
+| `form_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags` | `bic Rd, Rn, Rm, asr #shift` | A32 register mask, arithmetic right shift 1–31, no flag update |
 
 All six are currently **AL/unconditional forms**. The fixed `0xE`
 condition nibble is checked through independent word reconstruction.
@@ -64,18 +64,16 @@ while `expected_machine_word` reconstructs the actual A32 encoding.
   it checks all 23 expected normalized instructions and rejects altered raw
   words, altered operands, illegal register roles, duplicates, overlarge
   offsets, unimplemented shift forms and unknown branch instructions.
-- List-section headings and symbol headings are ignored; explicit
-  `R_ARM_CALL` annotation rows and `.word` lines are not executed.
+- List-section headings, object headers and symbol headings are classified; explicit
+  `R_ARM_CALL` annotation rows and `.word` lines are not executed. Every accepted record retains
+  its original line number and text. `--with-source` exposes these records.
+  Unknown records fail closed instead of silently losing input.
   This is **not** complete byte/section accounting. That remains owned by
   the separate ARM inventory and relocation audit.
 
-Build with pinned canonical Idriç, matching the existing independent Idriç
-experiment:
-
-```sh
-/path/to/pinned/Idric/build/exec/idris2 --build english-a32.ipkg
-A32_BINARY="$PWD/build/exec/english-a32" node --test research/a32-typed/test-a32.mjs
-```
+The existing exact-head workflow builds with canonical Idriç revision
+`2734ac5a86610eddfab73b1644d72b4ac85a65ee`. The reproducible Kitchen/Ike
+qualification route is tracked with the assignment in Flexible Pipes issue 228.
 
 The GitHub Actions workflow pins the Idriç source revision
 `2734ac5a86610eddfab73b1644d72b4ac85a65ee`, bootstraps and runs its
@@ -86,11 +84,11 @@ it does not execute ARM code or provide independent AICI acceptance.
 
 ## Next slices
 
-1. Parse conditional A32 branches and the exact `BL` relocation at
+1. Parse conditional A32 branches and the exact branch-and-save-return relocation at
    `0x5c`, without treating unlinked placeholder destinations as executable
    absolute addresses.
-2. Add separate atomic forms for `CMP`, `ADD`, `LSL`, `STRD`,
-   `POP`, and every further A32 operation actually occurring in the three
+2. Add separate atomic forms for comparison, addition, zero-filling left shift,
+   adjacent doubleword storage, stack restoration, and every further operation in the three
    QR routines. Account for skipped data/literal regions and source spans.
 3. Enumerate the **complete ISA** against a pinned ARMv7-A architectural
    reference, including the encoding/form distinctions hidden by aliases.

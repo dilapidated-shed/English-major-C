@@ -18,11 +18,11 @@ if (process.env.EXPECTED_SOURCE_SHA && sourceHead!==process.env.EXPECTED_SOURCE_
   throw new Error('The input checkout is not the exact requested PR head');
 console.log('A32_IDRIC_SOURCE_HEAD '+sourceHead);
 
-function actualParse(source) {
+function actualParse(source, options=[]) {
   const dir=mkdtempSync(join(tmpdir(),'emc-a32-idric-'));
   try {
     const input=join(dir,'listing.txt');writeFileSync(input,source);
-    return spawnSync(executable,[input],{encoding:'utf8',timeout:15000,
+    return spawnSync(executable,[...options,input],{encoding:'utf8',timeout:15000,
       maxBuffer:1024*1024,shell:false});
   } finally {rmSync(dir,{recursive:true,force:true});}
 }
@@ -40,29 +40,29 @@ function rejected(source,message) {
 }
 
 const expected=[
-  '0|e92d4ff0|push_a1|register_mask=20464',
-  '4|e1a06003|mov_register_a1|r6|r3',
-  '8|e592c000|ldr_immediate_a1|r12|r2|0',
-  '12|e24dd04c|sub_immediate_a1|r13|r13|76',
-  '16|e5914000|ldr_immediate_a1|r4|r1|0',
-  '20|e1a03002|mov_register_a1|r3|r2',
-  '24|e1a0a001|mov_register_a1|r10|r1',
-  '28|e1cc8fcc|bic_asr_a1|r8|r12|r12|asr|31',
-  '32|e59dc074|ldr_immediate_a1|r12|r13|116',
-  '36|e1c44fc4|bic_asr_a1|r4|r4|r4|asr|31',
-  '40|e59d2084|ldr_immediate_a1|r2|r13|132',
-  '44|e58dc000|str_immediate_a1|r12|r13|0',
-  '48|e59dc088|ldr_immediate_a1|r12|r13|136',
-  '52|e58d2004|str_immediate_a1|r2|r13|4',
-  '56|e58dc00c|str_immediate_a1|r12|r13|12',
-  '60|e59d208c|ldr_immediate_a1|r2|r13|140',
-  '64|e59dc090|ldr_immediate_a1|r12|r13|144',
-  '68|e58d2008|str_immediate_a1|r2|r13|8',
-  '72|e1a02001|mov_register_a1|r2|r1',
-  '76|e58dc010|str_immediate_a1|r12|r13|16',
-  '80|e58d0028|str_immediate_a1|r0|r13|40',
-  '84|e58d302c|str_immediate_a1|r3|r13|44',
-  '88|e58d8038|str_immediate_a1|r8|r13|56'
+  '0|e92d4ff0|store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags|register_mask=20464',
+  '4|e1a06003|copy_thirty_two_bit_register_contents_without_changing_condition_flags|r6|r3',
+  '8|e592c000|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r2|0',
+  '12|e24dd04c|subtract_unrotated_eight_bit_immediate_without_changing_condition_flags|r13|r13|76',
+  '16|e5914000|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r4|r1|0',
+  '20|e1a03002|copy_thirty_two_bit_register_contents_without_changing_condition_flags|r3|r2',
+  '24|e1a0a001|copy_thirty_two_bit_register_contents_without_changing_condition_flags|r10|r1',
+  '28|e1cc8fcc|clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags|r8|r12|r12|sign_extending_right_shift|31',
+  '32|e59dc074|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r13|116',
+  '36|e1c44fc4|clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags|r4|r4|r4|sign_extending_right_shift|31',
+  '40|e59d2084|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r2|r13|132',
+  '44|e58dc000|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r13|0',
+  '48|e59dc088|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r13|136',
+  '52|e58d2004|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r2|r13|4',
+  '56|e58dc00c|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r13|12',
+  '60|e59d208c|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r2|r13|140',
+  '64|e59dc090|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r13|144',
+  '68|e58d2008|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r2|r13|8',
+  '72|e1a02001|copy_thirty_two_bit_register_contents_without_changing_condition_flags|r2|r1',
+  '76|e58dc010|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r13|16',
+  '80|e58d0028|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r0|r13|40',
+  '84|e58d302c|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r3|r13|44',
+  '88|e58d8038|store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r8|r13|56'
 ];
 const machineLines=original.split('\n').filter(line=>/^\s*[0-9a-f]+:\s+[0-9a-f]{8}\s+\S+/i.test(line));
 const prefix=machineLines.filter(line=>
@@ -73,14 +73,17 @@ test('all 23 original dqrls A32 words match independently checked typed operands
   assert.deepEqual(accepted(prefix.join('\n')+'\n'),[...expected,'A32_CHECKED_INSTRUCTIONS=23']);
 });
 test('source headers, symbol declarations and relocation rows are not instructions',()=>{
-  assert.deepEqual(accepted('Disassembly of section .text:\n00000000 <dqrls_>:\n'+
-    '5c: R_ARM_CALL dqrdc2_\n'),['A32_CHECKED_INSTRUCTIONS=0']);
+  assert.deepEqual(accepted('/tmp/r-qr-arm-capture/dqrls.armv7-a32.o:     file format elf32-littlearm\n'+
+    'Disassembly of section .text:\n00000000 <dqrls_>:\n'+
+    '5c: R_ARM_CALL dqrdc2_\n'+
+    '60: R_ARM_JUMP24 external_target\n'+
+    '64: 00000000 .word 0x00000000\n'),['A32_CHECKED_INSTRUCTIONS=0']);
 });
 test('physical alias sl identifies register r10 and ip identifies r12',()=>{
   assert.deepEqual(accepted('18: e1a0a001 mov sl, r1\n'+
     '8: e592c000 ldr ip, [r2]\n'),[
-      '24|e1a0a001|mov_register_a1|r10|r1',
-      '8|e592c000|ldr_immediate_a1|r12|r2|0',
+      '24|e1a0a001|copy_thirty_two_bit_register_contents_without_changing_condition_flags|r10|r1',
+      '8|e592c000|load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r12|r2|0',
       'A32_CHECKED_INSTRUCTIONS=2'
   ]);
 });
@@ -104,7 +107,26 @@ test('reject duplicate push registers and malformed machine word',()=>{
   rejected('0: e92d4ff0 push {r4, r4, r6}\n','Unsupported');
   rejected('4: z1a06003 mov r6, r3\n','Malformed');
 });
-test('unknown BL/relocation remains unsupported rather than silently parsed',()=>{
+test('unknown branch-and-save-return relocation remains unsupported rather than silently parsed',()=>{
   rejected('5c: ebfffffe bl 0 <dqrdc2_>\n','Unsupported');
   rejected(original,'Unsupported');
+});
+
+test('all classified rows preserve exact source text and line numbers on request',()=>{
+  const source='/tmp/quoted path/dqrls.o: file format elf32-littlearm\n'+
+    '\n00000000 <dqrls_>:\n  4: e1a06003 mov r6, r3  @ original annotation\n'+
+    '5c: R_ARM_CALL dqrdc2_\n64: 00000000 .word 0x00000000\n';
+  const result=actualParse(source,['--with-source']);
+  assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
+  for(const [index,line] of source.trimEnd().split('\n').entries())
+    assert.ok(result.stdout.split('\n').includes(`SOURCE|${index+1}|${line}`));
+  assert.match(result.stdout,/A32_CHECKED_INSTRUCTIONS=1/);
+});
+
+test('unknown rows and malformed noninstruction records cannot hide machine bytes',()=>{
+  rejected('/tmp/input.o: file format elf64-x86-64\n','Malformed');
+  rejected('not-a-listing-record\n','Unsupported listing record');
+  rejected('zz: R_ARM_CALL dqrdc2_\n','Malformed');
+  rejected('64: z0000000 .word 0x00000000\n','Malformed');
+  rejected('4: e1a06003 mov r6, r3\nnot-a-listing-record\n','line: 2');
 });

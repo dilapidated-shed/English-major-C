@@ -294,41 +294,41 @@ as_a32_stack_member (register_r14 value) = Just (stack_r14 value)
 as_a32_stack_member _ = Nothing
 
 public export
-choice opcode_push_a1 one_of
-  encoded_push_a1
+choice form_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback one_of
+  encoding_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback
 
 public export
-choice opcode_mov_register_a1 one_of
-  encoded_mov_register_a1
+choice form_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags one_of
+  encoding_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags
 
 public export
-choice opcode_ldr_immediate_a1 one_of
-  encoded_ldr_immediate_a1
+choice form_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback one_of
+  encoding_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback
 
 public export
-choice opcode_str_immediate_a1 one_of
-  encoded_str_immediate_a1
+choice form_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback one_of
+  encoding_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback
 
 public export
-choice opcode_sub_immediate_a1 one_of
-  encoded_sub_immediate_a1
+choice form_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags one_of
+  encoding_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags
 
 public export
-choice opcode_bic_asr_a1 one_of
-  encoded_bic_asr_a1
+choice form_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags one_of
+  encoding_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags
 
 -- These are precisely the A32 operand forms admitted by the first parser.
--- The A1 suffix identifies the ARM encoding, not a family of assembler aliases.
+-- Architectural A1 identifiers belong to external encoding metadata only.
 -- No PC write, literal load, conditional execution, rotated immediate, or
 -- arbitrary shifted operand is silently assimilated into these forms.
 public export
 choice a32_instruction one_of
-  push_registers opcode_push_a1 a32_stack_member (List a32_stack_member)
-  move_register opcode_mov_register_a1 a32_data_register a32_data_register
-  load_word opcode_ldr_immediate_a1 a32_data_register a32_non_pc_register Number
-  store_word opcode_str_immediate_a1 a32_data_register a32_non_pc_register Number
-  subtract_immediate opcode_sub_immediate_a1 a32_non_pc_register a32_non_pc_register Number
-  clear_bits_asr opcode_bic_asr_a1 a32_data_register a32_data_register a32_data_register Number
+  store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags form_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback a32_stack_member (List a32_stack_member)
+  copy_thirty_two_bit_register_contents_without_changing_condition_flags form_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags a32_data_register a32_data_register
+  load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes form_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback a32_data_register a32_non_pc_register Number
+  store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes form_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback a32_data_register a32_non_pc_register Number
+  subtract_unrotated_eight_bit_immediate_without_changing_condition_flags form_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags a32_non_pc_register a32_non_pc_register Number
+  clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags form_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags a32_data_register a32_data_register a32_data_register Number
 
 -- This uses arbitrary precision Number; input range checks happen in the parser.
 -- The result is an independent encoding check, not an ARM execution proof.
@@ -338,49 +338,49 @@ power_of_two 0 = 1
 power_of_two (S count) = 2 × power_of_two count
 
 public export
-push_register_mask : a32_stack_member → List a32_stack_member → Number
-push_register_mask first rest =
+selected_stack_register_encoding_mask : a32_stack_member → List a32_stack_member → Number
+selected_stack_register_encoding_mask first rest =
   foldl (\sum, reg ⇒ sum + power_of_two (a32_stack_member_number reg))
         0 (first :: rest)
 
 public export
 expected_machine_word : a32_instruction → Number
-expected_machine_word (push_registers _ first rest) =
-  0xe92d0000 + push_register_mask first rest
-expected_machine_word (move_register _ destination source) =
+expected_machine_word (store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags _ first rest) =
+  0xe92d0000 + selected_stack_register_encoding_mask first rest
+expected_machine_word (copy_thirty_two_bit_register_contents_without_changing_condition_flags _ destination source) =
   0xe1a00000 + 4096 × a32_data_register_number destination +
     a32_data_register_number source
-expected_machine_word (load_word _ destination base offset) =
+expected_machine_word (load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes _ destination base offset) =
   0xe5900000 + 65536 × a32_non_pc_register_number base +
     4096 × a32_data_register_number destination + offset
-expected_machine_word (store_word _ source base offset) =
+expected_machine_word (store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes _ source base offset) =
   0xe5800000 + 65536 × a32_non_pc_register_number base +
     4096 × a32_data_register_number source + offset
-expected_machine_word (subtract_immediate _ destination source immediate) =
+expected_machine_word (subtract_unrotated_eight_bit_immediate_without_changing_condition_flags _ destination source immediate) =
   0xe2400000 + 65536 × a32_non_pc_register_number source +
     4096 × a32_non_pc_register_number destination + immediate
-expected_machine_word (clear_bits_asr _ destination source mask amount) =
+expected_machine_word (clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags _ destination source mask amount) =
   0xe1c00040 + 65536 × a32_data_register_number source +
     4096 × a32_data_register_number destination +
     128 × amount + a32_data_register_number mask
 
 public export
 describe_instruction : a32_instruction → Text
-describe_instruction (push_registers _ first rest) =
-  "push_a1|register_mask=" ++ show (push_register_mask first rest)
-describe_instruction (move_register _ destination source) =
-  "mov_register_a1|r" ++ show (a32_data_register_number destination) ++
+describe_instruction (store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags _ first rest) =
+  "store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags|register_mask=" ++ show (selected_stack_register_encoding_mask first rest)
+describe_instruction (copy_thirty_two_bit_register_contents_without_changing_condition_flags _ destination source) =
+  "copy_thirty_two_bit_register_contents_without_changing_condition_flags|r" ++ show (a32_data_register_number destination) ++
     "|r" ++ show (a32_data_register_number source)
-describe_instruction (load_word _ destination base offset) =
-  "ldr_immediate_a1|r" ++ show (a32_data_register_number destination) ++
+describe_instruction (load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes _ destination base offset) =
+  "load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r" ++ show (a32_data_register_number destination) ++
     "|r" ++ show (a32_non_pc_register_number base) ++ "|" ++ show offset
-describe_instruction (store_word _ source base offset) =
-  "str_immediate_a1|r" ++ show (a32_data_register_number source) ++
+describe_instruction (store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes _ source base offset) =
+  "store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes|r" ++ show (a32_data_register_number source) ++
     "|r" ++ show (a32_non_pc_register_number base) ++ "|" ++ show offset
-describe_instruction (subtract_immediate _ destination source immediate) =
-  "sub_immediate_a1|r" ++ show (a32_non_pc_register_number destination) ++
+describe_instruction (subtract_unrotated_eight_bit_immediate_without_changing_condition_flags _ destination source immediate) =
+  "subtract_unrotated_eight_bit_immediate_without_changing_condition_flags|r" ++ show (a32_non_pc_register_number destination) ++
     "|r" ++ show (a32_non_pc_register_number source) ++ "|" ++ show immediate
-describe_instruction (clear_bits_asr _ destination source mask amount) =
-  "bic_asr_a1|r" ++ show (a32_data_register_number destination) ++
+describe_instruction (clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags _ destination source mask amount) =
+  "clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags|r" ++ show (a32_data_register_number destination) ++
     "|r" ++ show (a32_data_register_number source) ++
-    "|r" ++ show (a32_data_register_number mask) ++ "|asr|" ++ show amount
+    "|r" ++ show (a32_data_register_number mask) ++ "|sign_extending_right_shift|" ++ show amount
