@@ -6,6 +6,7 @@ import System
 import System.File
 import EnglishMajorC.A32Atoms
 import EnglishMajorC.A32Decode
+import EnglishMajorC.A32English
 
 -- Dedicated A32 machine-listing parser. Never infer source instructions from
 -- English sentences, and never accept an assembler's mnemonic as evidence that
@@ -329,6 +330,7 @@ main = do
   case arguments of
     [_, source_path] ⇒ run_parser False source_path
     [_, "--with-source", source_path] ⇒ run_parser True source_path
+    [_, "--english", source_path] ⇒ run_english_source source_path
     [_, "--word", hexadecimal_word] ⇒
       case read_machine_word hexadecimal_word of
         Nothing ⇒ do
@@ -346,5 +348,5 @@ main = do
                   putStrLn "Decoded operands disagree with saved machine word"
                   exitFailure
     _ ⇒ do
-      putStrLn "Usage: english-a32 [--with-source] FILE_WITH_GNU_OBJDUMP_A32_LISTING"
+      putStrLn "Usage: english-a32 [--english FILE_WITH_ENGLISH_QR_SENTENCES | --with-source FILE_WITH_GNU_OBJDUMP_A32_LISTING | FILE_WITH_GNU_OBJDUMP_A32_LISTING]"
       exitFailure
