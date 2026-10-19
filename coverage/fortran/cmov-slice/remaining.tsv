@@ -1,0 +1,14 @@
+family	historical_occurrences	independent_complete_effects	remaining_work
+shl	14	UNVERIFIED	Count masks; zero/one/large counts; defined and undefined flags; alias writes; faults
+sar	12	UNVERIFIED	Count masks; sign propagation; defined and undefined flags; alias writes; faults
+shr	1	UNVERIFIED	Count mask; zero fill; defined and undefined flags; faults
+imul	26	UNVERIFIED	Two/three operand roles; immediate sign extension; truncated product; overflow and undefined flags
+ucomisd	18	UNVERIFIED	Ordered/unordered flags; signaling NaN; denormals; masks; MXCSR; memory and exception completion
+comisd	6	UNVERIFIED	Quiet/signaling NaN distinction; denormals; masks; MXCSR; memory and exception completion
+mulsd	8	UNVERIFIED	Operand order; lanes; rounding; NaNs; signed zero; denormals; MXCSR; exceptions
+divsd	18	UNVERIFIED	Operand order; lanes; rounding; divide by zero; NaNs; denormals; MXCSR; exceptions
+addsd	3	UNVERIFIED	Operand order; lanes; rounding; NaNs; signed zero; denormals; MXCSR; exceptions
+subsd	6	UNVERIFIED	Operand order; lanes; rounding; NaNs; signed zero; denormals; MXCSR; exceptions
+sqrtsd	2	UNVERIFIED	Source/destination lanes; rounding; negative inputs; NaNs; signed zero; MXCSR; exceptions
+maxsd	2	UNVERIFIED	Second operand priority; quiet/signaling NaNs; signed-zero ties; lane preservation; MXCSR
+cvtsi2sd	1	UNVERIFIED	Signed source width; rounding; register lane preservation; MXCSR and exception behavior

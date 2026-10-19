@@ -34,6 +34,12 @@ Emit conditional exact-head propagation, or NONE.
 
 ## P1: SUN EMC-SEMANTIC-SLICE-01
 
+Successor: [cmov-slice/](cmov-slice/README.md) implements the finite claim check
+for the eight repaired CMOV occurrences and inventories all 117 remaining
+partial descriptions. This settles that claim boundary, not the full semantic
+job. The next bounded slice is 27 shift occurrences; all complete-effect
+statuses remain UNVERIFIED. The original broader prompt is retained below.
+
 Refresh the same draft, semantic-forms.tsv and historical findings. Bound the
 first verification slice around eight false-CMOV occurrences and the 117 expanded
 shift/multiply/scalar-FP descriptions. Determine every required alias, implicit
