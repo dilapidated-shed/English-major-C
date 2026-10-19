@@ -1,7 +1,7 @@
 priority	item	status	evidence	recovery
 P2	Archived support and compressed-trace interpretation	HASHED_ONLY_NOT_SEMANTICALLY_AUDITED	ARCHIVED_SUPPORT rows in generated/artifacts.tsv	Inspect exact support artifacts separately; do not promote trace identity to state verification
-P1	Softfp linked English ledger	MISSING	2005 instruction rows in generated/missing-english.tsv	Author exact byte-aligned English without QR execution
-P1	Hardfp linked English ledger	MISSING	1437 instruction rows in generated/missing-english.tsv	Author separate A32/T32 ledger with separate ABI evidence
+P1	Softfp linked English ledger	PRELIMINARY_LEDGER_ADDED_SEMANTICS_UNVERIFIED	arm-linked/generated/softfp.instructions.english overlays 2005 historically missing rows	Verify full effects separately; frozen generated/missing-english.tsv remains historical
+P1	Hardfp linked English ledger	PRELIMINARY_LEDGER_ADDED_SEMANTICS_UNVERIFIED	arm-linked/generated/hardfp.instructions.english overlays 1437 historically missing rows	Verify A32/T32 effects and ABI separately; frozen missing rows remain historical
 P1	Complete instruction semantics	UNVERIFIED	1542 explicit form obligations in generated/semantic-forms.tsv	Bounded ISA/ABI claim audits and independent counterexamples
 P1	Object-only disassembly	MISSING_CAPTURED_LISTING	9 sections and 7340 bytes in generated/listing-gaps.tsv	Decode original objects read-only; preserve relocations and originals
 P1	Suppressed zero DATA meanings	UNKNOWN_MEANING_BYTES_CAPTURED	7 ranges and 60 bytes in generated/listing-gaps.tsv	Use mapping/section/source evidence; do not invent executed instructions
