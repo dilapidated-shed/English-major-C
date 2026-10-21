@@ -252,6 +252,7 @@ original_entry_offsets expected_offset
     actual_offset ≟ expected_offset && actual_offset <= 88 &&
       original_entry_offsets (expected_offset + 4) remaining
 
+export
 covering
 run_english_source : Text → IO ()
 run_english_source path = do
