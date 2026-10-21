@@ -1,0 +1,83 @@
+The machine boundary of the linked ARM English ledgers
+=====================================================
+
+Scope and evidence
+------------------
+specimens.tsv binds the two original binaries and listings by commit and
+SHA-256. They are GNU/Linux EABI softfp and hardfp specimens, not physical
+Android-device evidence. readelf ABI flags and attributes distinguish them.
+The annotated object and linked copies remain separate occurrences.
+
+Bytes in ledger headers are in increasing memory-address order. The original
+GNU A32 word e92d4008 therefore appears as 08402de9. Thumb f04f 0b00 appears
+as 4ff0000b. The original assembly column remains unchanged, including comments.
+
+Register and execution obligations
+----------------------------------
+General registers R0-R15 are 32 bits. SL/R10, FP/R11, IP/R12, SP/R13, LR/R14 and
+PC/R15 denote aliases. VFP D registers have 64-bit payloads and overlap their
+corresponding S-register pairs; exact access/alias effects remain unverified.
+Printed register lists and the implicit following register in A32 LDRD/STRD
+require full expansion before a complete state transformer is certified.
+
+An A32 word occupies four bytes. T32 instructions in the hardfp startup region
+occupy either two or four. A sequential successor is address plus encoded width;
+it is not the value read as PC and does not assert that the instruction runs,
+returns normally, has permission, or has that successor after a branch or fault.
+A32 ordinary PC operands generally use address plus eight. Thumb ordinary PC
+operands generally use address plus four; literal loads/address-generation forms
+can align that value. Exact operand/encoding rules remain verification work.
+
+A32 condition evidence is read from the encoding's condition field. The
+preliminary predicates describe APSR.NZCV; S spellings request encoding-specific
+flag updates. No universal preservation of the other flags is claimed. Thumb
+startup has no printed IT instruction, but arbitrary incoming ITSTATE and entry
+paths are unknown. The ledger preserves that context obligation. CBZ/CBNZ and
+conditional branches have their separate predicate behavior.
+
+BL, BLX, BX, POP containing PC, LDM containing PC and ordinary PC writes need
+different control-flow rules. BL/BLX write LR; immediate BLX crosses instruction
+states in these captures. Indirect values, state changes, target permissions,
+return addresses, exceptions and actual execution-index changes remain
+uncertified. A direct target printed as a PLT name is a captured stub, not the
+uncaptured library implementation.
+
+Memory and floating-point obligations
+--------------------------------------
+Every memory instruction needs exact effective-address formation, source/dest
+width, alignment and endianness rules, base writeback, register overlap rules,
+access ordering, permissions, memory type and fault/partial-completion behavior.
+Multiple transfers do not gain an atomicity guarantee from a compact sentence.
+No processor memory configuration or process mappings have been captured here.
+
+VFP payload transfers are distinct from arithmetic and conversions. Comparisons
+write FPSCR.NZCV; the observed VMRS APSR_nzcv,FPSCR transfers those condition bits
+to integer status. FPSCR rounding, default-NaN handling, signaling/quiet NaNs,
+signed zero, denormals/flush-to-zero, accumulated flags, trapping and exact
+intermediate rounding remain unverified for each form. VMLA/VMLS are not silently
+treated as fused arithmetic. No host JavaScript arithmetic is used as an oracle.
+
+ABI and external effects
+-------------------------
+The softfp/base and hardfp/VFP parameter conventions are separate contracts.
+R0-R3/stack argument placement, callee-saved general/VFP registers, stack
+alignment, by-reference Fortran arguments, return conventions and exceptional
+exits all remain obligations at each call boundary. Library interface names do
+not establish those libraries' actual effects. Softfp embeds five reference
+BLAS bodies; dynamic dependencies, loader resolution, indirect target state,
+libc behavior and missing R-side machinery retain their original unknowns.
+
+Status discipline
+------------------
+All operation explanations are PRELIMINARY/ANNOTATED_ONLY. Independent byte,
+mode, width, order, ABI identity and range assertions are structural evidence.
+They do not certify the prose's complete meaning. Join the native_record to the
+frozen semantic-forms table for explicit per-form unknowns. No form becomes
+COMPLETE by gaining a ledger row. Contradictions discovered later must remain
+visible alongside both the earlier explanation and its correction.
+
+Primary reference locators, not archived verification witnesses:
+Arm DDI 0406C.d:
+https://documentation-service.arm.com/static/5f8daeb7f86e16515cdb8c4e
+Arm AAPCS32 2025Q1:
+https://github.com/ARM-software/abi-aa/blob/2025Q1/aapcs32/aapcs32.rst

@@ -16,6 +16,16 @@ explicit; hashing a trace is not verification of its states.
 **Byte accounting is checked. Complete instruction semantics, library closure
 and whole-language coverage are not established.**
 
+Successor: [linked ARM ledgers](arm-linked/README.md) add first-pass English for
+the 3,442 instruction rows missing from these frozen trees. The historical
+tables below and generated/ remain unchanged; the successor records annotation
+coverage separately and grants no complete semantic or library claim.
+
+[First semantic claim slice](cmov-slice/README.md) checks the eight repaired
+CMOV occurrences against a pinned Intel source and finite flag/data cases.
+The other 117 historically partial descriptions retain separate obligations.
+No complete-effect form, native-execution or language-coverage claim is promoted.
+
 | Dimension | Observed accounting | Boundary |
 | --- | --- | --- |
 | Frozen inputs | 6 commits; 331 file occurrences; 136 distinct SHA-256 artifacts | Whole pinned trees; overlapping snapshots deduplicated by bytes |

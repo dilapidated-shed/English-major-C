@@ -5,6 +5,14 @@ interpreter extension or merge is authorized by these prompts.
 
 ## P1: SUN EMC-ARM-LEDGERS-01
 
+Successor status: representation and bounded ledger authoring are implemented
+in [arm-linked/](arm-linked/README.md). The two ledgers account for 3,442
+instructions, 98 printed data rows and six suppressed ranges. Independent
+structural acceptance is wired to exact-head receipts. All explanations remain
+ANNOTATED_ONLY and complete effects UNVERIFIED. The original scope below is
+retained for provenance; further ledger authoring is no longer the next job.
+The semantic-slice and dependency-closure jobs remain open and take priority.
+
 Refresh dilapidated-shed/English-major-C audit/emc-fortran-cover-01 and its source
 pins. Use generated/missing-english.tsv to design full ledgers for exactly the
 2,005 softfp-linked and 1,437 hardfp-linked instruction rows. Keep A32/T32, ABI,
@@ -25,6 +33,12 @@ Moon follow-up job(s)
 Emit conditional exact-head propagation, or NONE.
 
 ## P1: SUN EMC-SEMANTIC-SLICE-01
+
+Successor: [cmov-slice/](cmov-slice/README.md) implements the finite claim check
+for the eight repaired CMOV occurrences and inventories all 117 remaining
+partial descriptions. This settles that claim boundary, not the full semantic
+job. The next bounded slice is 27 shift occurrences; all complete-effect
+statuses remain UNVERIFIED. The original broader prompt is retained below.
 
 Refresh the same draft, semantic-forms.tsv and historical findings. Bound the
 first verification slice around eight false-CMOV occurrences and the 117 expanded
