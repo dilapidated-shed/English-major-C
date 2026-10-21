@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           repository: isomorphisms/ai-ci
-          ref: bf4eae551d67ac08f01a55834e88da30882259c7
+          ref: 4c9e0939e48f439fba316aaa55ee4ae11f9545b8
           path: .ai-ci
           persist-credentials: false
       - name: Independently verify the 23 English A32 words with pinned AI-CI
