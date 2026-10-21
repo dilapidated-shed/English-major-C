@@ -1,0 +1,276 @@
+module EnglishMajorC.A32English
+
+import Data.List
+import Data.Text
+import System
+import System.File
+import EnglishMajorC.A32Atoms
+
+-- Only the six word forms attested in the first 23 original QR instructions.
+-- Decode the English source, not GNU mnemonics or saved words.
+
+choice english_instruction_record one_of
+  english_instruction Number Number Text a32_instruction
+
+flush_english_token : List Char → List Text → List Text
+flush_english_token [] found = found
+flush_english_token reversed_letters found = pack (reverse reversed_letters) :: found
+
+english_separator : Char → Bool
+english_separator character = isSpace character || elem character [',', '.', ';']
+
+scan_english : List Char → List Char → List Text → List Text
+scan_english [] letters found = reverse (flush_english_token letters found)
+scan_english (character :: remaining) letters found =
+  if english_separator character
+    then scan_english remaining [] (flush_english_token letters found)
+    else scan_english remaining (character :: letters) found
+
+hexadecimal_digit : Char → Maybe Number
+hexadecimal_digit '0' = Just 0
+hexadecimal_digit '1' = Just 1
+hexadecimal_digit '2' = Just 2
+hexadecimal_digit '3' = Just 3
+hexadecimal_digit '4' = Just 4
+hexadecimal_digit '5' = Just 5
+hexadecimal_digit '6' = Just 6
+hexadecimal_digit '7' = Just 7
+hexadecimal_digit '8' = Just 8
+hexadecimal_digit '9' = Just 9
+hexadecimal_digit 'a' = Just 10
+hexadecimal_digit 'b' = Just 11
+hexadecimal_digit 'c' = Just 12
+hexadecimal_digit 'd' = Just 13
+hexadecimal_digit 'e' = Just 14
+hexadecimal_digit 'f' = Just 15
+hexadecimal_digit _ = Nothing
+
+hexadecimal_value : List Char → Number → Maybe Number
+hexadecimal_value [] value = Just value
+hexadecimal_value (digit :: remaining) value =
+  case hexadecimal_digit digit of
+    Nothing ⇒ Nothing
+    Just part ⇒ hexadecimal_value remaining (16 × value + part)
+
+read_hexadecimal_number : Text → Maybe Number
+read_hexadecimal_number source =
+  case unpack source of
+    '0' :: 'x' :: (first :: remaining) ⇒ hexadecimal_value (first :: remaining) 0
+    _ ⇒ Nothing
+
+read_data_register : Text → Maybe a32_data_register
+read_data_register name =
+  case register_from_text name of
+    Just register ⇒ as_a32_data_register register
+    Nothing ⇒ Nothing
+
+read_address_register : Text → Maybe a32_non_pc_register
+read_address_register name =
+  case register_from_text name of
+    Just register ⇒ as_a32_non_pc_register register
+    Nothing ⇒ Nothing
+
+read_stack_member : Text → Maybe a32_stack_member
+read_stack_member name =
+  case register_from_text name of
+    Just register ⇒ as_a32_stack_member register
+    Nothing ⇒ Nothing
+
+read_saved_stack_members : List Text → Maybe (List a32_stack_member)
+read_saved_stack_members
+  ["on", "a", "descending", "stack", "in", "ascending", "register", "order"] =
+    Just []
+read_saved_stack_members (name :: rest) =
+  case (read_stack_member name, read_saved_stack_members rest) of
+    (Just register, Just registers) ⇒ Just (register :: registers)
+    _ ⇒ Nothing
+read_saved_stack_members _ = Nothing
+
+strictly_increasing : List Number → Bool
+strictly_increasing [] = True
+strictly_increasing [_] = True
+strictly_increasing (first :: second :: rest) =
+  first < second && strictly_increasing (second :: rest)
+
+english_operation : List Text → Maybe a32_instruction
+english_operation
+  ("save" :: "four-byte" :: "values" :: "from" :: "registers" :: names) =
+  case read_saved_stack_members names of
+    Just (first :: rest) ⇒
+      if strictly_increasing (map a32_stack_member_number (first :: rest))
+        then Just
+          (store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags
+           encoding_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback
+           first rest)
+        else Nothing
+    _ ⇒ Nothing
+english_operation
+  ["copy", "the", "four-byte", "value", "in", "register", source_name,
+   "into", "register", destination_name] =
+  case (read_data_register destination_name, read_data_register source_name) of
+    (Just destination, Just source) ⇒ Just
+      (copy_thirty_two_bit_register_contents_without_changing_condition_flags
+       encoding_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags
+       destination source)
+    _ ⇒ Nothing
+english_operation
+  ["read", "a", "four-byte", "word", "at", "register", base_name,
+   "plus", displacement_name, "into", "register", destination_name] =
+  case (read_data_register destination_name, read_address_register base_name,
+        read_hexadecimal_number displacement_name) of
+    (Just destination, Just base, Just displacement) ⇒
+      if displacement <= 4095
+        then Just
+          (load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes
+           encoding_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback
+           destination base displacement)
+        else Nothing
+    _ ⇒ Nothing
+english_operation
+  ["store", "the", "four-byte", "value", "in", "register", source_name,
+   "at", "register", base_name, "plus", displacement_name] =
+  case (read_data_register source_name, read_address_register base_name,
+        read_hexadecimal_number displacement_name) of
+    (Just source, Just base, Just displacement) ⇒
+      if displacement <= 4095
+        then Just
+          (store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes
+           encoding_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback
+           source base displacement)
+        else Nothing
+    _ ⇒ Nothing
+english_operation
+  ["subtract", amount_name, "from", "stack", "register", "r13",
+   "without", "changing", "flags"] =
+  case read_hexadecimal_number amount_name of
+    Just amount ⇒
+      if amount <= 255
+        then Just
+          (subtract_unrotated_eight_bit_immediate_without_changing_condition_flags
+           encoding_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags
+           (non_pc_r13 physical_r13) (non_pc_r13 physical_r13) amount)
+        else Nothing
+    _ ⇒ Nothing
+english_operation
+  ["retain", "register", source_name, "in", "register", destination_name,
+   "when", "its", "signed", "four-byte", "value", "is", "nonnegative",
+   "otherwise", "write", "zero"] =
+  case (read_data_register destination_name, read_data_register source_name) of
+    (Just destination, Just source) ⇒ Just
+      (clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags
+       encoding_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags
+       destination source source 31)
+    _ ⇒ Nothing
+english_operation _ = Nothing
+
+english_sentence : List Text → Maybe (Number, a32_instruction)
+english_sentence ("At" :: "byte" :: "offset" :: address_name :: rest) =
+  case (read_hexadecimal_number address_name, english_operation rest) of
+    (Just address, Just operation) ⇒ Just (address, operation)
+    _ ⇒ Nothing
+english_sentence _ = Nothing
+
+is_note_line : List Char → Bool
+is_note_line ('(' :: 'N' :: 'O' :: 'T' :: 'E' :: ':' :: _) = True
+is_note_line _ = False
+
+parse_english_line : Number → Text → Either Text (Maybe english_instruction_record)
+parse_english_line line_number source =
+  if is_note_line (unpack source) then Right Nothing
+  else case scan_english (unpack source) [] [] of
+    [] ⇒ Right Nothing
+    tokens ⇒
+      case english_sentence tokens of
+        Nothing ⇒ Left ("Unsupported English machine sentence at line " ++ show line_number)
+        Just (address, operation) ⇒
+          Right (Just (english_instruction line_number address source operation))
+
+parse_english_lines : Number → List Text → Either Text (List english_instruction_record)
+parse_english_lines line_number [] = Right []
+parse_english_lines line_number (source :: remaining) =
+  case parse_english_line line_number source of
+    Left message ⇒ Left (message ++ " | source: " ++ source)
+    Right current ⇒
+      case parse_english_lines (line_number + 1) remaining of
+        Left message ⇒ Left message
+        Right later ⇒
+          case current of
+            Nothing ⇒ Right later
+            Just entry ⇒ Right (entry :: later)
+
+exact_word_integer : Number → Integer
+exact_word_integer word = cast word
+
+hexadecimal_character : Integer → Char
+hexadecimal_character 0 = '0'
+hexadecimal_character 1 = '1'
+hexadecimal_character 2 = '2'
+hexadecimal_character 3 = '3'
+hexadecimal_character 4 = '4'
+hexadecimal_character 5 = '5'
+hexadecimal_character 6 = '6'
+hexadecimal_character 7 = '7'
+hexadecimal_character 8 = '8'
+hexadecimal_character 9 = '9'
+hexadecimal_character 10 = 'a'
+hexadecimal_character 11 = 'b'
+hexadecimal_character 12 = 'c'
+hexadecimal_character 13 = 'd'
+hexadecimal_character 14 = 'e'
+hexadecimal_character 15 = 'f'
+hexadecimal_character _ = '?'
+
+hexadecimal_digits : Number → Integer → List Char
+hexadecimal_digits 0 _ = []
+hexadecimal_digits (S count) value =
+  hexadecimal_digits count (div value 16) ++
+    [hexadecimal_character (mod value 16)]
+
+machine_word_hexadecimal : Number → Text
+machine_word_hexadecimal word =
+  pack (hexadecimal_digits 8 (exact_word_integer word))
+
+print_english_words : List english_instruction_record → IO ()
+print_english_words [] = pure ()
+print_english_words (english_instruction source_line address source operation :: remaining) = do
+  putStrLn ("ENGLISH|" ++ show source_line ++ "|" ++ source)
+  putStrLn ("WORD|" ++ show address ++ "|" ++
+            machine_word_hexadecimal (expected_machine_word operation) ++
+            "|" ++ describe_instruction operation)
+  print_english_words remaining
+
+english_count : List english_instruction_record → Number
+english_count [] = 0
+english_count (_ :: remaining) = 1 + english_count remaining
+
+-- The specimen stops before the unresolved call at 0x005c. Permit operand
+-- mutations within the original six forms, not additional or reordered slots.
+original_entry_offsets : Number → List english_instruction_record → Bool
+original_entry_offsets expected_offset [] = expected_offset ≟ 92
+original_entry_offsets expected_offset
+  (english_instruction _ actual_offset _ _ :: remaining) =
+    actual_offset ≟ expected_offset && actual_offset <= 88 &&
+      original_entry_offsets (expected_offset + 4) remaining
+
+export
+covering
+run_english_source : Text → IO ()
+run_english_source path = do
+  contents ← readFile path
+  case contents of
+    Left _ ⇒ do
+      putStrLn "Cannot read English machine source."
+      exitFailure
+    Right source ⇒
+      case parse_english_lines 1 (lines source) of
+        Left message ⇒ do
+          putStrLn message
+          exitFailure
+        Right entries ⇒
+          if original_entry_offsets 0 entries
+            then do
+              print_english_words entries
+              putStrLn ("A32_ENGLISH_INSTRUCTIONS=" ++ show (english_count entries))
+            else do
+              putStrLn "English QR entry must contain exactly 23 ascending four-byte offsets 0x0000 through 0x0058."
+              exitFailure

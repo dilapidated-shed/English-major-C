@@ -1,0 +1,52 @@
+name: Idric typed ARM A32 source parser
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  a32-idric-execution:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          repository: isomorphisms/Idric
+          ref: 2734ac5a86610eddfab73b1644d72b4ac85a65ee
+          path: .idric-host
+          persist-credentials: false
+      - name: Bootstrap pinned canonical Idric and exercise its compiler
+        run: |
+          .idric-host/edric bootstrap
+          .idric-host/edric test --only idris2/basic/edric001
+      - name: Compile the exact typed A32 Idric source
+        run: |
+          export PATH="$GITHUB_WORKSPACE/.idric-host/.tools/bin:$PATH"
+          export IDRIS2_PREFIX="$GITHUB_WORKSPACE/.idric-host/_/build/env"
+          .idric-host/build/exec/idris2 --version
+          .idric-host/build/exec/idris2 --build english-a32.ipkg
+      - name: Execute real QR evidence and rejection tests using Idric binary
+        env:
+          A32_BINARY: ${{ github.workspace }}/build/exec/english-a32
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node --test research/a32-typed/test-a32.mjs
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          repository: isomorphisms/ai-ci
+          ref: 4c9e0939e48f439fba316aaa55ee4ae11f9545b8
+          path: .ai-ci
+          persist-credentials: false
+      - name: Independently verify the 23 English A32 words with pinned AI-CI
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node .ai-ci/english-major-c/verify-a32-23.mjs \
+            "$GITHUB_WORKSPACE/build/exec/english-a32" \
+            "$GITHUB_WORKSPACE/experiments/qr-entry/ARM entry before its first call.english" \
+            "$GITHUB_WORKSPACE/examples/r-lm-native-armv7-a32/dqrls.armv7-a32.disasm.txt" \
+            "$GITHUB_WORKSPACE"
+# This workflow does not claim ARM execution or automatic merge.

@@ -1,0 +1,352 @@
+module EnglishMajorC.A32Parser
+
+import Data.List
+import Data.Text
+import System
+import System.File
+import EnglishMajorC.A32Atoms
+import EnglishMajorC.A32Decode
+import EnglishMajorC.A32English
+
+-- Dedicated A32 machine-listing parser. Never infer source instructions from
+-- English sentences, and never accept an assembler's mnemonic as evidence that
+-- the saved raw word has that meaning.
+-- The initial profile covers the first 23 dqrls_ instructions, up to its external-call
+-- relocation. Unsupported instructions fail closed; other disassembly headers
+-- and symbol headings are not misclassified as machine instructions.
+
+choice parsed_listing_instruction one_of
+  parsed_a32_instruction Number Text Number Text a32_instruction
+
+flush_token : List Char → List Text → List Text
+flush_token [] found = found
+flush_token reversed_letters found = pack (reverse reversed_letters) :: found
+
+is_asm_separator : Char → Bool
+is_asm_separator character = elem character [':', ',', '[', ']', '{', '}', '#']
+
+scan_listing : List Char → List Char → List Text → List Text
+scan_listing [] letters found = reverse (flush_token letters found)
+scan_listing (character :: remaining) letters found =
+  if isSpace character
+     then scan_listing remaining [] (flush_token letters found)
+  else if is_asm_separator character
+     then scan_listing remaining [] (pack [character] :: flush_token letters found)
+  else scan_listing remaining (character :: letters) found
+
+-- GNU objdump's '@' annotation is supplementary display text, not an
+-- operand. Preserve original source outside this tokenizer for auditing.
+remove_annotation : List Char → List Char
+remove_annotation [] = []
+remove_annotation ('@' :: _) = []
+remove_annotation (character :: remaining) =
+  character :: remove_annotation remaining
+
+hex_digit : Char → Maybe Number
+hex_digit '0' = Just 0
+hex_digit '1' = Just 1
+hex_digit '2' = Just 2
+hex_digit '3' = Just 3
+hex_digit '4' = Just 4
+hex_digit '5' = Just 5
+hex_digit '6' = Just 6
+hex_digit '7' = Just 7
+hex_digit '8' = Just 8
+hex_digit '9' = Just 9
+hex_digit 'a' = Just 10
+hex_digit 'b' = Just 11
+hex_digit 'c' = Just 12
+hex_digit 'd' = Just 13
+hex_digit 'e' = Just 14
+hex_digit 'f' = Just 15
+hex_digit 'A' = Just 10
+hex_digit 'B' = Just 11
+hex_digit 'C' = Just 12
+hex_digit 'D' = Just 13
+hex_digit 'E' = Just 14
+hex_digit 'F' = Just 15
+hex_digit _ = Nothing
+
+decimal_digit : Char → Maybe Number
+decimal_digit '0' = Just 0
+decimal_digit '1' = Just 1
+decimal_digit '2' = Just 2
+decimal_digit '3' = Just 3
+decimal_digit '4' = Just 4
+decimal_digit '5' = Just 5
+decimal_digit '6' = Just 6
+decimal_digit '7' = Just 7
+decimal_digit '8' = Just 8
+decimal_digit '9' = Just 9
+decimal_digit _ = Nothing
+
+hex_value : List Char → Number → Maybe Number
+hex_value [] value = Just value
+hex_value (digit :: remaining) value =
+  case hex_digit digit of
+    Nothing ⇒ Nothing
+    Just part ⇒ hex_value remaining (value × 16 + part)
+
+decimal_value : List Char → Number → Maybe Number
+decimal_value [] value = Just value
+decimal_value (digit :: remaining) value =
+  case decimal_digit digit of
+    Nothing ⇒ Nothing
+    Just part ⇒ decimal_value remaining (value × 10 + part)
+
+read_hex_address : Text → Maybe Number
+read_hex_address source =
+  case unpack source of
+    [] ⇒ Nothing
+    chars ⇒ hex_value chars 0
+
+read_machine_word : Text → Maybe Number
+read_machine_word source =
+  if length (unpack source) ≟ 8 then hex_value (unpack source) 0
+     else Nothing
+
+read_decimal : Text → Maybe Number
+read_decimal source =
+  case unpack source of
+    [] ⇒ Nothing
+    chars ⇒ decimal_value chars 0
+
+read_data_register : Text → Maybe a32_data_register
+read_data_register source =
+  case register_from_text source of
+    Nothing ⇒ Nothing
+    Just register ⇒ as_a32_data_register register
+
+read_non_pc_register : Text → Maybe a32_non_pc_register
+read_non_pc_register source =
+  case register_from_text source of
+    Nothing ⇒ Nothing
+    Just register ⇒ as_a32_non_pc_register register
+
+read_stack_member : Text → Maybe a32_stack_member
+read_stack_member source =
+  case register_from_text source of
+    Nothing ⇒ Nothing
+    Just register ⇒ as_a32_stack_member register
+
+read_memory_address : List Text → Maybe (a32_non_pc_register, Number)
+read_memory_address ["[", base, "]"] =
+  case read_non_pc_register base of
+    Nothing ⇒ Nothing
+    Just register ⇒ Just (register, 0)
+read_memory_address ["[", base, ",", "#", offset, "]"] =
+  case (read_non_pc_register base, read_decimal offset) of
+    (Just register, Just displacement) ⇒
+      if displacement <= 4095 then Just (register, displacement) else Nothing
+    _ ⇒ Nothing
+read_memory_address _ = Nothing
+
+read_stack_rest : List Text → Maybe (List a32_stack_member)
+read_stack_rest ["}"] = Just []
+read_stack_rest ("," :: name :: remaining) =
+  case (read_stack_member name, read_stack_rest remaining) of
+    (Just register, Just rest) ⇒ Just (register :: rest)
+    _ ⇒ Nothing
+read_stack_rest _ = Nothing
+
+no_duplicate_registers : List Number → Bool
+no_duplicate_registers [] = True
+no_duplicate_registers (first :: rest) =
+  not (elem first rest) && no_duplicate_registers rest
+
+parse_assembly : List Text → Maybe a32_instruction
+parse_assembly ("push" :: "{" :: first :: rest) =
+  case (read_stack_member first, read_stack_rest rest) of
+    (Just first_register, Just other_registers) ⇒
+      if no_duplicate_registers
+         (map a32_stack_member_number (first_register :: other_registers))
+         then Just (store_selected_thirty_two_bit_register_values_below_stack_pointer_and_update_stack_pointer_without_changing_condition_flags encoding_for_storing_selected_register_values_below_stack_pointer_with_stack_pointer_writeback first_register other_registers)
+         else Nothing
+    _ ⇒ Nothing
+parse_assembly ["mov", destination, ",", source] =
+  case (read_data_register destination, read_data_register source) of
+    (Just dest, Just src) ⇒
+      Just (copy_thirty_two_bit_register_contents_without_changing_condition_flags encoding_for_copying_thirty_two_bit_register_contents_without_changing_condition_flags dest src)
+    _ ⇒ Nothing
+parse_assembly ("ldr" :: destination :: "," :: address) =
+  case (read_data_register destination, read_memory_address address) of
+    (Just dest, Just (base, offset)) ⇒
+      Just (load_thirty_two_bits_from_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes encoding_for_loading_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback dest base offset)
+    _ ⇒ Nothing
+parse_assembly ("str" :: source :: "," :: address) =
+  case (read_data_register source, read_memory_address address) of
+    (Just src, Just (base, offset)) ⇒
+      Just (store_thirty_two_bits_at_base_plus_unsigned_immediate_without_base_writeback_or_condition_flag_changes encoding_for_storing_thirty_two_bits_using_base_plus_unsigned_immediate_without_base_writeback src base offset)
+    _ ⇒ Nothing
+parse_assembly ["sub", destination, ",", source, ",", "#", immediate] =
+  case (read_non_pc_register destination, read_non_pc_register source,
+        read_decimal immediate) of
+    (Just dest, Just src, Just amount) ⇒
+      if amount <= 255
+         then Just (subtract_unrotated_eight_bit_immediate_without_changing_condition_flags encoding_for_subtracting_unrotated_eight_bit_immediate_without_changing_condition_flags dest src amount)
+         else Nothing
+    _ ⇒ Nothing
+parse_assembly ["bic", destination, ",", source, ",", mask, ",",
+                "asr", "#", amount] =
+  case (read_data_register destination, read_data_register source,
+        read_data_register mask, read_decimal amount) of
+    (Just dest, Just src, Just masked, Just shift) ⇒
+      if shift >= 1 && shift <= 31
+         then Just (clear_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags encoding_for_clearing_bits_selected_by_sign_extending_right_shift_without_changing_condition_flags dest src masked shift)
+         else Nothing
+    _ ⇒ Nothing
+parse_assembly _ = Nothing
+
+-- Classification precedes instruction parsing. Every accepted source row retains
+-- its original line number and text, including nonexecuting records.
+choice parsed_listing_record one_of
+  checked_instruction parsed_listing_instruction
+  nonexecuting_object_header Number Text
+  nonexecuting_section_heading Number Text
+  nonexecuting_symbol_heading Number Text
+  nonexecuting_relocation_annotation Number Text
+  nonexecuting_literal_data Number Text
+  nonexecuting_blank_line Number Text
+
+is_symbol_heading : Text → Bool
+is_symbol_heading symbol =
+  case (unpack symbol, reverse (unpack symbol)) of
+    ('<' :: _, '>' :: _) ⇒ True
+    _ ⇒ False
+
+-- File paths may contain spaces. Match the fixed header suffix, retaining
+-- the entire untouched source row rather than treating the path as one token.
+is_object_file_header : List Text → Bool
+is_object_file_header parts =
+  case reverse parts of
+    "elf32-littlearm" :: "format" :: "file" :: ":" :: (_ :: _) ⇒ True
+    _ ⇒ False
+
+parse_listing_line : Number → Text → Either Text parsed_listing_record
+parse_listing_line line_number source =
+  let parts = scan_listing (remove_annotation (unpack source)) [] [] in
+  if is_object_file_header parts
+    then Right (nonexecuting_object_header line_number source)
+  else case parts of
+    [] ⇒ Right (nonexecuting_blank_line line_number source)
+    ["Disassembly", "of", "section", section, ":"] ⇒
+      Right (nonexecuting_section_heading line_number source)
+    [address, symbol, ":"] ⇒
+      case read_hex_address address of
+        Just _ ⇒
+          if is_symbol_heading symbol
+             then Right (nonexecuting_symbol_heading line_number source)
+             else Left "Malformed symbol heading"
+        Nothing ⇒ Left "Malformed hexadecimal symbol address"
+    address :: ":" :: "R_ARM_CALL" :: [target] ⇒
+      case read_hex_address address of
+        Just _ ⇒ Right (nonexecuting_relocation_annotation line_number source)
+        Nothing ⇒ Left "Malformed hexadecimal relocation address"
+    address :: ":" :: "R_ARM_JUMP24" :: [target] ⇒
+      case read_hex_address address of
+        Just _ ⇒ Right (nonexecuting_relocation_annotation line_number source)
+        Nothing ⇒ Left "Malformed hexadecimal relocation address"
+    address :: ":" :: original_word :: ".word" :: [value] ⇒
+      case (read_hex_address address, read_machine_word original_word) of
+        (Just _, Just _) ⇒ Right (nonexecuting_literal_data line_number source)
+        _ ⇒ Left "Malformed literal data address or word"
+    address :: ":" :: original_word :: assembly ⇒
+      case (read_hex_address address, read_machine_word original_word,
+            parse_assembly assembly) of
+        (Nothing, _, _) ⇒ Left ("Malformed hexadecimal instruction address: " ++ address)
+        (_, Nothing, _) ⇒ Left ("Malformed eight-digit A32 machine word at " ++ address)
+        (_, _, Nothing) ⇒ Left ("Unsupported A32 instruction or operands at " ++ address)
+        (Just byte_address, Just word, Just operation) ⇒
+          if expected_machine_word operation ≟ word
+             then case decode_saved_machine_word word of
+               Nothing ⇒ Left ("Unsupported saved instruction bit fields at " ++ address)
+               Just decoded ⇒ Right (checked_instruction
+                 (parsed_a32_instruction byte_address original_word line_number source decoded))
+             else Left ("ARM word disagrees with parsed operands at " ++ address)
+    _ ⇒ Left "Unsupported listing record"
+
+parse_listing_from_line : Number → List Text → Either Text (List parsed_listing_record)
+parse_listing_from_line line_number [] = Right []
+parse_listing_from_line line_number (source :: remaining) =
+  case parse_listing_line line_number source of
+    Left message ⇒ Left (message ++ " | line: " ++ show line_number ++ " | source: " ++ source)
+    Right source_record ⇒
+      case parse_listing_from_line (line_number + 1) remaining of
+        Left message ⇒ Left message
+        Right other_records ⇒ Right (source_record :: other_records)
+
+render_instruction : parsed_listing_instruction → Text
+render_instruction (parsed_a32_instruction address word line_number source operation) =
+  show address ++ "|" ++ word ++ "|" ++ describe_instruction operation
+
+record_source : parsed_listing_record → (Number, Text)
+record_source (checked_instruction
+  (parsed_a32_instruction _ _ line_number source _)) = (line_number, source)
+record_source (nonexecuting_object_header line_number source) = (line_number, source)
+record_source (nonexecuting_section_heading line_number source) = (line_number, source)
+record_source (nonexecuting_symbol_heading line_number source) = (line_number, source)
+record_source (nonexecuting_relocation_annotation line_number source) = (line_number, source)
+record_source (nonexecuting_literal_data line_number source) = (line_number, source)
+record_source (nonexecuting_blank_line line_number source) = (line_number, source)
+
+instruction_count : List parsed_listing_record → Number
+instruction_count [] = 0
+instruction_count (checked_instruction _ :: remaining) = 1 + instruction_count remaining
+instruction_count (_ :: remaining) = instruction_count remaining
+
+print_records : Bool → List parsed_listing_record → IO ()
+print_records with_source [] = pure ()
+print_records with_source (source_record :: remaining) = do
+  if with_source
+    then let (line_number, source) = record_source source_record in
+         putStrLn ("SOURCE|" ++ show line_number ++ "|" ++ source)
+    else pure ()
+  case source_record of
+    checked_instruction instruction ⇒ putStrLn (render_instruction instruction)
+    _ ⇒ pure ()
+  print_records with_source remaining
+
+covering
+run_parser : Bool → Text → IO ()
+run_parser with_source source_path = do
+  contents ← readFile source_path
+  case contents of
+    Left _ ⇒ do
+      putStrLn "Cannot read A32 listing input."
+      exitFailure
+    Right source ⇒
+      case parse_listing_from_line 1 (lines source) of
+        Left message ⇒ do
+          putStrLn message
+          exitFailure
+        Right records ⇒ do
+          print_records with_source records
+          putStrLn ("A32_CHECKED_INSTRUCTIONS=" ++ show (instruction_count records))
+
+covering
+main : IO ()
+main = do
+  arguments ← getArgs
+  case arguments of
+    [_, source_path] ⇒ run_parser False source_path
+    [_, "--with-source", source_path] ⇒ run_parser True source_path
+    [_, "--english", source_path] ⇒ run_english_source source_path
+    [_, "--word", hexadecimal_word] ⇒
+      case read_machine_word hexadecimal_word of
+        Nothing ⇒ do
+          putStrLn "Malformed eight-digit A32 machine word"
+          exitFailure
+        Just word ⇒
+          case decode_saved_machine_word word of
+            Nothing ⇒ do
+              putStrLn "Unsupported saved instruction bit fields"
+              exitFailure
+            Just operation ⇒
+              if expected_machine_word operation ≟ word
+                then putStrLn (describe_instruction operation)
+                else do
+                  putStrLn "Decoded operands disagree with saved machine word"
+                  exitFailure
+    _ ⇒ do
+      putStrLn "Usage: english-a32 [--english FILE_WITH_ENGLISH_QR_SENTENCES | --with-source FILE_WITH_GNU_OBJDUMP_A32_LISTING | FILE_WITH_GNU_OBJDUMP_A32_LISTING]"
+      exitFailure
