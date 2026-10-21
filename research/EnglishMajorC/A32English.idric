@@ -243,6 +243,15 @@ english_count : List english_instruction_record → Number
 english_count [] = 0
 english_count (_ :: remaining) = 1 + english_count remaining
 
+-- The specimen stops before the unresolved call at 0x005c. Permit operand
+-- mutations within the original six forms, not additional or reordered slots.
+original_entry_offsets : Number → List english_instruction_record → Bool
+original_entry_offsets expected_offset [] = expected_offset ≟ 92
+original_entry_offsets expected_offset
+  (english_instruction _ actual_offset _ _ :: remaining) =
+    actual_offset ≟ expected_offset && actual_offset <= 88 &&
+      original_entry_offsets (expected_offset + 4) remaining
+
 covering
 run_english_source : Text → IO ()
 run_english_source path = do
@@ -256,6 +265,11 @@ run_english_source path = do
         Left message ⇒ do
           putStrLn message
           exitFailure
-        Right records ⇒ do
-          print_english_words records
-          putStrLn ("A32_ENGLISH_INSTRUCTIONS=" ++ show (english_count records))
+        Right entries ⇒
+          if original_entry_offsets 0 entries
+            then do
+              print_english_words entries
+              putStrLn ("A32_ENGLISH_INSTRUCTIONS=" ++ show (english_count entries))
+            else do
+              putStrLn "English QR entry must contain exactly 23 ascending four-byte offsets 0x0000 through 0x0058."
+              exitFailure
