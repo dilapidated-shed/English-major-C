@@ -196,7 +196,7 @@ parse_english_lines line_number (source :: remaining) =
         Right later ⇒
           case current of
             Nothing ⇒ Right later
-            Just record ⇒ Right (record :: later)
+            Just entry ⇒ Right (entry :: later)
 
 exact_word_integer : Number → Integer
 exact_word_integer word = cast word
