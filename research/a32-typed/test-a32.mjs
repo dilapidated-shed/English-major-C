@@ -235,3 +235,23 @@ test('English grammar rejects invalid registers, operand bounds, words and alter
     assert.match(result.stdout,/Unsupported English machine sentence/);
   }
 });
+
+// Exact 23-word boundary: grammatical instructions are still disallowed if
+// they add, remove, duplicate, reorder or move an original four-byte slot.
+test('the English QR entry stops at 0x0058 and preserves exactly 23 offsets',()=>{
+  const extraValidInstruction=englishSource+
+    'At byte offset 0x005c, copy the four-byte value in register r3 into register r6.\n';
+  const missingInstruction=englishSource.replace(
+    /^At byte offset 0x0010,.*\n/m,'');
+  const duplicateOffset=englishSource.replace(
+    'At byte offset 0x0018,','At byte offset 0x0014,');
+  const outOfOrder=englishSource.replace(
+    'At byte offset 0x0018,','At byte offset 0x0020,');
+  for(const altered of [extraValidInstruction,missingInstruction,duplicateOffset,outOfOrder]){
+    assert.notEqual(altered,englishSource);
+    const result=actualEnglish(altered);
+    assert.equal(result.error,undefined,String(result.error));
+    assert.notEqual(result.status,0,'Out-of-scope English entry was accepted');
+    assert.match(result.stdout,/exactly 23 ascending four-byte offsets/);
+  }
+});
